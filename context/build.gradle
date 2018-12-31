@@ -13,36 +13,24 @@ plugins {
 apply from: 'bintray.gradle'
 
 group 'cc.domovoi'
-version '0.0.1'
+version '0.0.1-spring5'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    compile 'cc.domovoi:ej-collection:0.0.1'
-
+    compile project(':basic')
+    
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 
     compile group: 'org.springframework', name: 'spring-core', version: '5.1.3.RELEASE'
     compile group: 'org.springframework', name: 'spring-webmvc', version: '5.1.3.RELEASE'
 
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.8'
-
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
-}
-
-allprojects {
     
-    sourceCompatibility = 1.8
-    
-    repositories {
-        mavenCentral()
-        maven {
-            url 'https://dl.bintray.com/izumookuni/domovoi/'
-        }
-    }
-    
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-    }
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
