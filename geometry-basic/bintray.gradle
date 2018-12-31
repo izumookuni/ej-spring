@@ -30,12 +30,12 @@ bintray {
     publications = ['MyPublication']
     pkg {
         repo = 'domovoi'
-        name = "${project.name}"
+        name = "ej-spring.${project.name}"
         desc = 'Easy Component for Spring Framework.'
         licenses = ['LGPL-3.0']
         vcsUrl = 'https://github.com/izumookuni/ej-spring.git'
         labels = ['spring']
-        githubRepo = "${github_user}/${project.name}"
+        githubRepo = "${github_user}/ej-spring"
         version {
             name = "${project.version}"
             desc = 'Easy Component for Spring Framework.'
