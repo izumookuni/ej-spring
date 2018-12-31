@@ -1,3 +1,4 @@
 rootProject.name = 'geometry-data'
+includeFlat 'basic'
 includeFlat 'geometry-model'
 includeFlat 'geometry-basic'

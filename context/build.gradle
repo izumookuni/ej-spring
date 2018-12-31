@@ -12,23 +12,26 @@ plugins {
 }
 apply from: 'bintray.gradle'
 
-group 'cc.domovoi'
-version '0.0.1-spring5'
+group 'cc.domovoi.ej-spring'
+version '0.0.1-spring4'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://dl.bintray.com/izumookuni/domovoi/'
+    }
 }
 
 dependencies {
     compile project(':basic')
     
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.7.0'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.7.0'
 
-    compile group: 'org.springframework', name: 'spring-core', version: '5.1.3.RELEASE'
-    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.1.3.RELEASE'
+    compile group: 'org.springframework', name: 'spring-core', version: '4.3.3.RELEASE'
+    compile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.3.RELEASE'
 
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     
