@@ -1,5 +1,7 @@
 package cc.domovoi.ej.spring.controller;
 
+import cc.domovoi.ej.collection.tuple.Tuple2;
+import cc.domovoi.ej.collection.util.Try;
 import cc.domovoi.ej.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -24,21 +26,21 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
      *
      * @return The number of successful insert operations.
      */
-    Function<E, Integer> addEntityFunction();
+    Function<E, Try<Tuple2<Integer, String>>> addEntityFunction();
 
     /**
      * The function that update Entity.
      *
      * @return The number of successful update operations.
      */
-    Function<E, Integer> updateEntityFunction();
+    Function<E, Try<Integer>> updateEntityFunction();
 
     /**
      * The function that delete Entity.
      *
      * @return The number of successful delete operations.
      */
-    Function<E, Integer> deleteEntityFunction();
+    Function<E, Try<Integer>> deleteEntityFunction();
 
     /**
      * Add Entity.
@@ -56,12 +58,22 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("addEntity: %s", entity));
-            Integer result = addEntityFunction().apply(entity);
-            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
+            Try<Tuple2<Integer, String>> result = addEntityFunction().apply(entity);
+            if (result.isSuccess()) {
+                Tuple2<Integer, String> data = result.get();
+                Map<String, Object> dataMap = new HashMap<>();
+                dataMap.put("result", data._1());
+                dataMap.put("id", data._2());
+                return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, dataMap);
+            }
+            else {
+                throw new RuntimeException(result.failed().get().getMessage());
+            }
+//            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
             e.printStackTrace();
-            logger().error(String.format("error in addEntity, message: %s", e.getLocalizedMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            logger().error(String.format("error in addEntity, message: %s", e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -81,8 +93,14 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("jsonMap: %s", entity));
-            Integer result = updateEntityFunction().apply(entity);
-            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
+            Try<Integer> result = updateEntityFunction().apply(entity);
+            if (result.isSuccess()) {
+                return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
+            }
+            else {
+                throw new RuntimeException(result.failed().get().getMessage());
+            }
+//            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
             e.printStackTrace();
             logger().error(String.format("error in updateEntity, message: %s", e.getLocalizedMessage()));
@@ -96,7 +114,7 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
      * @param entity The entity need to be deleted.
      * @return The number of successful delete operations.
      */
-    @ApiOperation(value = "Delete entity", notes = "")
+    @ApiOperation(value = "Delete entity", notes = "none")
     @RequestMapping(
             value = "delete",
             method = {RequestMethod.POST},
@@ -106,8 +124,14 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("deleteEntity: %s", entity));
-            Integer result = deleteEntityFunction().apply(entity);
-            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
+            Try<Integer> result = deleteEntityFunction().apply(entity);
+            if (result.isSuccess()) {
+                return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
+            }
+            else {
+                throw new RuntimeException(result.failed().get().getMessage());
+            }
+//            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
             e.printStackTrace();
             logger().error(String.format("error in deleteEntity, message: %s", e.getLocalizedMessage()));

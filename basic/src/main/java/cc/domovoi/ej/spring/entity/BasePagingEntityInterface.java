@@ -41,11 +41,25 @@ public interface BasePagingEntityInterface {
     Integer getPageSize();
 
     /**
+     * Set sort key.
+     *
+     * @param sortBy Sort key.
+     */
+    void setSortBy(List<String> sortBy);
+
+    /**
      * Sort key.
      *
      * @return Sort key.
      */
     List<String> getSortBy();
+
+    /**
+     * Set sort order.
+     *
+     * @param sortOrder Sort order.
+     */
+    void setSortOrder(String sortOrder);
 
     /**
      * Sort order.

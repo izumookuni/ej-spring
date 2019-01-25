@@ -1,11 +1,14 @@
 package cc.domovoi.ej.spring.service;
 
+import cc.domovoi.ej.collection.tuple.Tuple2;
+import cc.domovoi.ej.collection.util.Try;
 import cc.domovoi.ej.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.ej.spring.mapper.BaseMapperInterface;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * BaseJoiningServiceInterface.
@@ -15,16 +18,27 @@ import java.util.UUID;
  */
 public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterface, M extends BaseMapperInterface<E>> extends BaseRetrieveJoiningServiceInterface<E, M> {
 
+    default String idGenerator() {
+        return UUID.randomUUID().toString();
+    }
+
     /**
      * Add entity function, called by the Controller layer.
      *
      * @param entity The entity need to be added.
      * @return The number of successful insert operations.
      */
-    default Integer addEntity(E entity) {
-        // TODO: 将返回类型改为Try<Tuple2<Integer, String>>
-        Boolean entityExist = checkEntityExist(entity);
-        return entityExist ? 0 : addEntityByMapper(entity);
+    default Try<Tuple2<Integer, String>> addEntity(E entity) {
+        return Try.apply(() -> {
+            Boolean entityExist = checkEntityExist(entity);
+            if (entityExist) {
+                return new Tuple2<>(0, null);
+            }
+            Integer addResult = addEntityByMapper(entity);
+            return new Tuple2<>(addResult, entity.getId());
+        });
+//        Boolean entityExist = checkEntityExist(entity);
+//        return entityExist ? 0 : addEntityByMapper(entity);
     }
 
     /**
@@ -33,9 +47,9 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @param entity The entity need to be updated.
      * @return The number of successful update operations.
      */
-    default Integer updateEntity(E entity) {
-        // TODO: 将返回类型改为Try<Integer>
-        return updateEntityByMapper(entity);
+    default Try<Integer> updateEntity(E entity) {
+        return Try.apply(() -> updateEntityByMapper(entity));
+//        return updateEntityByMapper(entity);
     }
 
     /**
@@ -44,9 +58,12 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @param entity The entity need to be deleted.
      * @return The number of successful delete operations.
      */
-    default Integer deleteEntity(E entity) {
-        // TODO: 将返回类型改为Try<Integer>
-        return deleteEntityByMapper(entity);
+    default Try<Integer> deleteEntity(E entity) {
+        if (entity.getId() == null) {
+            throw new RuntimeException("id must not be null");
+        }
+        return Try.apply(() -> deleteEntityByMapper(entity));
+//        return deleteEntityByMapper(entity);
     }
 
     /**
@@ -57,11 +74,12 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @param entity The entity need to be added.
      * @return Whether an Entity with the same ID exists.
      */
+    @SuppressWarnings("unchecked")
     default Boolean checkEntityExist(E entity) {
         // Repeated additions are not allowed. Update operations should be used
         try {
             if (entity.getId() == null || "".equals(entity.getId())) {
-                entity.setId(UUID.randomUUID().toString());
+                entity.setId(idGenerator());
                 return false;
             }
             E query = (E) entity.getClass().newInstance();
@@ -82,7 +100,7 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      */
     default Integer addEntityByMapper(E entity) {
         if (entity.getId() == null || "".equals(entity.getId())) {
-            entity.setId(UUID.randomUUID().toString());
+            entity.setId(idGenerator());
         }
         LocalDateTime now = LocalDateTime.now();
         entity.setCreationTime(now);

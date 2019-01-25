@@ -7,6 +7,7 @@ import cc.domovoi.ej.spring.service.BaseRetrieveJoiningServiceInterface;
 import cc.domovoi.ej.spring.service.GeometryServiceInterface;
 import cc.domovoi.geometry.model.GeoContextLike;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -69,9 +70,21 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         if (e != null) {
             findGeometryAndSet(e);
             exp(e);
-            joinEntity(e, depth);
+//            joinEntity(e, depth);
+            joinEntityList(Collections.singletonList(e), depth);
         }
         return e;
+    }
+
+    @Override
+    default List<E> findWithJoiningEntity(List<String> idList, Integer depth) {
+        List<E> entityList = findListUsingIdByMapper(idList);
+        entityList.forEach(e -> {
+            findGeometryAndSet(e);
+            exp(e);
+        });
+        joinEntityList(entityList, depth);
+        return entityList;
     }
 
     /**
@@ -86,9 +99,10 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         List<E> eList = findListByMapper(entity);
         eList.forEach(this::findGeometryAndSet);
         eList.forEach(this::exp);
-        if (depth > 0) {
-            eList.forEach(e -> joinEntity(e, depth));
-        }
+//        if (depth > 0) {
+//            eList.forEach(e -> joinEntity(e, depth));
+//        }
+        joinEntityList(eList, depth);
         return eList;
     }
 

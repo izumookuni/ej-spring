@@ -1,6 +1,7 @@
 package cc.domovoi.ej.spring.geometry.service;
 
 import cc.domovoi.ej.collection.tuple.Tuple2;
+import cc.domovoi.ej.collection.util.Try;
 import cc.domovoi.ej.spring.geometry.converter.GeometryLoader;
 import cc.domovoi.ej.spring.geometry.entity.GeometryMultipleJoiningEntityInterface;
 import cc.domovoi.ej.spring.geometry.mapper.BaseGeometryMapperInterface;
@@ -35,17 +36,30 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      * @return The number of successful insert operations.
      */
     @Override
-    default Integer addEntity(E entity) {
-        Boolean entityExist = checkEntityExist(entity);
-        if (entityExist) {
-            return 0;
-        }
-        imp(entity);
-        List<Integer> addGeometryResultList = addGeometryByGeometryService(entity);
-        if (addGeometryResultList.stream().anyMatch(i -> i == 0)) {
-            throw new RuntimeException(String.format("addGeometryResult is %s", addGeometryResultList));
-        }
-        return addEntityByMapper(entity);
+    default Try<Tuple2<Integer, String>> addEntity(E entity) {
+        return Try.apply(() -> {
+            Boolean entityExist = checkEntityExist(entity);
+            if (entityExist) {
+                return new Tuple2<>(0, null);
+            }
+            imp(entity);
+            List<Integer> addGeometryResultList = addGeometryByGeometryService(entity);
+            if (addGeometryResultList.stream().anyMatch(i -> i == 0)) {
+                throw new RuntimeException(String.format("addGeometryResult is %s", addGeometryResultList));
+            }
+            Integer addResult = addEntityByMapper(entity);
+            return new Tuple2<>(addResult, entity.getId());
+        });
+//        Boolean entityExist = checkEntityExist(entity);
+//        if (entityExist) {
+//            return 0;
+//        }
+//        imp(entity);
+//        List<Integer> addGeometryResultList = addGeometryByGeometryService(entity);
+//        if (addGeometryResultList.stream().anyMatch(i -> i == 0)) {
+//            throw new RuntimeException(String.format("addGeometryResult is %s", addGeometryResultList));
+//        }
+//        return addEntityByMapper(entity);
     }
 
     /**
@@ -57,13 +71,21 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      * @return The number of successful update operations.
      */
     @Override
-    default Integer updateEntity(E entity) {
-        imp(entity);
-        List<Integer> updateGeometryResultList = updateGeometryByGeometryService(entity);
-        if (updateGeometryResultList.stream().anyMatch(i -> i == 0)) {
-            throw new RuntimeException(String.format("updateGeometryResult is %s", updateGeometryResultList));
-        }
-        return updateEntityByMapper(entity);
+    default Try<Integer> updateEntity(E entity) {
+        return Try.apply(() -> {
+            imp(entity);
+            List<Integer> updateGeometryResultList = updateGeometryByGeometryService(entity);
+            if (updateGeometryResultList.stream().anyMatch(i -> i == 0)) {
+                throw new RuntimeException(String.format("updateGeometryResult is %s", updateGeometryResultList));
+            }
+            return updateEntityByMapper(entity);
+        });
+//        imp(entity);
+//        List<Integer> updateGeometryResultList = updateGeometryByGeometryService(entity);
+//        if (updateGeometryResultList.stream().anyMatch(i -> i == 0)) {
+//            throw new RuntimeException(String.format("updateGeometryResult is %s", updateGeometryResultList));
+//        }
+//        return updateEntityByMapper(entity);
     }
 
     /**
@@ -76,17 +98,35 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      * @return The number of successful delete operations.
      */
     @Override
-    default Integer deleteEntity(E entity) {
-        imp(entity);
-        Tuple2<List<Integer>, Boolean> deleteGeometryResult = deleteGeometryByGeometryService(entity);
+    default Try<Integer> deleteEntity(E entity) {
+        return Try.apply(() -> {
+            if (entity.getId() == null) {
+                throw new RuntimeException("id must not be null");
+            }
+            imp(entity);
+            Tuple2<List<Integer>, Boolean> deleteGeometryResult = deleteGeometryByGeometryService(entity);
 
-        if (deleteGeometryResult._2()) {
-            // Provide geometry
-            return -1;
-        } else {
-            // Does not provide geometry
-            return deleteEntityByMapper(entity);
-        }
+            if (deleteGeometryResult._2()) {
+                // Provide geometry
+                return -1;
+            } else {
+                // Does not provide geometry
+                return deleteEntityByMapper(entity);
+            }
+        });
+//        if (entity.getId() == null) {
+//            throw new RuntimeException("id must not be null");
+//        }
+//        imp(entity);
+//        Tuple2<List<Integer>, Boolean> deleteGeometryResult = deleteGeometryByGeometryService(entity);
+//
+//        if (deleteGeometryResult._2()) {
+//            // Provide geometry
+//            return -1;
+//        } else {
+//            // Does not provide geometry
+//            return deleteEntityByMapper(entity);
+//        }
     }
 
     /**

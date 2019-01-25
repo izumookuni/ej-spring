@@ -1,5 +1,7 @@
 package cc.domovoi.ej.spring.controller;
 
+import cc.domovoi.ej.collection.tuple.Tuple2;
+import cc.domovoi.ej.collection.util.Try;
 import cc.domovoi.ej.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.ej.spring.service.BaseJoiningServiceInterface;
 
@@ -14,17 +16,17 @@ import java.util.function.Function;
 public interface BaseCRUDControllerInterface<E extends BaseJoiningEntityInterface, S extends BaseJoiningServiceInterface<E, ?>> extends BaseRetrieveControllerInterface<E, S>, OriginalCRUDControllerInterface<E> {
 
     @Override
-    default Function<E, Integer> addEntityFunction() {
+    default Function<E, Try<Tuple2<Integer, String>>> addEntityFunction() {
         return service()::addEntity;
     }
 
     @Override
-    default Function<E, Integer> updateEntityFunction() {
+    default Function<E, Try<Integer>> updateEntityFunction() {
         return service()::updateEntity;
     }
 
     @Override
-    default Function<E, Integer> deleteEntityFunction() {
+    default Function<E, Try<Integer>> deleteEntityFunction() {
         return service()::deleteEntity;
     }
 }
