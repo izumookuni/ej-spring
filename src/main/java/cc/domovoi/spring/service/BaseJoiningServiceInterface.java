@@ -1,9 +1,9 @@
-package cc.domovoi.ej.spring.service;
+package cc.domovoi.spring.service;
 
 import cc.domovoi.ej.collection.tuple.Tuple2;
 import cc.domovoi.ej.collection.util.Try;
-import cc.domovoi.ej.spring.entity.BaseJoiningEntityInterface;
-import cc.domovoi.ej.spring.mapper.BaseMapperInterface;
+import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
+import cc.domovoi.spring.mapper.BaseMapperInterface;
 
 import java.time.LocalDateTime;
 import java.util.List;
