@@ -3,11 +3,12 @@ package cc.domovoi.ej.spring.data;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JoiningDepthTree implements JoiningDepthTreeLike {
 
-    private static JoiningDepthLeaf leaf = new JoiningDepthLeaf();
+    public static JoiningDepthLeaf leaf = new JoiningDepthLeaf();
 
     private Map<String, JoiningDepthTreeLike> tree;
 
@@ -37,6 +38,16 @@ public class JoiningDepthTree implements JoiningDepthTreeLike {
     @Override
     public Boolean isLeaf() {
         return false;
+    }
+
+    @Override
+    public Boolean contains(String key) {
+        return tree.containsKey(key);
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return tree.keySet();
     }
 
     @Override

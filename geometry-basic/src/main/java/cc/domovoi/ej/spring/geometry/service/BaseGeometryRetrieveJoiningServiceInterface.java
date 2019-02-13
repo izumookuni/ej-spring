@@ -1,5 +1,6 @@
 package cc.domovoi.ej.spring.geometry.service;
 
+import cc.domovoi.ej.spring.data.JoiningDepthTreeLike;
 import cc.domovoi.ej.spring.geometry.converter.GeometryExporter;
 import cc.domovoi.ej.spring.geometry.entity.GeometryMultipleJoiningEntityInterface;
 import cc.domovoi.ej.spring.geometry.mapper.BaseGeometryRetrieveMapperInterface;
@@ -43,7 +44,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
      */
     @Override
     default E findEntity(String id) {
-        return findWithJoiningEntity(id, depth());
+        return findWithJoiningEntity(id, depth(), depthTree());
     }
 
     /**
@@ -54,7 +55,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
      */
     @Override
     default List<E> findList(E entity) {
-        return findListWithJoiningEntity(entity, depth());
+        return findListWithJoiningEntity(entity, depth(), depthTree());
     }
 
     /**
@@ -65,13 +66,19 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
      * @return Entity.
      */
     @Override
-    default E findWithJoiningEntity(String id, Integer depth) {
+    default E findWithJoiningEntity(String id, Integer depth, JoiningDepthTreeLike tree) {
         E e = findByMapper(id);
         if (e != null) {
             findGeometryAndSet(e);
             exp(e);
 //            joinEntity(e, depth);
-            joinEntityList(Collections.singletonList(e), depth);
+//            joiningEntityByDepth(Collections.singletonList(e), depth);
+            if (depth == -1) {
+                joinEntityListByTree(Collections.singletonList(e), tree);
+            }
+            else {
+                joiningEntityByDepth(Collections.singletonList(e), depth);
+            }
         }
         return e;
     }
@@ -83,7 +90,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
             findGeometryAndSet(e);
             exp(e);
         });
-        joinEntityList(entityList, depth);
+        joiningEntityByDepth(entityList, depth);
         return entityList;
     }
 
@@ -95,14 +102,20 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
      * @return Entity list.
      */
     @Override
-    default List<E> findListWithJoiningEntity(E entity, Integer depth) {
+    default List<E> findListWithJoiningEntity(E entity, Integer depth, JoiningDepthTreeLike tree) {
         List<E> eList = findListByMapper(entity);
         eList.forEach(this::findGeometryAndSet);
         eList.forEach(this::exp);
 //        if (depth > 0) {
 //            eList.forEach(e -> joinEntity(e, depth));
 //        }
-        joinEntityList(eList, depth);
+//        joiningEntityByDepth(eList, depth);
+        if (depth == -1) {
+            joinEntityListByTree(eList, tree);
+        }
+        else {
+            joiningEntityByDepth(eList, depth);
+        }
         return eList;
     }
 
