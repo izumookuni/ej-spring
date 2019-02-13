@@ -1,6 +1,8 @@
 package cc.domovoi.ej.spring.data;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 public class JoiningDepthLeaf implements JoiningDepthTreeLike {
 
@@ -15,6 +17,16 @@ public class JoiningDepthLeaf implements JoiningDepthTreeLike {
     @Override
     public Boolean isLeaf() {
         return true;
+    }
+
+    @Override
+    public Boolean contains(String key) {
+        return false;
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return Collections.emptySet();
     }
 
     @Override
