@@ -1,7 +1,2 @@
 rootProject.name = 'ej-spring'
-include 'basic'
-include 'context'
-include 'geometry-model'
-include 'geometry-basic'
-include 'geometry-data'
 

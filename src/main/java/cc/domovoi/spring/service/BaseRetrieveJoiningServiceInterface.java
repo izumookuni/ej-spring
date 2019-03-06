@@ -1,11 +1,12 @@
 package cc.domovoi.spring.service;
 
+import cc.domovoi.ej.collection.tuple.Tuple2;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.spring.mapper.BaseRetrieveMapperInterface;
+import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
+import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,8 +34,8 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
         return 1;
     }
 
-    default Map<String, Integer> depthMap() {
-        return Collections.emptyMap();
+    default JoiningDepthTreeLike depthTree() {
+        return JoiningDepthTree.leaf;
     }
 
     /**
@@ -44,7 +45,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
      * @return Entity.
      */
     default E findEntity(String id) {
-        return findWithJoiningEntity(id, depth());
+        return findWithJoiningEntity(id, depth(), depthTree());
     }
 
     /**
@@ -54,7 +55,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
      * @return Entity list.
      */
     default List<E> findList(E entity) {
-        return findListWithJoiningEntity(entity, depth());
+        return findListWithJoiningEntity(entity, depth(), depthTree());
     }
 
     /**
@@ -91,7 +92,19 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
             return Collections.emptyList();
         }
         try {
-            return mapper().findBaseListById(idList);
+            int listSize = idList.size();
+            if (listSize <= 500) {
+                return mapper().findBaseListById(idList);
+            }
+            else {
+                List<E> entityList = new ArrayList<>();
+                for (int i = 0; i < listSize / 500; i++) {
+                    List<String> innerIdList = idList.subList(i * 500, (i + 1) * 500);
+                    List<E> innerEntityList = mapper().findBaseListById(innerIdList);
+                    entityList.addAll(innerEntityList);
+                }
+                return entityList;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return idList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
@@ -104,19 +117,20 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
      *
      * @param id    ID of entity.
      * @param depth Depth of association.
+     * @param tree JoiningDepthTree.
      * @return Entity.
      */
-    default E findWithJoiningEntity(String id, Integer depth) {
+    default E findWithJoiningEntity(String id, Integer depth, JoiningDepthTreeLike tree) {
         E e = findByMapper(id);
-//        joinEntity(e, depth);
-        joinEntityList(Collections.singletonList(e), depth);
+        if (e != null) {
+            if (depth == -1) {
+                joinEntityListByTree(Collections.singletonList(e), tree);
+            }
+            else {
+                joiningEntityByDepth(Collections.singletonList(e), depth);
+            }
+        }
         return e;
-    }
-
-    default List<E> findWithJoiningEntity(List<String> idList, Integer depth) {
-        List<E> entityList = findListUsingIdByMapper(idList);
-        joinEntityList(entityList, depth);
-        return entityList;
     }
 
     /**
@@ -124,40 +138,22 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
      *
      * @param entity Query conditions.
      * @param depth  Depth of association.
+     * @param tree JoiningDepthTree.
      * @return Entity list.
      */
-    default List<E> findListWithJoiningEntity(E entity, Integer depth) {
+    default List<E> findListWithJoiningEntity(E entity, Integer depth, JoiningDepthTreeLike tree) {
         List<E> eList = findListByMapper(entity);
-//        if (depth > 0) {
-//            eList.forEach(e -> joinEntity(e, depth));
-//        }
-        joinEntityList(eList, depth);
+        if (depth == -1) {
+            joinEntityListByTree(eList, tree);
+        }
+        else {
+            joiningEntityByDepth(eList, depth);
+        }
         return eList;
     }
 
-//    /**
-//     * Attached external entity.
-//     *
-//     * @param entity Current entity.
-//     * @param depth  Depth of association.
-//     */
-//    @Deprecated
-//    default void joinEntity(E entity, Integer depth) {
-//        if (depth > 0) {
-//            entity.joiningKeyMap().forEach((key, idSupplier) -> {
-//                BaseRetrieveJoiningServiceInterface joiningService = joiningService().get(key);
-//                if (idSupplier.get() != null) {
-//                    idSupplier.get().forEach(joiningId -> {
-//                        BaseJoiningEntityInterface joiningEntity = joiningService.findWithJoiningEntity(joiningId, depth - 1);
-//                        entity.joiningEntityMap().get(key).accept(joiningEntity);
-//                    });
-//                }
-//            });
-//        }
-//    }
-
     @SuppressWarnings("unchecked")
-    default void joinEntityList(List<E> entityList, Integer depth) {
+    default void joiningEntityByDepth(List<E> entityList, Integer depth) {
         if (depth > 0) {
             if (entityList != null && !entityList.isEmpty()) {
                 entityList.get(0).joiningKeyMap().keySet().forEach(key -> {
@@ -174,6 +170,96 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
                     });
                 });
             }
+        }
+    }
+
+    default List<E> findWithJoiningEntity(List<String> idList, Integer depth) {
+        List<E> entityList = findListUsingIdByMapper(idList);
+        joiningEntityByDepth(entityList, depth);
+        return entityList;
+    }
+
+    @SuppressWarnings("unchecked")
+    default void joinEntityListByTree(List<E> entityList, JoiningDepthTreeLike tree) {
+        if (tree.isLeaf()) {
+            return;
+        }
+        List<Tuple2<String, List<BaseJoiningEntityInterface>>> currentEntityMap = Collections.singletonList(new Tuple2<>("_root", entityList.stream().map(e -> (BaseJoiningEntityInterface) e).collect(Collectors.toList())));
+        List<Tuple2<String, JoiningDepthTreeLike>> currentTreeMap = Collections.singletonList(new Tuple2<>("_root", tree)); // {_root -> {a -> Leaf, b -> Leaf, c -> {d -> Leaf, e -> Leaf}}}
+
+        Map<String, Map<String, BaseRetrieveJoiningServiceInterface>> currentJoiningServiceMap = Collections.singletonMap("_root", joiningService());
+
+
+        List<Tuple2<String, List<BaseJoiningEntityInterface>>> currentEntityMapBuffer = new ArrayList<>();
+        List<Tuple2<String, JoiningDepthTreeLike>> currentTreeMapBuffer = new ArrayList<>();
+        Map<String, Map<String, BaseRetrieveJoiningServiceInterface>> currentJoiningServiceMapBuffer = new HashMap<>();
+
+
+        while (currentTreeMap.stream().map(Tuple2::_2).anyMatch(JoiningDepthTreeLike::isTree)) {
+            // _root for first time.
+            List<String> keyList = currentTreeMap.stream().map(Tuple2::_1).collect(Collectors.toList());
+            for (int keyIdx = 0; keyIdx < keyList.size(); keyIdx++) {
+
+                String key = keyList.get(keyIdx);
+                String key2 = currentEntityMap.get(keyIdx)._1();
+                assert key.equals(key2);
+                List<BaseJoiningEntityInterface> currentEntityList = currentEntityMap.get(keyIdx)._2();
+                JoiningDepthTreeLike currentTree = currentTreeMap.get(keyIdx)._2(); // tree
+                Map<String, BaseRetrieveJoiningServiceInterface> currentJoiningService = currentJoiningServiceMap.get(key);
+
+                List<BaseJoiningEntityInterface> joiningEntityListBuffer = Collections.emptyList();
+
+                if (currentTree.isTree()) {
+
+                    for (String subKey : currentTree.keySet()) {
+                        // a, b, c for first time
+                        Optional<JoiningDepthTreeLike> subTree = currentTree.subTree(subKey);
+                        BaseRetrieveJoiningServiceInterface joiningService = currentJoiningService.get(subKey);
+                        if (currentEntityList != null && !currentEntityList.isEmpty()) {
+
+                            List<String> idList = currentEntityList.stream().flatMap(e -> {
+                                List<String> innerKeyList = e.joiningKeyMap().get(subKey).get();
+                                return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
+                            }).collect(Collectors.toList());
+
+                            List<BaseJoiningEntityInterface> joiningEntityList = joiningService.findListUsingIdByMapper(idList);
+                            currentEntityList.forEach(e -> {
+
+                                List<String> innerKeyList = e.joiningKeyMap().get(subKey).get();
+                                if (innerKeyList != null) {
+
+                                    List<BaseJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
+                                    innerJoiningEntityList.forEach(e.joiningEntityMap().get(subKey)::accept);
+                                }
+                            });
+                            joiningEntityListBuffer = joiningEntityList;
+                        }
+
+
+                        if (subTree.map(JoiningDepthTreeLike::isTree).orElseGet(() -> false)) {
+
+                            currentTreeMapBuffer.add(new Tuple2<>(subKey, subTree.get()));
+
+                            currentEntityMapBuffer.add(new Tuple2<>(subKey, joiningEntityListBuffer));
+
+                            currentJoiningServiceMapBuffer.putIfAbsent(subKey, joiningService.joiningService());
+                        }
+
+                    }
+                }
+            }
+
+
+            currentTreeMap = new ArrayList<>(currentTreeMapBuffer);
+            currentEntityMap = new ArrayList<>(currentEntityMapBuffer);
+            currentJoiningServiceMap = new HashMap<>(currentJoiningServiceMapBuffer);
+//            currentTreeMap = currentTreeMapBuffer;
+//            currentEntityMap = currentEntityMapBuffer;
+//            currentJoiningServiceMap = currentJoiningServiceMapBuffer;
+
+            currentTreeMapBuffer.clear();
+            currentEntityMapBuffer.clear();
+            currentJoiningServiceMapBuffer.clear();
         }
     }
 }

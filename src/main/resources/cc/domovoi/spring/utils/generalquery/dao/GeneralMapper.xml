@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.domovoi.spring.utils.generalquery.dao.GeneralMapper">
+
+    <select id="findSimpleBaseList" parameterType="cc.domovoi.spring.utils.generalquery.GeneralQueryModel" resultType="java.util.Map">
+        select
+        <foreach collection="baseColumn" index="index" item="item" separator=",">
+            ${index} ${item}
+        </foreach>
+        from ${baseTable}
+        <foreach collection="baseInnerJoin" index="index" item="item">
+            inner join ${index} on ${item}
+        </foreach>
+        <foreach collection="baseLeftJoin" index="index" item="item">
+            left join ${index} on ${item}
+        </foreach>
+        <foreach collection="baseRightJoin" index="index" item="item">
+            right join ${index} on ${item}
+        </foreach>
+        <foreach collection="baseFullJoin" index="index" item="item">
+            full join ${index} on ${item}
+        </foreach>
+        <trim prefix="where" prefixOverrides="and |or ">
+            <foreach collection="baseWhereEqual" index="index" item="item">
+                and ${index} = #{item}
+            </foreach>
+            <foreach collection="baseWhereNotEqual" index="index" item="item">
+                and ${index} != #{item}
+            </foreach>
+            <foreach collection="baseWhereLike" index="index" item="item">
+                and ${index} like CONCAT('%', #{item}, '%')
+            </foreach>
+            <foreach collection="baseWhereNull" index="index" item="item">
+                and #{item} is null
+            </foreach>
+            <foreach collection="baseWhereNotNull" index="index" item="item">
+                and #{item} is not null
+            </foreach>
+            <foreach collection="baseWhereLessThan" index="index" item="item">
+                and ${index} &lt; #{item}
+            </foreach>
+            <foreach collection="baseWhereGreaterThan" index="index" item="item">
+                and ${index} &gt; #{item}
+            </foreach>
+            <foreach collection="baseWhereEqualLessThan" index="index" item="item">
+                and ${index} &lt;= #{item}
+            </foreach>
+            <foreach collection="baseWhereEqualGreaterThan" index="index" item="item">
+                and ${index} &gt;= #{item}
+            </foreach>
+        </trim>
+        <if test="sortByCertified != null">
+            <foreach collection="sortByCertified" item="item" index="index" separator="," open="order by">
+                ${item}
+                <if test="sortOrderCertified != null">
+                    ${sortOrderCertified}
+                </if>
+            </foreach>
+        </if>
+        <if test="offset != null &amp;&amp; pageSize != null">
+            limit #{offset, jdbcType = INTEGER}, #{pageSize, jdbcType = INTEGER}
+        </if>
+    </select>
+
+
+</mapper>
