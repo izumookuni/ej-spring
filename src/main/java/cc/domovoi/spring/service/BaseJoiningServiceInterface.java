@@ -21,6 +21,18 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
         return UUID.randomUUID().toString();
     }
 
+    default void beforeAdd(E entity) {
+
+    }
+
+    default void beforeUpdate(E entity) {
+
+    }
+
+    default void beforeDelete(E entity) {
+
+    }
+
     /**
      * Add entity function, called by the Controller layer.
      *
@@ -28,6 +40,7 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @return The number of successful insert operations.
      */
     default Try<Tuple2<Integer, String>> addEntity(E entity) {
+        beforeAdd(entity);
         return Try.apply(() -> {
             Boolean entityExist = checkEntityExist(entity);
             if (entityExist) {
@@ -47,6 +60,7 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @return The number of successful update operations.
      */
     default Try<Integer> updateEntity(E entity) {
+        beforeUpdate(entity);
         return Try.apply(() -> updateEntityByMapper(entity));
 //        return updateEntityByMapper(entity);
     }
@@ -58,6 +72,7 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @return The number of successful delete operations.
      */
     default Try<Integer> deleteEntity(E entity) {
+        beforeDelete(entity);
         if (entity.getId() == null) {
             throw new RuntimeException("id must not be null");
         }

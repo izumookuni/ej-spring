@@ -7,6 +7,7 @@ import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +37,14 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
 
     default JoiningDepthTreeLike depthTree() {
         return JoiningDepthTree.leaf;
+    }
+
+    default void beforeFindEntity(E entity) {
+
+    }
+
+    default void afterFindEntity(E entity) {
+
     }
 
     /**
@@ -103,6 +112,8 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
                     List<E> innerEntityList = mapper().findBaseListById(innerIdList);
                     entityList.addAll(innerEntityList);
                 }
+                // after find
+                entityList.forEach(this::afterFindEntity);
                 return entityList;
             }
         } catch (Exception e) {
@@ -122,6 +133,10 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
      */
     default E findWithJoiningEntity(String id, Integer depth, JoiningDepthTreeLike tree) {
         E e = findByMapper(id);
+        // after find
+        if (e != null) {
+            afterFindEntity(e);
+        }
         if (e != null) {
             if (depth == -1) {
                 joinEntityListByTree(Collections.singletonList(e), tree);
@@ -142,7 +157,13 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
      * @return Entity list.
      */
     default List<E> findListWithJoiningEntity(E entity, Integer depth, JoiningDepthTreeLike tree) {
+        // before find
+        if (entity != null) {
+            beforeFindEntity(entity);
+        }
         List<E> eList = findListByMapper(entity);
+        // after find
+        eList.forEach(this::afterFindEntity);
         if (depth == -1) {
             joinEntityListByTree(eList, tree);
         }

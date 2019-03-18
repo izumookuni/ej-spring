@@ -8,8 +8,10 @@ import cc.domovoi.spring.service.BaseRetrieveJoiningServiceInterface;
 import cc.domovoi.spring.service.GeometryServiceInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * BaseGeometryRetrieveJoiningServiceInterface.
@@ -58,6 +60,42 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         return findListWithJoiningEntity(entity, depth(), depthTree());
     }
 
+
+    /**
+     * Find entity directly using mapper.
+     *
+     * @param idList ID list of entity list.
+     * @return Entity list.
+     */
+    @Override
+    default List<E> findListUsingIdByMapper(List<String> idList) {
+        if (idList == null || idList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            int listSize = idList.size();
+            if (listSize <= 500) {
+                return mapper().findBaseListById(idList);
+            }
+            else {
+                List<E> entityList = new ArrayList<>();
+                for (int i = 0; i < listSize / 500; i++) {
+                    List<String> innerIdList = idList.subList(i * 500, (i + 1) * 500);
+                    List<E> innerEntityList = mapper().findBaseListById(innerIdList);
+                    entityList.addAll(innerEntityList);
+                }
+                // after find
+                entityList.forEach(this::afterFindEntity);
+                entityList.forEach(this::exp);
+                return entityList;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return idList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
+        }
+
+    }
+
     /**
      * Find entity by ID, and attached external entity. Also, attached geometry data to this entity.
      *
@@ -68,6 +106,10 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
     @Override
     default E findWithJoiningEntity(String id, Integer depth, JoiningDepthTreeLike tree) {
         E e = findByMapper(id);
+        // after find
+        if (e != null) {
+            afterFindEntity(e);
+        }
         if (e != null) {
             findGeometryAndSet(e);
             exp(e);
@@ -103,7 +145,13 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
      */
     @Override
     default List<E> findListWithJoiningEntity(E entity, Integer depth, JoiningDepthTreeLike tree) {
+        // before find
+        if (entity != null) {
+            beforeFindEntity(entity);
+        }
         List<E> eList = findListByMapper(entity);
+        // after find
+        eList.forEach(this::afterFindEntity);
         eList.forEach(this::findGeometryAndSet);
         eList.forEach(this::exp);
 //        if (depth > 0) {

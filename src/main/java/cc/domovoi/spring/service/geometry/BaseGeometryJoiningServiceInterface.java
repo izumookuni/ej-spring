@@ -37,6 +37,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     @Override
     default Try<Tuple2<Integer, String>> addEntity(E entity) {
+        beforeAdd(entity);
         return Try.apply(() -> {
             Boolean entityExist = checkEntityExist(entity);
             if (entityExist) {
@@ -72,6 +73,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     @Override
     default Try<Integer> updateEntity(E entity) {
+        beforeUpdate(entity);
         return Try.apply(() -> {
             imp(entity);
             List<Integer> updateGeometryResultList = updateGeometryByGeometryService(entity);
@@ -99,6 +101,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     @Override
     default Try<Integer> deleteEntity(E entity) {
+        beforeDelete(entity);
         return Try.apply(() -> {
             if (entity.getId() == null) {
                 throw new RuntimeException("id must not be null");
