@@ -17,9 +17,9 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            groupId 'cc.domovoi'
+            groupId project.group
             artifactId project.name
-            version '0.0.1'
+            version project.version
         }
     }
 }

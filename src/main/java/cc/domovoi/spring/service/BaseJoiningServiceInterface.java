@@ -33,6 +33,30 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
 
     }
 
+    default Boolean addCondition(E entity) {
+        return true;
+    }
+
+    default Boolean updateCondition(E entity) {
+        return true;
+    }
+
+    default Boolean deleteCondition(E entity) {
+        return true;
+    }
+
+    default void afterAdd(E entity) {
+
+    }
+
+    default void afterUpdate(E entity) {
+
+    }
+
+    default void afterDelete(E entity) {
+
+    }
+
     /**
      * Add entity function, called by the Controller layer.
      *

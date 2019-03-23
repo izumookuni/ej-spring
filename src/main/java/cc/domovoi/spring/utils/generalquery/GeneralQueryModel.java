@@ -30,6 +30,8 @@ public class GeneralQueryModel implements BasePagingEntityInterface {
 
     private Map<String, String> baseWhereLike;
 
+    private Map<String, List<String>> baseWhereIn;
+
     private List<String> baseWhereNull;
 
     private List<String> baseWhereNotNull;
@@ -126,6 +128,14 @@ public class GeneralQueryModel implements BasePagingEntityInterface {
             baseWhereLike = new HashMap<>();
         }
         baseWhereLike.put(column, value);
+    }
+
+
+    public void putBaseWhereIn(String column, List<String> value) {
+        if (this.baseWhereIn == null) {
+            this.baseWhereIn = new HashMap<>();
+        }
+        this.baseWhereIn.put(column, value);
     }
 
     public void putBaseWhereNull(String value) {
@@ -245,6 +255,14 @@ public class GeneralQueryModel implements BasePagingEntityInterface {
 
     public void setBaseWhereLike(Map<String, String> baseWhereLike) {
         this.baseWhereLike = baseWhereLike;
+    }
+
+    public Map<String, List<String>> getBaseWhereIn() {
+        return baseWhereIn != null ? baseWhereIn : Collections.emptyMap();
+    }
+
+    public void setBaseWhereIn(Map<String, List<String>> baseWhereIn) {
+        this.baseWhereIn = baseWhereIn;
     }
 
     public List<String> getBaseWhereNull() {

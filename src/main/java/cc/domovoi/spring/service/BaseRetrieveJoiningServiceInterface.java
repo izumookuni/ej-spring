@@ -47,6 +47,10 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
 
     }
 
+    default Boolean collectCondition(E entity) {
+        return true;
+    }
+
     /**
      * Find entity function, called by the Controller layer.
      *
@@ -114,7 +118,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
                 }
                 // after find
                 entityList.forEach(this::afterFindEntity);
-                return entityList;
+                return entityList.stream().filter(this::collectCondition).collect(Collectors.toList());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,7 +149,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
                 joiningEntityByDepth(Collections.singletonList(e), depth);
             }
         }
-        return e;
+        return collectCondition(e) ? e : null;
     }
 
     /**
@@ -170,7 +174,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
         else {
             joiningEntityByDepth(eList, depth);
         }
-        return eList;
+        return eList.stream().filter(this::collectCondition).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")

@@ -87,7 +87,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
                 // after find
                 entityList.forEach(this::afterFindEntity);
                 entityList.forEach(this::exp);
-                return entityList;
+                return entityList.stream().filter(this::collectCondition).collect(Collectors.toList());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,7 +122,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
                 joiningEntityByDepth(Collections.singletonList(e), depth);
             }
         }
-        return e;
+        return this.collectCondition(e) ? e : null;
     }
 
     @Override
@@ -164,7 +164,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         else {
             joiningEntityByDepth(eList, depth);
         }
-        return eList;
+        return eList.stream().filter(this::collectCondition).collect(Collectors.toList());
     }
 
     /**
