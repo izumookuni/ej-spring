@@ -1,6 +1,7 @@
 package cc.domovoi.spring.service.geometry;
 
 import cc.domovoi.ej.collection.tuple.Tuple2;
+import cc.domovoi.ej.collection.util.Failure;
 import cc.domovoi.ej.collection.util.Try;
 import cc.domovoi.spring.geometry.converter.GeometryLoader;
 import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
@@ -37,6 +38,9 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     @Override
     default Try<Tuple2<Integer, String>> addEntity(E entity) {
+        if (!addCondition(entity)) {
+            return new Failure<>(new RuntimeException("do not meet the addCondition"));
+        }
         beforeAdd(entity);
         return Try.apply(() -> {
             Boolean entityExist = checkEntityExist(entity);
@@ -73,6 +77,9 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     @Override
     default Try<Integer> updateEntity(E entity) {
+        if (!updateCondition(entity)) {
+            return new Failure<>(new RuntimeException("do not meet the updateCondition"));
+        }
         beforeUpdate(entity);
         return Try.apply(() -> {
             imp(entity);
@@ -101,11 +108,14 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     @Override
     default Try<Integer> deleteEntity(E entity) {
+        if (!deleteCondition(entity)) {
+            return new Failure<>(new RuntimeException("do not meet the deleteCondition"));
+        }
         beforeDelete(entity);
         return Try.apply(() -> {
-            if (entity.getId() == null) {
-                throw new RuntimeException("id must not be null");
-            }
+//            if (entity.getId() == null) {
+//                throw new RuntimeException("id must not be null");
+//            }
             imp(entity);
             Tuple2<List<Integer>, Boolean> deleteGeometryResult = deleteGeometryByGeometryService(entity);
 

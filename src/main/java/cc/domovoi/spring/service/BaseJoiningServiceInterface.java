@@ -1,6 +1,7 @@
 package cc.domovoi.spring.service;
 
 import cc.domovoi.ej.collection.tuple.Tuple2;
+import cc.domovoi.ej.collection.util.Failure;
 import cc.domovoi.ej.collection.util.Try;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.spring.mapper.BaseMapperInterface;
@@ -64,6 +65,9 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @return The number of successful insert operations.
      */
     default Try<Tuple2<Integer, String>> addEntity(E entity) {
+        if (!addCondition(entity)) {
+            return new Failure<>(new RuntimeException("do not meet the addCondition"));
+        }
         beforeAdd(entity);
         return Try.apply(() -> {
             Boolean entityExist = checkEntityExist(entity);
@@ -84,6 +88,9 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @return The number of successful update operations.
      */
     default Try<Integer> updateEntity(E entity) {
+        if (!updateCondition(entity)) {
+            return new Failure<>(new RuntimeException("do not meet the updateCondition"));
+        }
         beforeUpdate(entity);
         return Try.apply(() -> updateEntityByMapper(entity));
 //        return updateEntityByMapper(entity);
@@ -96,10 +103,13 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
      * @return The number of successful delete operations.
      */
     default Try<Integer> deleteEntity(E entity) {
-        beforeDelete(entity);
-        if (entity.getId() == null) {
-            throw new RuntimeException("id must not be null");
+        if (!deleteCondition(entity)) {
+            return new Failure<>(new RuntimeException("do not meet the deleteCondition"));
         }
+        beforeDelete(entity);
+//        if (entity.getId() == null) {
+//            throw new RuntimeException("id must not be null");
+//        }
         return Try.apply(() -> deleteEntityByMapper(entity));
 //        return deleteEntityByMapper(entity);
     }
