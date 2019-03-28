@@ -31,9 +31,10 @@ public interface OriginalRetrieveControllerInterface<E> {
     /**
      * The function that find entity list.
      *
+     * @param entity entity
      * @return Entity list.
      */
-    Function<E, List<E>> findEntityFunction();
+    List<E> findEntityFunction(E entity);
 
     /**
      * Find entity list.
@@ -51,7 +52,7 @@ public interface OriginalRetrieveControllerInterface<E> {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("findEntity: %s", entity));
-            List<E> entityList = findEntityFunction().apply(entity);
+            List<E> entityList = findEntityFunction(entity);
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, entityList);
 
         } catch (Exception e) {

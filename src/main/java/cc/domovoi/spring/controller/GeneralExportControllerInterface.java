@@ -38,7 +38,7 @@ public interface GeneralExportControllerInterface<C, E extends BaseExportEntityI
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request body is null");
                 return;
             }
-            List<E> eList = findEntityFunction().apply(entity);
+            List<E> eList = findEntityFunction(entity);
             if (eList == null || eList.isEmpty()) {
                 response.sendError(HttpServletResponse.SC_NO_CONTENT, "There is nothing to export");
                 return;

@@ -24,23 +24,26 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
     /**
      * The function that add Entity.
      *
+     * @param entity entity
      * @return The number of successful insert operations.
      */
-    Function<E, Try<Tuple2<Integer, String>>> addEntityFunction();
+    Try<Tuple2<Integer, String>> addEntityFunction(E entity);
 
     /**
      * The function that update Entity.
      *
+     * @param entity entity
      * @return The number of successful update operations.
      */
-    Function<E, Try<Integer>> updateEntityFunction();
+    Try<Integer> updateEntityFunction(E entity);
 
     /**
      * The function that delete Entity.
      *
+     * @param entity entity
      * @return The number of successful delete operations.
      */
-    Function<E, Try<Integer>> deleteEntityFunction();
+    Try<Integer> deleteEntityFunction(E entity);
 
     /**
      * Add Entity.
@@ -58,7 +61,7 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("addEntity: %s", entity));
-            Try<Tuple2<Integer, String>> result = addEntityFunction().apply(entity);
+            Try<Tuple2<Integer, String>> result = addEntityFunction(entity);
             if (result.isSuccess()) {
                 Tuple2<Integer, String> data = result.get();
                 Map<String, Object> dataMap = new HashMap<>();
@@ -93,7 +96,7 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("jsonMap: %s", entity));
-            Try<Integer> result = updateEntityFunction().apply(entity);
+            Try<Integer> result = updateEntityFunction(entity);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
@@ -124,7 +127,7 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("deleteEntity: %s", entity));
-            Try<Integer> result = deleteEntityFunction().apply(entity);
+            Try<Integer> result = deleteEntityFunction(entity);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }

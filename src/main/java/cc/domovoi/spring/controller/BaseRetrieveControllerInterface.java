@@ -24,8 +24,17 @@ import java.util.function.Function;
 public interface BaseRetrieveControllerInterface<E extends BaseJoiningEntityInterface, S extends BaseRetrieveJoiningServiceInterface<E, ?>> extends OriginalRetrieveControllerInterface<E>, GeneralControllerInterface<S> {
 
     @Override
-    default Function<E, List<E>> findEntityFunction() {
-        return service()::findList;
+    default List<E> findEntityFunction(E entity) {
+        return service().findList(entity);
+    }
+
+    /**
+     * The function that find entity.
+     * @param id ID of entity.
+     * @return Entity.
+     */
+    default E findEntityByIdFunction(String id) {
+        return service().findEntity(id);
     }
 
     /**
@@ -44,7 +53,7 @@ public interface BaseRetrieveControllerInterface<E extends BaseJoiningEntityInte
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("findById: %s", id));
-            E entity = service().findEntity(id);
+            E entity = findEntityByIdFunction(id);
             if (entity != null) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, entity);
             } else {

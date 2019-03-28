@@ -16,17 +16,17 @@ import java.util.function.Function;
 public interface BaseCRUDControllerInterface<E extends BaseJoiningEntityInterface, S extends BaseJoiningServiceInterface<E, ?>> extends BaseRetrieveControllerInterface<E, S>, OriginalCRUDControllerInterface<E> {
 
     @Override
-    default Function<E, Try<Tuple2<Integer, String>>> addEntityFunction() {
-        return service()::addEntity;
+    default Try<Tuple2<Integer, String>> addEntityFunction(E entity) {
+        return service().addEntity(entity);
     }
 
     @Override
-    default Function<E, Try<Integer>> updateEntityFunction() {
-        return service()::updateEntity;
+    default Try<Integer> updateEntityFunction(E entity) {
+        return service().updateEntity(entity);
     }
 
     @Override
-    default Function<E, Try<Integer>> deleteEntityFunction() {
-        return service()::deleteEntity;
+    default Try<Integer> deleteEntityFunction(E entity) {
+        return service().deleteEntity(entity);
     }
 }

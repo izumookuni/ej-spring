@@ -44,7 +44,7 @@ public interface OriginalPagingControllerInterface<E extends BasePagingEntityInt
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("findPagingEntity: %s", entity));
-            List<E> entityList = findEntityFunction().apply(entity);
+            List<E> entityList = findEntityFunction(entity);
             Integer total = findCountFunction().apply(entity);
             jsonMap.put("total", total);
             jsonMap.put("rows", entityList);
