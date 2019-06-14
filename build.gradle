@@ -13,7 +13,7 @@ plugins {
 apply from: 'bintray.gradle'
 
 group 'cc.domovoi'
-version '0.0.4'
+version '0.0.5'
 
 dependencies {
     compile 'cc.domovoi:ej-collection:0.0.2'

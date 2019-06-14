@@ -5,9 +5,11 @@ import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.spring.mapper.BaseMapperInterface;
 import org.jooq.lambda.tuple.Tuple2;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -43,7 +45,7 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
     }
 
     default Boolean deleteCondition(E entity) {
-        return true;
+        return Objects.nonNull(entity) && StringUtils.hasText(entity.getId());
     }
 
     default void afterAdd(E entity) {
@@ -69,14 +71,16 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
             return new Failure<>(new RuntimeException("do not meet the addCondition"));
         }
         beforeAdd(entity);
-        return Try.apply(() -> {
+        Try<Tuple2<Integer, String>> addResult = Try.apply(() -> {
             Boolean entityExist = checkEntityExist(entity);
             if (entityExist) {
                 return new Tuple2<>(0, null);
             }
-            Integer addResult = addEntityByMapper(entity);
-            return new Tuple2<>(addResult, entity.getId());
+            Integer result = addEntityByMapper(entity);
+            return new Tuple2<>(result, entity.getId());
         });
+        afterAdd(entity);
+        return addResult;
 //        Boolean entityExist = checkEntityExist(entity);
 //        return entityExist ? 0 : addEntityByMapper(entity);
     }
@@ -92,7 +96,9 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
             return new Failure<>(new RuntimeException("do not meet the updateCondition"));
         }
         beforeUpdate(entity);
-        return Try.apply(() -> updateEntityByMapper(entity));
+        Try<Integer> updateResult = Try.apply(() -> updateEntityByMapper(entity));
+        afterUpdate(entity);
+        return updateResult;
 //        return updateEntityByMapper(entity);
     }
 
@@ -110,7 +116,9 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
 //        if (entity.getId() == null) {
 //            throw new RuntimeException("id must not be null");
 //        }
-        return Try.apply(() -> deleteEntityByMapper(entity));
+        Try<Integer> deleteResult = Try.apply(() -> deleteEntityByMapper(entity));
+        afterDelete(entity);
+        return deleteResult;
 //        return deleteEntityByMapper(entity);
     }
 

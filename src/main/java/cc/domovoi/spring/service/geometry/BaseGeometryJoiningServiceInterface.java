@@ -42,7 +42,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
             return new Failure<>(new RuntimeException("do not meet the addCondition"));
         }
         beforeAdd(entity);
-        return Try.apply(() -> {
+        Try<Tuple2<Integer, String>> addResult = Try.apply(() -> {
             Boolean entityExist = checkEntityExist(entity);
             if (entityExist) {
                 return new Tuple2<>(0, null);
@@ -52,9 +52,11 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
             if (addGeometryResultList.stream().anyMatch(i -> i == 0)) {
                 throw new RuntimeException(String.format("addGeometryResult is %s", addGeometryResultList));
             }
-            Integer addResult = addEntityByMapper(entity);
-            return new Tuple2<>(addResult, entity.getId());
+            Integer result = addEntityByMapper(entity);
+            return new Tuple2<>(result, entity.getId());
         });
+        afterAdd(entity);
+        return addResult;
 //        Boolean entityExist = checkEntityExist(entity);
 //        if (entityExist) {
 //            return 0;
@@ -81,7 +83,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
             return new Failure<>(new RuntimeException("do not meet the updateCondition"));
         }
         beforeUpdate(entity);
-        return Try.apply(() -> {
+        Try<Integer> updateResult = Try.apply(() -> {
             imp(entity);
             List<Integer> updateGeometryResultList = updateGeometryByGeometryService(entity);
             if (updateGeometryResultList.stream().anyMatch(i -> i == 0)) {
@@ -89,6 +91,8 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
             }
             return updateEntityByMapper(entity);
         });
+        afterUpdate(entity);
+        return updateResult;
 //        imp(entity);
 //        List<Integer> updateGeometryResultList = updateGeometryByGeometryService(entity);
 //        if (updateGeometryResultList.stream().anyMatch(i -> i == 0)) {
@@ -112,7 +116,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
             return new Failure<>(new RuntimeException("do not meet the deleteCondition"));
         }
         beforeDelete(entity);
-        return Try.apply(() -> {
+        Try<Integer> deleteResult = Try.apply(() -> {
 //            if (entity.getId() == null) {
 //                throw new RuntimeException("id must not be null");
 //            }
@@ -127,6 +131,8 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
                 return deleteEntityByMapper(entity);
             }
         });
+        afterDelete(entity);
+        return deleteResult;
 //        if (entity.getId() == null) {
 //            throw new RuntimeException("id must not be null");
 //        }
