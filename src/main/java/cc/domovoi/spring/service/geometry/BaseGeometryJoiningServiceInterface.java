@@ -1,13 +1,13 @@
 package cc.domovoi.spring.service.geometry;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
-import cc.domovoi.ej.collection.util.Failure;
-import cc.domovoi.ej.collection.util.Try;
+import cc.domovoi.collection.util.Failure;
+import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.geometry.converter.GeometryLoader;
 import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
 import cc.domovoi.spring.mapper.geometry.BaseGeometryMapperInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
+import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +119,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
             imp(entity);
             Tuple2<List<Integer>, Boolean> deleteGeometryResult = deleteGeometryByGeometryService(entity);
 
-            if (deleteGeometryResult._2()) {
+            if (deleteGeometryResult.v2()) {
                 // Provide geometry
                 return -1;
             } else {

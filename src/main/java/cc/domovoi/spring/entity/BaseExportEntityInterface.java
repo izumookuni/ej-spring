@@ -1,6 +1,6 @@
 package cc.domovoi.spring.entity;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
+import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.List;
 import java.util.function.Function;

@@ -1,13 +1,12 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.spring.mapper.BaseRetrieveMapperInterface;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
+import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -220,16 +219,16 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
         Map<String, Map<String, BaseRetrieveJoiningServiceInterface>> currentJoiningServiceMapBuffer = new HashMap<>();
 
 
-        while (currentTreeMap.stream().map(Tuple2::_2).anyMatch(JoiningDepthTreeLike::isTree)) {
+        while (currentTreeMap.stream().map(Tuple2::v2).anyMatch(JoiningDepthTreeLike::isTree)) {
             // _root for first time.
-            List<String> keyList = currentTreeMap.stream().map(Tuple2::_1).collect(Collectors.toList());
+            List<String> keyList = currentTreeMap.stream().map(Tuple2::v1).collect(Collectors.toList());
             for (int keyIdx = 0; keyIdx < keyList.size(); keyIdx++) {
 
                 String key = keyList.get(keyIdx);
-                String key2 = currentEntityMap.get(keyIdx)._1();
+                String key2 = currentEntityMap.get(keyIdx).v1();
                 assert key.equals(key2);
-                List<BaseJoiningEntityInterface> currentEntityList = currentEntityMap.get(keyIdx)._2();
-                JoiningDepthTreeLike currentTree = currentTreeMap.get(keyIdx)._2(); // tree
+                List<BaseJoiningEntityInterface> currentEntityList = currentEntityMap.get(keyIdx).v2();
+                JoiningDepthTreeLike currentTree = currentTreeMap.get(keyIdx).v2(); // tree
                 Map<String, BaseRetrieveJoiningServiceInterface> currentJoiningService = currentJoiningServiceMap.get(key);
 
                 List<BaseJoiningEntityInterface> joiningEntityListBuffer = Collections.emptyList();

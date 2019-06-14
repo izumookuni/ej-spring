@@ -1,6 +1,6 @@
 package cc.domovoi.spring.format.json;
 
-import cc.domovoi.ej.collection.util.Try;
+import cc.domovoi.collection.util.Try;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;

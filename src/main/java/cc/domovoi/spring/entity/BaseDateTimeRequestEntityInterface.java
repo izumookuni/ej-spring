@@ -1,6 +1,6 @@
 package cc.domovoi.spring.entity;
 
-import cc.domovoi.ej.collection.util.Try;
+import cc.domovoi.collection.util.Try;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.base.CaseFormat;
 

@@ -13,10 +13,10 @@ plugins {
 apply from: 'bintray.gradle'
 
 group 'cc.domovoi'
-version '0.0.3'
+version '0.0.4'
 
 dependencies {
-    compile 'cc.domovoi:ej-collection:0.0.1'
+    compile 'cc.domovoi:ej-collection:0.0.2'
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'

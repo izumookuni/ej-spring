@@ -1,8 +1,8 @@
 package cc.domovoi.spring.utils;
 
-import cc.domovoi.ej.collection.util.Either;
-import cc.domovoi.ej.collection.util.Left;
-import cc.domovoi.ej.collection.util.Right;
+import cc.domovoi.collection.util.Either;
+import cc.domovoi.collection.util.Left;
+import cc.domovoi.collection.util.Right;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -107,7 +107,7 @@ public class CompressUtils {
                     else {
                         List<Boolean> deleteResult = uncompressFile.stream().map(file -> {
                             if (file.isRight()) {
-                                return file.toOption();
+                                return file.toOptional();
                             }
                             else {
                                 return file.left().get();

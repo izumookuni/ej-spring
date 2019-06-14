@@ -1,9 +1,9 @@
 package cc.domovoi.spring.controller;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
-import cc.domovoi.ej.collection.util.Try;
+import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
+import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,8 +65,8 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
             if (result.isSuccess()) {
                 Tuple2<Integer, String> data = result.get();
                 Map<String, Object> dataMap = new HashMap<>();
-                dataMap.put("result", data._1());
-                dataMap.put("id", data._2());
+                dataMap.put("result", data.v1());
+                dataMap.put("id", data.v2());
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, dataMap);
             }
             else {

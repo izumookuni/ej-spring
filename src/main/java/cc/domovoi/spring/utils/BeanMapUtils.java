@@ -1,8 +1,8 @@
 package cc.domovoi.spring.utils;
 
-import cc.domovoi.ej.collection.util.Failure;
-import cc.domovoi.ej.collection.util.Success;
-import cc.domovoi.ej.collection.util.Try;
+import cc.domovoi.collection.util.Failure;
+import cc.domovoi.collection.util.Success;
+import cc.domovoi.collection.util.Try;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

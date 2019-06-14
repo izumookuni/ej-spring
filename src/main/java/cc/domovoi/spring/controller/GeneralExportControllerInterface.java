@@ -1,6 +1,5 @@
 package cc.domovoi.spring.controller;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
 import cc.domovoi.spring.format.json.DateTimeObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cc.domovoi.spring.entity.BaseExportEntityInterface;
@@ -10,6 +9,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,7 +59,7 @@ public interface GeneralExportControllerInterface<C, E extends BaseExportEntityI
                 List<Tuple2<String, Function<? super C, ? extends Object>>> columnMeta = sheetEntity.exportColumnMeta();
                 IntStream.range(0, columnMeta.size()).forEach(cellIndex -> {
                     Cell titleCell = titleRow.createCell(cellIndex);
-                    titleCell.setCellValue(columnMeta.get(cellIndex)._1());
+                    titleCell.setCellValue(columnMeta.get(cellIndex).v1());
                 });
                 IntStream.range(0, contentEntityList.size()).forEach(rowIndex -> {
                     // Each Row
@@ -68,7 +68,7 @@ public interface GeneralExportControllerInterface<C, E extends BaseExportEntityI
                     C contentEntity = contentEntityList.get(rowIndex);
                     IntStream.range(0, columnMeta.size()).forEach(cellIndex -> {
                         // Each Cell
-                        Object content = columnMeta.get(cellIndex)._2().apply(contentEntity);
+                        Object content = columnMeta.get(cellIndex).v2().apply(contentEntity);
                         Cell contentCell = contentRow.createCell(cellIndex);
                         try {
                             String contentValue = objectMapper.writeValueAsString(content);

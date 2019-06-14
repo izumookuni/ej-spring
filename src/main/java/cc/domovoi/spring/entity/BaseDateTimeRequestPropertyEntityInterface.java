@@ -1,6 +1,5 @@
 package cc.domovoi.spring.entity;
 
-import cc.domovoi.spring.entity.GeneralPropertyEntityInterface;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDate;

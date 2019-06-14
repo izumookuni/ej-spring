@@ -1,11 +1,11 @@
 package cc.domovoi.spring.utils;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.jooq.lambda.tuple.Tuple2;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class TestUtils {
     public static <E extends BaseJoiningEntityInterface, S extends BaseJoiningServiceInterface<E, ?>> void testBeanEntityService(Class<E> entityClass, S service, Logger logger, Consumer<Boolean> assertFunction, String... ignore) throws Exception {
         E originEntity = RandomUtils.randomEntity(entityClass, ignore);
         logger.info(String.format("origin: %s", originEntity));
-        Integer addResult = service.addEntity(originEntity).map(Tuple2::_1).getOrElse(() -> 0);
+        Integer addResult = service.addEntity(originEntity).map(Tuple2::v1).getOrElse(() -> 0);
         assertFunction.accept(1 == addResult);
 
         E query = entityClass.newInstance();
@@ -54,7 +54,7 @@ public class TestUtils {
         originEntity.geometricGetMap().forEach((key, supplier) -> {
             logger.info(String.format("key: %s -> content: %s", key, supplier.get().toString()));
         });
-        Integer addResult = service.addEntity(originEntity).map(Tuple2::_1).getOrElse(() -> 0);
+        Integer addResult = service.addEntity(originEntity).map(Tuple2::v1).getOrElse(() -> 0);
         assertFunction.accept(1 == addResult);
         originEntity.geometryGetMap().forEach((key, supplier) -> {
             logger.info(String.format("key: %s -> content: %s", key, supplier.get().toString()));

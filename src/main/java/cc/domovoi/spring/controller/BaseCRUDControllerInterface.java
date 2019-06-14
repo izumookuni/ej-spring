@@ -1,9 +1,9 @@
 package cc.domovoi.spring.controller;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
-import cc.domovoi.ej.collection.util.Try;
+import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
+import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.function.Function;
 

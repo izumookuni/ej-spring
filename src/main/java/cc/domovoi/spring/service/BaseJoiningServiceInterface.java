@@ -1,10 +1,10 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.ej.collection.tuple.Tuple2;
-import cc.domovoi.ej.collection.util.Failure;
-import cc.domovoi.ej.collection.util.Try;
+import cc.domovoi.collection.util.Failure;
+import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.spring.mapper.BaseMapperInterface;
+import org.jooq.lambda.tuple.Tuple2;
 
 import java.time.LocalDateTime;
 import java.util.List;
