@@ -1,18 +1,22 @@
 package cc.domovoi.spring.utils;
 
-import cc.domovoi.collection.util.Either;
-import cc.domovoi.collection.util.Left;
-import cc.domovoi.collection.util.Right;
+import cc.domovoi.collection.util.*;
+import cc.domovoi.spring.utils.filetree.FileTreeInterface;
+import cc.domovoi.spring.utils.filetree.TreeFile;
+import cc.domovoi.spring.utils.filetree.TreeFolder;
 import org.apache.commons.io.IOUtils;
+import org.jooq.lambda.Seq;
+import org.jooq.lambda.tuple.Tuple2;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -129,6 +133,42 @@ public class CompressUtils {
         } catch (Exception e) {
             e.printStackTrace();
             return new Left<>(e.getMessage());
+        }
+    }
+
+    public static Try<File> initCompressFileTree(File outputFile, List<FileTreeInterface> fileTree) {
+        try(ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(outputFile))) {
+            zos.setComment(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+            Map<String, List<FileTreeInterface>> currentFileTreeMap = Collections.singletonMap("", fileTree);
+            while (!currentFileTreeMap.isEmpty()) {
+                Tuple2<Map<String, List<TreeFile>>, Map<String, List<TreeFolder>>> partitionFileTreeMap = Seq.partition(currentFileTreeMap.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(fTI -> new Tuple2<>(entry.getKey(), fTI))), t2 -> t2.v2.isFile())
+                        .map1(seq -> seq.collect(Collectors.groupingBy(t2 -> t2.v1, Collectors.mapping(t2 -> t2.v2.asTreeFile(), Collectors.toList()))))
+                        .map2(seq -> seq.collect(Collectors.groupingBy(t2 -> t2.v1, Collectors.mapping(t2 -> t2.v2.asTreeFolder(), Collectors.toList()))));
+                Map<String, List<TreeFile>> treeFileMap = partitionFileTreeMap.v1();
+                Map<String, List<TreeFolder>> treeFolderMap = partitionFileTreeMap.v2();
+                treeFileMap.forEach((key, tFList) -> tFList.forEach(tF -> {
+                    String fileName = key + (StringUtils.hasText(key) ? "/" : "") + tF.getName();
+                    File file = tF.getSourceFile();
+                    Assert.isTrue(file.exists(), String.format("WTF! file %s no exists!", file.getName()));
+                    try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+                        ZipEntry zipEntry = new ZipEntry(fileName);
+                        zipEntry.setSize(Objects.nonNull(tF.getFileSize()) ? tF.getFileSize() : file.length());
+                        zos.putNextEntry(zipEntry);
+                        IOUtils.copy(bis, zos);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }));
+                currentFileTreeMap = Seq.toMap(treeFolderMap.entrySet().stream().flatMap(entry -> entry.getValue().stream().flatMap(tF -> {
+                    String subKey = entry.getKey() + (StringUtils.hasText(entry.getKey()) ? "/" : "") + tF.getName();
+                    return Stream.of(new Tuple2<>(subKey, tF.getChildren()));
+                })));
+            }
+            return new Success<>(outputFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Failure<>(e);
         }
     }
 }

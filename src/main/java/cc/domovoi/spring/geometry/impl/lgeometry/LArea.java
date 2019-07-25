@@ -34,6 +34,12 @@ public class LArea implements PolygonLike<LArea>, LGeometryInterface, Serializab
     @JsonIgnore
     private String geoId;
 
+    /**
+     * Associated entity ID List for query.
+     */
+    @JsonIgnore
+    private List<String> contextIdIn;
+
     @Override
     public String toString() {
         return "LArea{" +
@@ -128,5 +134,16 @@ public class LArea implements PolygonLike<LArea>, LGeometryInterface, Serializab
 
     public void setGeoId(String geoId) {
         this.geoId = geoId;
+    }
+
+    @Override
+    public List<String> getContextIdIn() {
+        return contextIdIn;
+    }
+
+    @Override
+    public void setContextIdIn(List<String> contextIdIn) {
+        this.contextIdIn = contextIdIn;
+        putContextIdIn(contextIdIn);
     }
 }

@@ -8,9 +8,8 @@ import cc.domovoi.spring.service.BaseRetrieveJoiningServiceInterface;
 import cc.domovoi.spring.service.GeometryServiceInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -72,26 +71,30 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         if (idList == null || idList.isEmpty()) {
             return Collections.emptyList();
         }
+        List<String> normalizeIdList = idList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        if (normalizeIdList.isEmpty()) {
+            return Collections.emptyList();
+        }
         try {
-            int listSize = idList.size();
+            int listSize = normalizeIdList.size();
             if (listSize <= 500) {
-                return mapper().findBaseListById(idList);
+                return mapper().findBaseListById(normalizeIdList);
             }
             else {
                 List<E> entityList = new ArrayList<>();
                 for (int i = 0; i < listSize / 500; i++) {
-                    List<String> innerIdList = idList.subList(i * 500, (i + 1) * 500);
+                    List<String> innerIdList = normalizeIdList.subList(i * 500, (i + 1) * 500);
                     List<E> innerEntityList = mapper().findBaseListById(innerIdList);
                     entityList.addAll(innerEntityList);
                 }
                 // after find
                 entityList.forEach(this::afterFindEntity);
-                entityList.forEach(this::exp);
+//                entityList.forEach(this::exp);
                 return entityList.stream().filter(this::collectCondition).collect(Collectors.toList());
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return idList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
+            return normalizeIdList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
         }
 
     }
@@ -128,10 +131,12 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
     @Override
     default List<E> findWithJoiningEntity(List<String> idList, Integer depth) {
         List<E> entityList = findListUsingIdByMapper(idList);
-        entityList.forEach(e -> {
-            findGeometryAndSet(e);
-            exp(e);
-        });
+        this.findGeometryListAndSet(entityList);
+        entityList.forEach(this::exp);
+//        entityList.forEach(e -> {
+//            findGeometryAndSet(e);
+//            exp(e);
+//        });
         joiningEntityByDepth(entityList, depth);
         return entityList;
     }
@@ -152,7 +157,8 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         List<E> eList = findListByMapper(entity);
         // after find
         eList.forEach(this::afterFindEntity);
-        eList.forEach(this::findGeometryAndSet);
+//        eList.forEach(this::findGeometryAndSet);
+        this.findGeometryListAndSet(eList);
         eList.forEach(this::exp);
 //        if (depth > 0) {
 //            eList.forEach(e -> joinEntity(e, depth));
@@ -179,6 +185,26 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
             query.setContextName(key);
             INNER geometry = geometryService().findGeometry(query);
             entity.geometrySetMap().get(key).accept(geometry);
+        });
+    }
+
+    default void findGeometryListAndSet(List<E> entityList) {
+        if (Objects.isNull(entityList) || entityList.isEmpty()) {
+            return;
+        }
+        List<String> idList = entityList.stream().map(E::getId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        Map<String, E> entityMap = entityList.stream().collect(Collectors.toMap(E::getId, Function.identity()));
+        entityList.get(0).geometryGetMap().keySet().forEach(key -> {
+            INNER query = geometryService().tempInner();
+            query.setContextIdIn(idList);
+            query.setContextName(key);
+            List<INNER> geometryList = geometryService().findGeometryList(query);
+            geometryList.forEach(geometry -> {
+                E entity = entityMap.get(geometry.getContextId());
+                if (Objects.nonNull(entity)) {
+                    entity.geometrySetMap().get(key).accept(geometry);
+                }
+            });
         });
     }
 

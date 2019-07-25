@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public interface BaseDateTimeRequestPropertyEntityInterface extends BaseDateTimeRequestEntityInterface, GeneralPropertyEntityInterface {
 
@@ -93,5 +94,38 @@ public interface BaseDateTimeRequestPropertyEntityInterface extends BaseDateTime
     @Override
     default void setTimeRangeField(String timeRangeField) {
         propertyMap().put("timeRangeField", timeRangeField);
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    default LocalDate getDateRangeFrom() {
+        return getTimeRangeFrom() != null ? getTimeRangeFrom().toLocalDate() : null;
+    }
+
+    default void setDateRangeFrom(LocalDate dateRangeFrom) {
+        if (dateRangeFrom != null) {
+            setTimeRangeFrom(LocalDateTime.of(dateRangeFrom, LocalTime.MIDNIGHT));
+        }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    default LocalDate getDateRangeUntil() {
+        return getTimeRangeUntil() != null ? getTimeRangeUntil().toLocalDate() : null;
+    }
+
+    default void setDateRangeUntil(LocalDate dateRangeUntil) {
+        if (dateRangeUntil != null) {
+            setTimeRangeUntil(LocalDateTime.of(dateRangeUntil, LocalTime.MIDNIGHT));
+        }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    default LocalDate getDateRangeTo() {
+        return getTimeRangeUntil() != null ? getTimeRangeUntil().toLocalDate().minusDays(1L) : null;
+    }
+
+    default void setDateRangeTo(LocalDate dateRangeTo) {
+        if (dateRangeTo != null) {
+            setTimeRangeUntil(LocalDateTime.of(dateRangeTo.plusDays(1L), LocalTime.MIDNIGHT));
+        }
     }
 }

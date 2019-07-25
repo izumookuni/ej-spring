@@ -64,6 +64,14 @@ public interface LGeometryInterface extends GeoContextLike {
         }
     }
 
+    default void putContextIdIn(List<String> contextIdIn) {
+        if (getPoints() != null) {
+            getPoints().forEach(point -> {
+                point.setContextIdIn(contextIdIn);
+            });
+        }
+    }
+
     default Optional<LPoint> corePoint() {
         if (getPoints() != null && !getPoints().isEmpty()) {
             OptionalDouble avgX = getPoints().stream().mapToDouble(LPoint::getX).average();

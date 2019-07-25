@@ -55,6 +55,12 @@ public class LPoint implements PointLike<LPoint>, LGeometryInterface, Serializab
     @JsonIgnore
     private Integer geoType;
 
+    /**
+     * Associated entity ID List for query.
+     */
+    @JsonIgnore
+    private List<String> contextIdIn;
+
 //    @Override
 //    public String toString() {
 //        return "LPoint{" +
@@ -211,5 +217,15 @@ public class LPoint implements PointLike<LPoint>, LGeometryInterface, Serializab
 
     public void setGeoType(Integer geoType) {
         this.geoType = geoType;
+    }
+
+    @Override
+    public List<String> getContextIdIn() {
+        return contextIdIn;
+    }
+
+    @Override
+    public void setContextIdIn(List<String> contextIdIn) {
+        this.contextIdIn = contextIdIn;
     }
 }

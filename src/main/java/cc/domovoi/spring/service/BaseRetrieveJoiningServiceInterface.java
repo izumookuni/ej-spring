@@ -5,6 +5,7 @@ import cc.domovoi.spring.mapper.BaseRetrieveMapperInterface;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
 import org.jooq.lambda.tuple.Tuple2;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -87,7 +88,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
      * @return Entity.
      */
     default E findByMapper(String id) {
-        if (id == null) {
+        if (!StringUtils.hasText(id)) {
             return null;
         }
         return mapper().findBaseById(id);
@@ -103,15 +104,19 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
         if (idList == null || idList.isEmpty()) {
             return Collections.emptyList();
         }
+        List<String> normalizeIdList = idList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        if (normalizeIdList.isEmpty()) {
+            return Collections.emptyList();
+        }
         try {
-            int listSize = idList.size();
+            int listSize = normalizeIdList.size();
             if (listSize <= 500) {
-                return mapper().findBaseListById(idList);
+                return mapper().findBaseListById(normalizeIdList);
             }
             else {
                 List<E> entityList = new ArrayList<>();
                 for (int i = 0; i < listSize / 500; i++) {
-                    List<String> innerIdList = idList.subList(i * 500, (i + 1) * 500);
+                    List<String> innerIdList = normalizeIdList.subList(i * 500, (i + 1) * 500);
                     List<E> innerEntityList = mapper().findBaseListById(innerIdList);
                     entityList.addAll(innerEntityList);
                 }
@@ -121,7 +126,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return idList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
+            return normalizeIdList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
         }
 
     }

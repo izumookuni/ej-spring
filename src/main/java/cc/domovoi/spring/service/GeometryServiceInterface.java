@@ -1,5 +1,7 @@
 package cc.domovoi.spring.service;
 
+import java.util.List;
+
 /**
  * GeometryServiceInterface.
  *
@@ -38,5 +40,12 @@ public interface GeometryServiceInterface<INNER> {
      */
     Integer deleteGeometry(INNER geometry);
 
+    /**
+     * Find geometry entity list.
+     *
+     * @param geometry Query conditions.
+     * @return Geometry entity list.
+     */
+    List<INNER> findGeometryList(INNER geometry);
 
 }
