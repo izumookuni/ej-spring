@@ -1,3 +1,6 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 buildscript {
     repositories {
         jcenter()
@@ -10,11 +13,32 @@ buildscript {
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'com.jfrog.artifactory' version '4.9.8'
 }
 apply from: 'bintray.gradle'
 
 group 'cc.domovoi'
-version '0.0.6'
+version '0.0.7'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url "${artifactory_url}"
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+    maven {
+        url 'https://dl.bintray.com/izumookuni/domovoi/'
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 dependencies {
     compile 'cc.domovoi:ej-collection:0.0.2'
@@ -44,21 +68,21 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-allprojects {
-    
-    sourceCompatibility = 1.8
-    
-    repositories {
-        mavenCentral()
-        maven {
-            url 'https://dl.bintray.com/izumookuni/domovoi/'
-        }
-    }
-    
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-    }
-}
+//allprojects {
+//
+//    sourceCompatibility = 1.8
+//
+//    repositories {
+//        mavenCentral()
+//        maven {
+//            url 'https://dl.bintray.com/izumookuni/domovoi/'
+//        }
+//    }
+//
+//    tasks.withType(JavaCompile) {
+//        options.encoding = 'UTF-8'
+//    }
+//}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -72,13 +96,41 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 publishing {
     publications {
-        MyPublication(MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            groupId project.group
-            artifactId project.name
-            version project.version
+            groupId "${project.group}"
+            artifactId "${project.name}"
+//            version "${project.version}"
+            version "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}-SNAPSHOT"
+        }
+    }
+}
+
+artifactory {
+    contextUrl = "${artifactory_url}"
+    publish {
+        repository {
+            repoKey = 'libs-snapshot-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+            publications ('mavenJava')
+//            properties = ['qa.level': 'basic', 'q.os': 'win32, deb, osx']
+            publishBuildInfo = true
+            publishArtifacts = true
+            publishPom = true
+            publishIvy = false
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-release'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
         }
     }
 }

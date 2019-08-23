@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,8 @@ public interface OriginalRetrieveControllerInterface<E> {
      * Find entity list.
      *
      * @param entity Query conditions.
+     * @param request request
+     * @param response response
      * @return Entity list.
      */
     @ApiOperation(value = "Find entity list", notes = "")
@@ -47,7 +51,7 @@ public interface OriginalRetrieveControllerInterface<E> {
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> findEntity(@RequestBody E entity) {
+    default Map<String, Object> findEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("findEntity: %s", entity));

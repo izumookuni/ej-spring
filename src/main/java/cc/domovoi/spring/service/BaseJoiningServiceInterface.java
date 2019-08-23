@@ -24,17 +24,11 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
         return UUID.randomUUID().toString();
     }
 
-    default void beforeAdd(E entity) {
+    default void beforeAdd(E entity) { }
 
-    }
+    default void beforeUpdate(E entity) { }
 
-    default void beforeUpdate(E entity) {
-
-    }
-
-    default void beforeDelete(E entity) {
-
-    }
+    default void beforeDelete(E entity) { }
 
     default Boolean addCondition(E entity) {
         return true;
@@ -48,17 +42,11 @@ public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterfac
         return Objects.nonNull(entity) && StringUtils.hasText(entity.getId());
     }
 
-    default void afterAdd(E entity) {
+    default void afterAdd(E entity) { }
 
-    }
+    default void afterUpdate(E entity) { }
 
-    default void afterUpdate(E entity) {
-
-    }
-
-    default void afterDelete(E entity) {
-
-    }
+    default void afterDelete(E entity) { }
 
     /**
      * Add entity function, called by the Controller layer.

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -45,10 +47,24 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
      */
     Try<Integer> deleteEntityFunction(E entity);
 
+    default void beforeAdd(E entity, HttpServletRequest request, HttpServletResponse response) { }
+
+    default void beforeUpdate(E entity, HttpServletRequest request, HttpServletResponse response) { }
+
+    default void beforeDelete(E entity, HttpServletRequest request, HttpServletResponse response) { }
+
+    default void afterAdd(E entity, HttpServletRequest request, HttpServletResponse response) { }
+
+    default void afterUpdate(E entity, HttpServletRequest request, HttpServletResponse response) { }
+
+    default void afterDelete(E entity, HttpServletRequest request, HttpServletResponse response) { }
+
     /**
      * Add Entity.
      *
      * @param entity The entity need to be added.
+     * @param request request
+     * @param response response
      * @return The number of successful insert operations.
      */
     @ApiOperation(value = "Add entity", notes = "id, creationTime and updateTime will be generated automatically by the system")
@@ -57,11 +73,13 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> addEntity(@RequestBody E entity) {
+    default Map<String, Object> addEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("addEntity: %s", entity));
+            beforeAdd(entity, request, response);
             Try<Tuple2<Integer, String>> result = addEntityFunction(entity);
+            afterAdd(entity, request, response);
             if (result.isSuccess()) {
                 Tuple2<Integer, String> data = result.get();
                 Map<String, Object> dataMap = new HashMap<>();
@@ -84,6 +102,8 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
      * Update entity.
      *
      * @param entity The entity need to be updated.
+     * @param request request
+     * @param response response
      * @return The number of successful update operations.
      */
     @ApiOperation(value = "Update entity", notes = "id can't be null")
@@ -92,11 +112,13 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> updateEntity(@RequestBody E entity) {
+    default Map<String, Object> updateEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("jsonMap: %s", entity));
+            beforeUpdate(entity, request, response);
             Try<Integer> result = updateEntityFunction(entity);
+            afterUpdate(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
@@ -115,6 +137,8 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
      * Delete entity.
      *
      * @param entity The entity need to be deleted.
+     * @param request request
+     * @param response response
      * @return The number of successful delete operations.
      */
     @ApiOperation(value = "Delete entity", notes = "none")
@@ -123,11 +147,13 @@ public interface OriginalCRUDControllerInterface<E> extends OriginalRetrieveCont
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> deleteEntity(@RequestBody E entity) {
+    default Map<String, Object> deleteEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("deleteEntity: %s", entity));
+            beforeDelete(entity, request, response);
             Try<Integer> result = deleteEntityFunction(entity);
+            afterDelete(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
