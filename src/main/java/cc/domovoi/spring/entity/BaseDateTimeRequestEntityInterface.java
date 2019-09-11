@@ -105,6 +105,7 @@ public interface BaseDateTimeRequestEntityInterface {
                 try {
                     return getTimeRangeFrom().format(DateTimeFormatter.ofPattern(getCustomTimeFormat()));
                 } catch (Exception e) {
+                    e.printStackTrace();
                     return getTimeRangeFrom().format(DateTimeFormatter.ofPattern("yyyy-MM"));
                 }
             }

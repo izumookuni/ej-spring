@@ -4,9 +4,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.UUID;
 
 @ApiModel(value = "审计")
-public class AuditDisplayEntity implements AuditEntityInterface {
+public class AuditDisplayEntity implements AuditInterface {
 
     @ApiModelProperty(value = "ID")
     private String auditId;
@@ -23,7 +25,7 @@ public class AuditDisplayEntity implements AuditEntityInterface {
     @ApiModelProperty(value = "等级", notes = "info;warn;error")
     private String auditLevel;
 
-    @ApiModelProperty(value = "类型", notes = "用户;系统")
+    @ApiModelProperty(value = "类型")
     private String auditType;
 
     @ApiModelProperty(value = "范围", notes = "移动端;pc")
@@ -31,6 +33,9 @@ public class AuditDisplayEntity implements AuditEntityInterface {
 
     @ApiModelProperty(value = "行为", notes = "add;update;delete")
     private String auditBehavior;
+
+    @ApiModelProperty(value = "范围ID", notes = "项目ID")
+    private String scopeId;
 
     @ApiModelProperty(value = "关联ID")
     private String contextId;
@@ -50,6 +55,24 @@ public class AuditDisplayEntity implements AuditEntityInterface {
     @ApiModelProperty(value = "时间")
     private LocalDateTime auditTime;
 
+    public void init() {
+        if (Objects.isNull(auditId)) {
+            auditId = UUID.randomUUID().toString();
+        }
+        if (Objects.isNull(auditTime)) {
+            auditTime = LocalDateTime.now();
+        }
+    }
+
+//    @Override
+//    public String toString() {
+//        return "AuditDisplayEntity{" +
+//                "auditId='" + auditId + '\'' +
+//                ", auditContent='" + (Objects.nonNull(auditContent) ? (auditContent.length() <= 300) ? auditContent : auditContent.substring(0, 300) + "..." : null) + '\'' +
+//                '}';
+//    }
+
+
     @Override
     public String toString() {
         return "AuditDisplayEntity{" +
@@ -61,71 +84,76 @@ public class AuditDisplayEntity implements AuditEntityInterface {
                 ", auditType='" + auditType + '\'' +
                 ", auditScope='" + auditScope + '\'' +
                 ", auditBehavior='" + auditBehavior + '\'' +
+                ", scopeId='" + scopeId + '\'' +
+                ", contextId='" + contextId + '\'' +
+                ", contextPid='" + contextPid + '\'' +
+                ", contextName='" + contextName + '\'' +
                 ", auditField='" + auditField + '\'' +
-                ", auditContent='" + auditContent + '\'' +
+                ", auditContent='" + (Objects.nonNull(auditContent) ? (auditContent.length() <= 300) ? auditContent : auditContent.substring(0, 300) + "..." : null) + '\'' +
                 ", auditTime=" + auditTime +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AuditDisplayEntity that = (AuditDisplayEntity) o;
+        return Objects.equals(auditId, that.auditId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(auditId);
     }
 
     public AuditDisplayEntity() {
     }
 
-    @Override
     public String getAuditId() {
         return auditId;
     }
 
-    @Override
     public void setAuditId(String auditId) {
         this.auditId = auditId;
     }
 
-    @Override
     public String getAuditAuthor() {
         return auditAuthor;
     }
 
-    @Override
     public void setAuditAuthor(String auditAuthor) {
         this.auditAuthor = auditAuthor;
     }
 
-    @Override
     public String getAuditIp() {
         return auditIp;
     }
 
-    @Override
     public void setAuditIp(String auditIp) {
         this.auditIp = auditIp;
     }
 
-    @Override
     public String getAuditUri() {
         return auditUri;
     }
 
-    @Override
     public void setAuditUri(String auditUri) {
         this.auditUri = auditUri;
     }
 
-    @Override
     public String getAuditLevel() {
         return auditLevel;
     }
 
-    @Override
     public void setAuditLevel(String auditLevel) {
         this.auditLevel = auditLevel;
     }
 
-    @Override
     public String getAuditType() {
         return auditType;
     }
 
-    @Override
     public void setAuditType(String auditType) {
         this.auditType = auditType;
     }
@@ -138,42 +166,20 @@ public class AuditDisplayEntity implements AuditEntityInterface {
         this.auditScope = auditScope;
     }
 
-    @Override
     public String getAuditBehavior() {
         return auditBehavior;
     }
 
-    @Override
     public void setAuditBehavior(String auditBehavior) {
         this.auditBehavior = auditBehavior;
     }
 
-    public String getAuditField() {
-        return auditField;
+    public String getScopeId() {
+        return scopeId;
     }
 
-    public void setAuditField(String auditField) {
-        this.auditField = auditField;
-    }
-
-    @Override
-    public String getAuditContent() {
-        return auditContent;
-    }
-
-    @Override
-    public void setAuditContent(String auditContent) {
-        this.auditContent = auditContent;
-    }
-
-    @Override
-    public LocalDateTime getAuditTime() {
-        return auditTime;
-    }
-
-    @Override
-    public void setAuditTime(LocalDateTime auditTime) {
-        this.auditTime = auditTime;
+    public void setScopeId(String scopeId) {
+        this.scopeId = scopeId;
     }
 
     public String getContextId() {
@@ -198,5 +204,29 @@ public class AuditDisplayEntity implements AuditEntityInterface {
 
     public void setContextName(String contextName) {
         this.contextName = contextName;
+    }
+
+    public String getAuditField() {
+        return auditField;
+    }
+
+    public void setAuditField(String auditField) {
+        this.auditField = auditField;
+    }
+
+    public String getAuditContent() {
+        return auditContent;
+    }
+
+    public void setAuditContent(String auditContent) {
+        this.auditContent = auditContent;
+    }
+
+    public LocalDateTime getAuditTime() {
+        return auditTime;
+    }
+
+    public void setAuditTime(LocalDateTime auditTime) {
+        this.auditTime = auditTime;
     }
 }

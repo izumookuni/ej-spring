@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
+@Deprecated
 public class DoubleSerializer extends JsonSerializer<Double> {
 
     private static DecimalFormat df = new DecimalFormat("#.00");

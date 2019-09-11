@@ -24,13 +24,13 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
-    maven {
-        url "${artifactory_url}"
-        credentials {
-            username "${artifactory_user}"
-            password "${artifactory_password}"
-        }
-    }
+//    maven {
+//        url "${artifactory_url}"
+//        credentials {
+//            username "${artifactory_user}"
+//            password "${artifactory_password}"
+//        }
+//    }
     maven {
         url 'https://dl.bintray.com/izumookuni/domovoi/'
     }
@@ -41,27 +41,23 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    compile 'cc.domovoi:ej-collection:0.0.2'
+    compile 'cc.domovoi:ej-collection:0.0.3'
+    compile 'cc.domovoi:ej-lambda:0.0.2'
+    compile 'cc.domovoi:ej-tools:20190911095932-SNAPSHOT'
 
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.8'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.7.0'
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.7.0'
+    compile group: 'org.springframework', name: 'spring-core', version: '5.1.9.RELEASE'
+    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.1.9.RELEASE'
 
-    compile group: 'org.springframework', name: 'spring-core', version: '4.3.3.RELEASE'
-    compile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.3.RELEASE'
+    compile group: 'org.mybatis', name: 'mybatis-spring', version: '2.0.2'
+    compile group: 'org.mybatis', name: 'mybatis', version: '3.5.2'
 
-    compile group: 'org.mybatis', name: 'mybatis-spring', version: '1.3.2'
-    compile group: 'org.mybatis', name: 'mybatis', version: '3.4.6'
-
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-
-    compile group: 'org.apache.poi', name: 'poi', version: '4.0.1'
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.0.1'
-    compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.0.1'
-    compile group: 'org.apache.poi', name: 'poi-scratchpad', version: '4.0.1'
+    compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
+    compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.0'
+    compile group: 'org.apache.poi', name: 'poi-scratchpad', version: '4.1.0'
 
     compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
 
@@ -127,7 +123,7 @@ artifactory {
     }
     resolve {
         repository {
-            repoKey = 'libs-release'
+            repoKey = 'libs-snapshot-local'
             username = "${artifactory_user}"
             password = "${artifactory_password}"
             maven = true

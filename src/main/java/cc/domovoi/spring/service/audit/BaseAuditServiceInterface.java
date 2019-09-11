@@ -1,16 +1,20 @@
 package cc.domovoi.spring.service.audit;
 
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
+import cc.domovoi.spring.entity.audit.AuditDisplayEntity;
 import cc.domovoi.spring.entity.audit.AuditEntityInterface;
 import cc.domovoi.spring.mapper.BaseMapperInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
-import cc.domovoi.spring.service.audit.AuditServiceInterface;
+
+import java.util.List;
 
 public interface BaseAuditServiceInterface<E extends BaseJoiningEntityInterface & AuditEntityInterface, M extends BaseMapperInterface<E>> extends BaseJoiningServiceInterface<E, M> {
 
     AuditServiceInterface auditService();
 
     String auditAuthorGetter();
+
+    Class<E> auditClass();
 
     @Override
     default void afterAdd(E entity) {
@@ -28,29 +32,37 @@ public interface BaseAuditServiceInterface<E extends BaseJoiningEntityInterface 
     }
 
     default void recordAddAuditEntity(E entity) {
-        entity.setAuditBehavior("add");
-        entity.setAuditType("service");
-        entity.setAuditLevel("info");
-        entity.setAuditAuthor(auditAuthorGetter());
-        entity.init();
-        auditService().addEntity(entity);
+        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+            auditEntity.setAuditBehavior("add");
+            auditEntity.setAuditType("service");
+            auditEntity.setAuditLevel("info");
+            auditEntity.setAuditAuthor(auditAuthorGetter());
+        });
+        auditService().addAudit(auditDisplayEntity);
     }
 
     default void recordUpdateAuditEntity(E entity) {
-        entity.setAuditBehavior("update");
-        entity.setAuditType("service");
-        entity.setAuditLevel("info");
-        entity.setAuditAuthor(auditAuthorGetter());
-        entity.init();
-        auditService().addEntity(entity);
+        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+            auditEntity.setAuditBehavior("update");
+            auditEntity.setAuditType("service");
+            auditEntity.setAuditLevel("info");
+            auditEntity.setAuditAuthor(auditAuthorGetter());
+        });
+        auditService().addAudit(auditDisplayEntity);
     }
 
     default void recordDeleteAuditEntity(E entity) {
-        entity.setAuditBehavior("delete");
-        entity.setAuditType("service");
-        entity.setAuditLevel("info");
-        entity.setAuditAuthor(auditAuthorGetter());
-        entity.init();
-        auditService().addEntity(entity);
+        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+            auditEntity.setAuditBehavior("delete");
+            auditEntity.setAuditType("service");
+            auditEntity.setAuditLevel("info");
+            auditEntity.setAuditAuthor(auditAuthorGetter());
+        });
+        auditService().addAudit(auditDisplayEntity);
+    }
+
+    default List<Object> findAuditField() {
+        // Todo: ...
+        return null;
     }
 }

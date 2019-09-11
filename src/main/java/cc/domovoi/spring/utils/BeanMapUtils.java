@@ -179,6 +179,7 @@ public class BeanMapUtils {
             });
             return new Success<>((T) beanWrapper1.getWrappedInstance());
         } catch (Exception e) {
+            e.printStackTrace();
             return new Failure<>(e);
         }
     }
@@ -206,6 +207,7 @@ public class BeanMapUtils {
         try {
             return new Success<>((Set<String>) BeanMap.create(bean).keySet());
         } catch (Exception e) {
+            e.printStackTrace();
             return new Failure<>(e);
         }
     }
@@ -214,6 +216,7 @@ public class BeanMapUtils {
         try {
             return new Success<>((Set<String>) BeanMap.create(beanClass.newInstance()).keySet());
         } catch (Exception e) {
+            e.printStackTrace();
             return new Failure<>(e);
         }
     }

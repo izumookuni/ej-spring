@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@Deprecated
 public class RandomUtils {
 
     private static Random r = new Random();

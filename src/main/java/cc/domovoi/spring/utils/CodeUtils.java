@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+@Deprecated
 public class CodeUtils {
 
     private static final int width = 180;// 定义图片的width

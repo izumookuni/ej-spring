@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@Deprecated
 public interface TreeInterface<E extends TreeInterface> extends BaseJoiningEntityInterface, TreeDisplayInterface<E> {
 
     List<String> getCid();

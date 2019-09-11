@@ -3,6 +3,7 @@ package cc.domovoi.spring.utils.filetree;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class TreeFolder implements FileTreeInterface {
 
     private String name;

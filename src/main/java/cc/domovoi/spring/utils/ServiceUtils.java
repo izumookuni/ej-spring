@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class ServiceUtils {
 
+    public static String uuidRegex = "^[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}$";
+
     /**
      * 分组查询
      * @param mapper mapper实例
@@ -60,6 +62,15 @@ public class ServiceUtils {
         }
         else {
             return new Failure<>(new RuntimeException(addResultList.stream().filter(Try::isFailure).findFirst().map(t -> t.failed().get().getMessage()).get()));
+        }
+    }
+
+    public static Try<Integer> collectUpdateResult(List<Try<Integer>> updateResultList) {
+        if (updateResultList.stream().allMatch(Try::isSuccess)) {
+            return new Success<>(updateResultList.size());
+        }
+        else {
+            return new Failure<>(new RuntimeException(updateResultList.stream().filter(Try::isFailure).findFirst().map(t -> t.failed().get().getMessage()).get()));
         }
     }
 }

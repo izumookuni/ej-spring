@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public class TreeFile implements FileTreeInterface {
 
     private String name;

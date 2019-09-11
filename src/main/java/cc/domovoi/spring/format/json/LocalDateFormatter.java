@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 import java.time.LocalDate;
 
+@Deprecated
 public class LocalDateFormatter extends JsonSerializer<LocalDate> {
 
     @Override

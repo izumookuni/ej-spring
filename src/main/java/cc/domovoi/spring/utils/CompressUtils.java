@@ -22,6 +22,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+@Deprecated
 public class CompressUtils {
 
     /**
@@ -101,6 +102,7 @@ public class CompressUtils {
                             IOUtils.copy(bis, bos);
                             uncompressFile.add(new Right<>(outputFile));
                         } catch (Exception e) {
+                            e.printStackTrace();
                             uncompressFile.add(new Left<>(Optional.of(outputFile)));
                         }
                         zipEntry = zis.getNextEntry();

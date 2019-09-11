@@ -1,6 +1,7 @@
 package cc.domovoi.spring.controller.audit;
 
 import cc.domovoi.spring.controller.OriginalCRUDControllerInterface;
+import cc.domovoi.spring.entity.audit.AuditDisplayEntity;
 import cc.domovoi.spring.entity.audit.AuditEntityInterface;
 import cc.domovoi.spring.service.audit.AuditServiceInterface;
 
@@ -31,36 +32,39 @@ public interface BaseAuditControllerInterface<E extends AuditEntityInterface> ex
     }
 
     default void recordAddAuditEntity(E entity, HttpServletRequest request) {
-        entity.setAuditBehavior("add");
-        entity.setAuditType("controller");
-        entity.setAuditLevel("info");
-        entity.setAuditAuthor(auditAuthorGetter());
-        entity.setAuditIp(getIpAddr(request));
-        entity.setAuditUri(request.getRequestURI());
-        entity.init();
-        auditService().addEntity(entity);
+        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+            auditEntity.setAuditBehavior("add");
+            auditEntity.setAuditType("controller");
+            auditEntity.setAuditLevel("info");
+            auditEntity.setAuditAuthor(auditAuthorGetter());
+            auditEntity.setAuditIp(getIpAddr(request));
+            auditEntity.setAuditUri(request.getRequestURI());
+        });
+        auditService().addAudit(auditDisplayEntity);
     }
 
     default void recordUpdateAuditEntity(E entity, HttpServletRequest request) {
-        entity.setAuditBehavior("update");
-        entity.setAuditType("controller");
-        entity.setAuditLevel("info");
-        entity.setAuditAuthor(auditAuthorGetter());
-        entity.setAuditIp(getIpAddr(request));
-        entity.setAuditUri(request.getRequestURI());
-        entity.init();
-        auditService().addEntity(entity);
+        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+            auditEntity.setAuditBehavior("update");
+            auditEntity.setAuditType("controller");
+            auditEntity.setAuditLevel("info");
+            auditEntity.setAuditAuthor(auditAuthorGetter());
+            auditEntity.setAuditIp(getIpAddr(request));
+            auditEntity.setAuditUri(request.getRequestURI());
+        });
+        auditService().addAudit(auditDisplayEntity);
     }
 
     default void recordDeleteAuditEntity(E entity, HttpServletRequest request) {
-        entity.setAuditBehavior("delete");
-        entity.setAuditType("controller");
-        entity.setAuditLevel("info");
-        entity.setAuditAuthor(auditAuthorGetter());
-        entity.setAuditIp(getIpAddr(request));
-        entity.setAuditUri(request.getRequestURI());
-        entity.init();
-        auditService().addEntity(entity);
+        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+            auditEntity.setAuditBehavior("delete");
+            auditEntity.setAuditType("controller");
+            auditEntity.setAuditLevel("info");
+            auditEntity.setAuditAuthor(auditAuthorGetter());
+            auditEntity.setAuditIp(getIpAddr(request));
+            auditEntity.setAuditUri(request.getRequestURI());
+        });
+        auditService().addAudit(auditDisplayEntity);
     }
 
     static String getIpAddr(HttpServletRequest request) {
@@ -94,6 +98,7 @@ public interface BaseAuditControllerInterface<E extends AuditEntityInterface> ex
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             ipAddress="";
         }
         // ipAddress = this.getRequest().getRemoteAddr();

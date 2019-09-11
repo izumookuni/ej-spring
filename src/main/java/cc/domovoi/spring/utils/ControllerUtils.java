@@ -37,6 +37,7 @@ public class ControllerUtils {
                     deleteQuery.setId(id);
                     return deleteEntityFunction.apply(deleteQuery);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
                 }
             }).collect(Collectors.toList());

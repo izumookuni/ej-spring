@@ -4,6 +4,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.function.Supplier;
 
+@Deprecated
 public class OptionalUtils {
     public static <T> T orElse(T value, Supplier<T> zero) {
         if (value == null) {

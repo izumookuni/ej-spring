@@ -6,6 +6,7 @@ import org.jooq.lambda.tuple.Tuple2;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public interface FileTreeInterface {
 
     String getName();

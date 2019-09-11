@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@Deprecated
 public class DecimalSerializer extends JsonSerializer<BigDecimal> {
 
     @Override
