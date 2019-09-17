@@ -83,8 +83,11 @@ public class AuditTest {
         });
         auditMapper.showAllData();
 
-        List<AuditDisplayEntity> auditDisplayEntityList = auditMapper.findAllList();
-        List<AuditChangeContextGroupModel> auditChangeContextGroupModelList = auditService.findAuditChangeRecord(auditDisplayEntityList, AuditBeanEntityTestImpl.class, Optional.empty(), Optional.empty(), Optional.empty());
+//        List<AuditDisplayEntity> auditDisplayEntityList = auditMapper.findAllList();
+//        List<AuditChangeContextGroupModel> auditChangeContextGroupModelList = auditService.findAuditChangeRecord(auditDisplayEntityList, AuditBeanEntityTestImpl.class, Optional.empty(), Optional.empty(), Optional.empty());
+//        logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(auditChangeContextGroupModelList));
+
+        List<AuditChangeContextGroupModel> auditChangeContextGroupModelList = auditBeanService.findAuditChangeContextGroupModel();
         logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(auditChangeContextGroupModelList));
     }
 }

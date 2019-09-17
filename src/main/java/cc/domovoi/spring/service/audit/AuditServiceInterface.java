@@ -4,13 +4,14 @@ import cc.domovoi.spring.entity.audit.*;
 import cc.domovoi.spring.mapper.audit.AuditMapperInterface;
 import cc.domovoi.spring.utils.ServiceUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jooq.lambda.tuple.Tuple1;
+import io.swagger.annotations.ApiModelProperty;
 import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public interface AuditServiceInterface {
@@ -57,19 +58,20 @@ public interface AuditServiceInterface {
 
     /**
      * findAuditChangeRecord
-     * @param auditClass audit Class
+     * @param auditDisplayEntityList auditDisplayEntityList
+     * @param auditClass auditClass
      * @param contextNameFilter contextNameFilter
      * @param contextIdFilter contextIdFilter
      * @param fieldNameFilter fieldNameFilter
      * @param <T> AuditEntityInterface
      * @return AuditChangeContextGroupModel List
      */
-    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameFilter, Optional<List<String>> contextIdFilter, Optional<List<String>> fieldNameFilter) {
-        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> !contextNameFilter.isPresent() || contextNameFilter.get().contains(auditDisplayEntity.getContextName())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
+    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
+        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
         return auditDisplayEntityListMap.entrySet().stream().map(entry -> {
             // context group
             String contextName = entry.getKey();
-            Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap1 = entry.getValue().stream().filter(auditDisplayEntity -> !contextIdFilter.isPresent() || contextIdFilter.get().contains(auditDisplayEntity.getContextId())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextId));
+            Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap1 = entry.getValue().stream().filter(auditDisplayEntity -> contextIdFilter.test(auditDisplayEntity.getContextId())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextId));
             List<AuditChangeContextModel> auditChangeContextModelList = auditDisplayEntityListMap1.entrySet().stream().map(entry1 -> {
                 // context
                 String contextId = entry1.getKey();
@@ -88,39 +90,62 @@ public interface AuditServiceInterface {
     }
 
     /**
+     * findAuditChangeRecord
+     * @param auditDisplayEntityList auditDisplayEntityList
+     * @param auditClass audit Class
+     * @param contextNameList contextNameList
+     * @param contextIdList contextIdList
+     * @param auditFieldList auditFieldList
+     * @param <T> AuditEntityInterface
+     * @return AuditChangeContextGroupModel List
+     */
+    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
+        return findAuditChangeRecord(auditDisplayEntityList, auditClass,
+                contextName -> contextNameList.map(list -> list.contains(contextName)).orElse(true),
+                contextId -> contextIdList.map(list -> list.contains(contextId)).orElse(true),
+                fieldName -> auditFieldList.map(list -> list.contains(fieldName)).orElse(true));
+    }
+
+    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass) {
+        return findAuditChangeRecord(auditDisplayEntityList, auditClass,
+                contextName -> true,
+                contextId -> true,
+                fieldName -> true);
+    }
+
+    /**
      * initAuditChangeFieldModelList
      * @param auditDisplayEntityList auditDisplayEntityList with same contextName, contextId
      * @param auditClass audit Class
-     * @param fieldNameFilter fieldNameFilter
+     * @param auditFieldFilter auditFieldFilter
      * @param <T> AuditEntityInterface
      * @return AuditChangeFieldModel List
      */
-    default <T extends AuditEntityInterface> List<AuditChangeFieldModel> initAuditChangeFieldModelList(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> fieldNameFilter) {
+    default <T extends AuditEntityInterface> List<AuditChangeFieldModel> initAuditChangeFieldModelList(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> auditFieldFilter) {
         try {
-            T auditEntity = auditClass.newInstance();
             List<AuditChangeFieldModel> auditChangeFieldModelList = new ArrayList<>();
-            auditEntity.processAuditFieldList(auditEntity.auditFieldList(), (name) -> {
-                if (fieldNameFilter.map(l -> !l.contains(name)).orElse(false)) {
+            AuditUtils.processAuditFieldList(AuditUtils.auditFieldList(auditClass), (name, apiModelPropertyOptional) -> {
+                if (!auditFieldFilter.test(name)) {
                     return;
                 }
                 AuditChangeFieldModel auditChangeFieldModel = new AuditChangeFieldModel();
-                auditChangeFieldModel.setField(name);
+                auditChangeFieldModel.setField(apiModelPropertyOptional.map(ApiModelProperty::value).orElse(name));
                 auditChangeFieldModel.setChangeRecord(initAuditChangeRecordModelList(auditDisplayEntityList, name));
                 auditChangeFieldModelList.add(auditChangeFieldModel);
-            }, (name, auditRecord) -> {
-                if (fieldNameFilter.map(l -> !l.contains(name)).orElse(false)) {
+            }, (name, auditRecord, apiModelPropertyOptional) -> {
+                if (!auditFieldFilter.test(name)) {
                     return;
                 }
                 AuditChangeFieldModel auditChangeFieldModel = new AuditChangeFieldModel();
-                auditChangeFieldModel.setField(!"".equals(auditRecord.value()) ? auditRecord.value() : (!"".equals(auditRecord.key()) ? auditRecord.key() : name));
+                auditChangeFieldModel.setField(!"".equals(auditRecord.value()) ? auditRecord.value() : apiModelPropertyOptional.map(ApiModelProperty::value).orElse((!"".equals(auditRecord.key()) ? auditRecord.key() : name)));
                 auditChangeFieldModel.setChangeRecord(initAuditChangeRecordModelList(auditDisplayEntityList, name));
                 auditChangeFieldModelList.add(auditChangeFieldModel);
-            }, (name, auditRecord) -> {
-                if (fieldNameFilter.map(l -> !l.contains(name)).orElse(false)) {
+            }, (name, auditRecord, apiModelPropertyOptional) -> {
+                if (!auditFieldFilter.test(name)) {
                     return;
                 }
                 AuditChangeFieldModel auditChangeFieldModel = new AuditChangeFieldModel();
-                auditChangeFieldModel.setField(!"".equals(auditRecord.value()) ? auditRecord.value() : auditRecord.key());
+                auditChangeFieldModel.setField(!"".equals(auditRecord.value()) ? auditRecord.value() : apiModelPropertyOptional.map(ApiModelProperty::value).orElse(auditRecord.key()));
                 auditChangeFieldModel.setChangeRecord(initAuditChangeRecordModelList(auditDisplayEntityList, auditRecord.key()));
                 auditChangeFieldModelList.add(auditChangeFieldModel);
             }, auditRecord -> "".equals(auditRecord.key()));

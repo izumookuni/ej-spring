@@ -1,20 +1,21 @@
 package cc.domovoi.spring.controller.audit;
 
 import cc.domovoi.spring.controller.OriginalCRUDControllerInterface;
-import cc.domovoi.spring.entity.audit.AuditDisplayEntity;
-import cc.domovoi.spring.entity.audit.AuditEntityInterface;
-import cc.domovoi.spring.service.audit.AuditServiceInterface;
+import cc.domovoi.spring.entity.audit.*;
+import cc.domovoi.spring.service.BaseJoiningServiceInterface;
+import cc.domovoi.spring.utils.ControllerUtils;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.Optional;
 
-public interface BaseAuditControllerInterface<E extends AuditEntityInterface> extends OriginalCRUDControllerInterface<E> {
-
-    AuditServiceInterface auditService();
-
-    String auditAuthorGetter();
+public interface BaseAuditControllerInterface<E extends AuditEntityInterface, S extends BaseJoiningServiceInterface<E, ?>> extends OriginalCRUDControllerInterface<E>, BaseAuditInterface<E> {
 
     @Override
     default void afterAdd(E entity, HttpServletRequest request, HttpServletResponse response) {
@@ -37,7 +38,7 @@ public interface BaseAuditControllerInterface<E extends AuditEntityInterface> ex
             auditEntity.setAuditType("controller");
             auditEntity.setAuditLevel("info");
             auditEntity.setAuditAuthor(auditAuthorGetter());
-            auditEntity.setAuditIp(getIpAddr(request));
+            auditEntity.setAuditIp(AuditUtils.getIpAddr(request));
             auditEntity.setAuditUri(request.getRequestURI());
         });
         auditService().addAudit(auditDisplayEntity);
@@ -49,7 +50,7 @@ public interface BaseAuditControllerInterface<E extends AuditEntityInterface> ex
             auditEntity.setAuditType("controller");
             auditEntity.setAuditLevel("info");
             auditEntity.setAuditAuthor(auditAuthorGetter());
-            auditEntity.setAuditIp(getIpAddr(request));
+            auditEntity.setAuditIp(AuditUtils.getIpAddr(request));
             auditEntity.setAuditUri(request.getRequestURI());
         });
         auditService().addAudit(auditDisplayEntity);
@@ -61,48 +62,29 @@ public interface BaseAuditControllerInterface<E extends AuditEntityInterface> ex
             auditEntity.setAuditType("controller");
             auditEntity.setAuditLevel("info");
             auditEntity.setAuditAuthor(auditAuthorGetter());
-            auditEntity.setAuditIp(getIpAddr(request));
+            auditEntity.setAuditIp(AuditUtils.getIpAddr(request));
             auditEntity.setAuditUri(request.getRequestURI());
         });
         auditService().addAudit(auditDisplayEntity);
     }
 
-    static String getIpAddr(HttpServletRequest request) {
-        String ipAddress = null;
-        try {
-            ipAddress = request.getHeader("x-forwarded-for");
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getHeader("Proxy-Client-IP");
-            }
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getHeader("WL-Proxy-Client-IP");
-            }
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getRemoteAddr();
-                if (ipAddress.equals("127.0.0.1")) {
-                    // 根据网卡取本机配置的IP
-                    InetAddress inet = null;
-                    try {
-                        inet = InetAddress.getLocalHost();
-                    } catch (UnknownHostException e) {
-                        e.printStackTrace();
-                    }
-                    ipAddress = inet.getHostAddress();
-                }
-            }
-            // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
-            if (ipAddress != null && ipAddress.length() > 15) { // "***.***.***.***".length()
-                // = 15
-                if (ipAddress.indexOf(",") > 0) {
-                    ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            ipAddress="";
-        }
-        // ipAddress = this.getRequest().getRemoteAddr();
+    @ApiOperation(value = "initAuditRecord", notes = "")
+    @RequestMapping(
+            value = "init-audit-record",
+            method = {RequestMethod.GET, RequestMethod.POST},
+            produces = "application/json")
+    @ResponseBody
+    default Map<String, Object> findAuditChangeContextGroupModel(@RequestBody AuditRequestModel model) {
+         return ControllerUtils.commonFunction(logger(), "findAuditChangeContextGroupModel", () -> this.findAuditChangeContextGroupModel(Optional.ofNullable(model.getContextName()), Optional.ofNullable(model.getContextId()), Optional.ofNullable(model.getAuditField())));
+    }
 
-        return ipAddress;
+    @ApiOperation(value = "initAuditRecord", notes = "")
+    @RequestMapping(
+            value = "init-audit-record",
+            method = {RequestMethod.POST},
+            produces = "application/json")
+    @ResponseBody
+    default Map<String, Object> initAuditRecordF() {
+        return ControllerUtils.commonTryFunction(logger(), "initAuditRecord", () -> this.initAuditRecord(this::findEntityFunction, "controller"));
     }
 }

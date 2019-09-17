@@ -43,7 +43,7 @@ tasks.withType(JavaCompile) {
 dependencies {
     compile 'cc.domovoi:ej-collection:0.0.3'
     compile 'cc.domovoi:ej-lambda:0.0.2'
-    compile 'cc.domovoi:ej-tools:20190911095932-SNAPSHOT'
+    compile 'cc.domovoi:ej-tools:20190917114737-SNAPSHOT'
 
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'

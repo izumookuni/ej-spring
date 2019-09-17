@@ -19,4 +19,7 @@ public @interface AuditRecord {
     // 是否忽略（最低优先）
     boolean ignore() default false;
 
+    // pid
+    boolean pid() default false;
+
 }

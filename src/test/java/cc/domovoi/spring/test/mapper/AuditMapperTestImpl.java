@@ -80,6 +80,11 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
         return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity.getScopeId(), scopeId)).collect(Collectors.toList());
     }
 
+    @Override
+    public List<AuditDisplayEntity> findListByContextName(String contextName) {
+        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity.getContextName(), contextName)).collect(Collectors.toList());
+    }
+
     public List<AuditDisplayEntity> findAllList() {
         return auditDisplayEntityList;
     }

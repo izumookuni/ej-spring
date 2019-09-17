@@ -19,4 +19,6 @@ public interface AuditMapperInterface {
     Integer deleteEntity(AuditDisplayEntity entity);
 
     List<AuditDisplayEntity> findListByScopeId(String scopeId);
+
+    List<AuditDisplayEntity> findListByContextName(String contextName);
 }

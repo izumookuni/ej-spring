@@ -3,6 +3,9 @@ package cc.domovoi.spring.entity.audit;
 import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
 import cc.domovoi.tools.jackson.ObjectMappers;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.ApiModelProperty;
+import org.jooq.lambda.function.Consumer2;
+import org.jooq.lambda.function.Consumer3;
 import org.jooq.lambda.function.Function2;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
@@ -10,12 +13,8 @@ import org.joor.Reflect;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.joor.Reflect.*;
 
@@ -32,7 +31,8 @@ public interface AuditEntityInterface extends BaseJoiningEntityInterface, AuditI
             auditDisplayEntity.setAuditId(UUID.randomUUID().toString());
             auditDisplayEntity.setAuditTime(LocalDateTime.now());
             auditDisplayEntity.setContextId(this.getId());
-            auditDisplayEntity.setContextName(audit().flatMap(audit -> !"".equals(audit.value()) ? Optional.of(audit.value()) : Optional.empty()).orElseGet(() -> this.getClass().getSimpleName()));
+            auditDisplayEntity.setContextName(contextName());
+            contextPidField().ifPresent(pidField -> auditDisplayEntity.setContextPid(on(this).get(pidField.v1().getName())));
             try {
                 auditDisplayEntity.setAuditContent(objectMapper.writeValueAsString(auditRecordMap()));
             } catch (Exception e) {
@@ -49,52 +49,40 @@ public interface AuditEntityInterface extends BaseJoiningEntityInterface, AuditI
     }
 
     default List<Tuple2<Field, AuditRecord>> auditRecordList(Predicate<? super AuditRecord> filter) {
-        Field[] fields = this.getClass().getDeclaredFields();
-        return Stream.of(fields).map(field -> new Tuple2<>(field, field.getAnnotation(AuditRecord.class))).filter(t2 -> Objects.nonNull(t2.v2())).filter(t2 -> filter.test(t2.v2())).collect(Collectors.toList());
+        return AuditUtils.auditRecordList(this.getClass(), filter);
+    }
+
+    default String contextName() {
+        return AuditUtils.contextName(this.getClass());
     }
 
     default List<Tuple2<Field, AuditRecord>> auditRecordList() {
-        return auditRecordList(ar -> true);
+        return AuditUtils.auditRecordList(this.getClass(), ar -> true);
     }
 
     default Optional<Audit> audit() {
-        return Optional.ofNullable(this.getClass().getAnnotation(Audit.class));
+        return AuditUtils.audit(this.getClass());
+    }
+
+    default Optional<Tuple2<Field, AuditRecord>> contextPidField() {
+        return AuditUtils.contextPidField(this.getClass());
     }
 
     default <T> void insertAuditRecordMap(Map<String, T> auditRecordMap, List<Field> auditFieldList, Function2<? super Reflect, ? super String, ? extends T> op) {
         Reflect reflect = on(this);
         processAuditFieldList(auditFieldList,
-                (name) -> auditRecordMap.put(name, op.apply(reflect, name)),
-                (name, auditRecord) -> auditRecordMap.put(name, op.apply(reflect, name)),
-                (name, auditRecord) -> auditRecordMap.put(auditRecord.key(), op.apply(reflect, name)),
+                (name, apiModelPropertyOptional) -> auditRecordMap.put(name, op.apply(reflect, name)),
+                (name, auditRecord, apiModelPropertyOptional) -> auditRecordMap.put(name, op.apply(reflect, name)),
+                (name, auditRecord, apiModelPropertyOptional) -> auditRecordMap.put(auditRecord.key(), op.apply(reflect, name)),
                 auditRecord -> "".equals(auditRecord.key()));
     }
 
-    default void processAuditFieldList(List<Field> auditFieldList, Consumer<String> noAuditRecordOp, BiConsumer<String, AuditRecord> fieldNameAuditRecordOp1, BiConsumer<String, AuditRecord> fieldNameAuditRecordOp2, Predicate<? super AuditRecord> auditRecordPredicate) {
-        auditFieldList.forEach(field -> {
-            AuditRecord auditRecord = field.getAnnotation(AuditRecord.class);
-            String name = field.getName();
-            if (Objects.isNull(auditRecord)) {
-                noAuditRecordOp.accept(name);
-            }
-            else if (!auditRecord.ignore() && auditRecordPredicate.test(auditRecord)) {
-                fieldNameAuditRecordOp1.accept(name, auditRecord);
-            }
-            else if (!auditRecord.ignore()) {
-                fieldNameAuditRecordOp2.accept(name, auditRecord);
-            }
-        });
+    default void processAuditFieldList(List<Field> auditFieldList, Consumer2<String, Optional<ApiModelProperty>> noAuditRecordOp, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp1, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp2, Predicate<? super AuditRecord> auditRecordPredicate) {
+        AuditUtils.processAuditFieldList(auditFieldList, noAuditRecordOp, fieldNameAuditRecordOp1, fieldNameAuditRecordOp2, auditRecordPredicate);
     }
 
     default List<Field> auditFieldList() {
-        Optional<Audit> auditOptional = audit();
-        Field[] fields = this.getClass().getDeclaredFields();
-        return auditOptional.map(audit -> {
-            List<String> include = Arrays.asList(audit.include());
-            List<String> skip = Arrays.asList(audit.skip());
-            List<String> inner = auditRecordList(auditRecord -> !auditRecord.ignore()).stream().map(t2 -> t2.v1().getName()).collect(Collectors.toList());
-            return Stream.of(fields).filter(field -> !skip.contains(field.getName()) && (audit.containsAll() || include.contains(field.getName()) || (include.isEmpty() && inner.contains(field.getName())))).collect(Collectors.toList());
-        }).orElseGet(() -> auditRecordList(auditRecord -> !auditRecord.ignore()).stream().map(Tuple2::v1).collect(Collectors.toList()));
+        return AuditUtils.auditFieldList(this.getClass());
     }
 
 //    default Map<String, Supplier<Object>> auditRecordGetMap() {

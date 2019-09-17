@@ -1,5 +1,6 @@
 package cc.domovoi.spring.entity.audit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -38,6 +39,7 @@ public class AuditDisplayEntity implements AuditInterface {
     private String scopeId;
 
     @ApiModelProperty(value = "关联ID")
+    @JsonProperty
     private String contextId;
 
     @ApiModelProperty(value = "关联上级ID")

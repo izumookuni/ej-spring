@@ -4,6 +4,7 @@ import cc.domovoi.spring.entity.BaseEntityInterface;
 import cc.domovoi.spring.entity.audit.Audit;
 import cc.domovoi.spring.entity.audit.AuditEntityInterface;
 import cc.domovoi.spring.entity.audit.AuditRecord;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -16,7 +17,8 @@ public class AuditBeanEntityTestImpl implements BaseEntityInterface, AuditEntity
     @AuditRecord(value = "值1", key = "VALUE1")
     private String v1;
 
-    @AuditRecord("值2")
+    @AuditRecord
+    @ApiModelProperty("值2")
     private Integer v2;
 
     @AuditRecord("值3")
