@@ -22,4 +22,7 @@ public @interface AuditRecord {
     // pid
     boolean pid() default false;
 
+    // 范围ID
+    boolean scopeId() default false;
+
 }

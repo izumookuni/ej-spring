@@ -1,14 +1,8 @@
 package cc.domovoi.spring.service.audit;
 
-import cc.domovoi.collection.util.Failure;
-import cc.domovoi.collection.util.Success;
-import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.audit.*;
 import cc.domovoi.spring.mapper.BaseMapperInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
-import cc.domovoi.spring.utils.RecordAuthorInterface;
-
-import java.util.List;
 
 public interface BaseAuditServiceInterface<E extends AuditEntityInterface, M extends BaseMapperInterface<E>> extends BaseJoiningServiceInterface<E, M>, BaseAuditInterface<E> {
 

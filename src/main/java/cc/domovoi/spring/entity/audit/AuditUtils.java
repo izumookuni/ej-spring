@@ -41,6 +41,11 @@ public class AuditUtils {
         return contextPidList.size() == 1 ? Optional.of(contextPidList.get(0)) : Optional.empty();
     }
 
+    public static Optional<Tuple2<Field, AuditRecord>> scopeIdField(Class<? extends AuditEntityInterface> auditClass) {
+        List<Tuple2<Field, AuditRecord>> scopeIdList = auditRecordList(auditClass, AuditRecord::scopeId);
+        return scopeIdList.size() == 1 ? Optional.of(scopeIdList.get(0)) : Optional.empty();
+    }
+
     public static void processAuditFieldList(List<Field> auditFieldList, Consumer2<String, Optional<ApiModelProperty>> noAuditRecordOp, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp1, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp2, Predicate<? super AuditRecord> auditRecordPredicate) {
         auditFieldList.forEach(field -> {
             AuditRecord auditRecord = field.getAnnotation(AuditRecord.class);

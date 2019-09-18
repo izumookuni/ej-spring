@@ -27,12 +27,17 @@ public interface AuditEntityInterface extends BaseJoiningEntityInterface, AuditI
             return (AuditDisplayEntity) this;
         }
         else {
+            Reflect reflect = on(this);
+
             AuditDisplayEntity auditDisplayEntity = new AuditDisplayEntity();
             auditDisplayEntity.setAuditId(UUID.randomUUID().toString());
             auditDisplayEntity.setAuditTime(LocalDateTime.now());
             auditDisplayEntity.setContextId(this.getId());
             auditDisplayEntity.setContextName(contextName());
-            contextPidField().ifPresent(pidField -> auditDisplayEntity.setContextPid(on(this).get(pidField.v1().getName())));
+
+            contextPidField().ifPresent(contextPidField -> auditDisplayEntity.setContextPid(reflect.get(contextPidField.v1().getName())));
+            scopeIdField().ifPresent(scopeIdField -> auditDisplayEntity.setScopeId(reflect.get(scopeIdField.v1().getName())));
+
             try {
                 auditDisplayEntity.setAuditContent(objectMapper.writeValueAsString(auditRecordMap()));
             } catch (Exception e) {
@@ -66,6 +71,10 @@ public interface AuditEntityInterface extends BaseJoiningEntityInterface, AuditI
 
     default Optional<Tuple2<Field, AuditRecord>> contextPidField() {
         return AuditUtils.contextPidField(this.getClass());
+    }
+
+    default Optional<Tuple2<Field, AuditRecord>> scopeIdField() {
+        return AuditUtils.scopeIdField(this.getClass());
     }
 
     default <T> void insertAuditRecordMap(Map<String, T> auditRecordMap, List<Field> auditFieldList, Function2<? super Reflect, ? super String, ? extends T> op) {

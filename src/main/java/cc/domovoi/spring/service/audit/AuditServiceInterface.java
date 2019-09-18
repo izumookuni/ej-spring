@@ -61,13 +61,14 @@ public interface AuditServiceInterface {
      * @param auditDisplayEntityList auditDisplayEntityList
      * @param auditClass auditClass
      * @param contextNameFilter contextNameFilter
+     * @param scopeIdFilter scopeIdFilter
      * @param contextIdFilter contextIdFilter
      * @param fieldNameFilter fieldNameFilter
      * @param <T> AuditEntityInterface
      * @return AuditChangeContextGroupModel List
      */
-    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
-        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
+    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super String> scopeIdFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
+        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName()) && scopeIdFilter.test(auditDisplayEntity.getScopeId())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
         return auditDisplayEntityListMap.entrySet().stream().map(entry -> {
             // context group
             String contextName = entry.getKey();
@@ -94,14 +95,16 @@ public interface AuditServiceInterface {
      * @param auditDisplayEntityList auditDisplayEntityList
      * @param auditClass audit Class
      * @param contextNameList contextNameList
+     * @param scopeIdList scopeIdList
      * @param contextIdList contextIdList
      * @param auditFieldList auditFieldList
      * @param <T> AuditEntityInterface
      * @return AuditChangeContextGroupModel List
      */
-    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
+    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameList, Optional<List<String>> scopeIdList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
         return findAuditChangeRecord(auditDisplayEntityList, auditClass,
                 contextName -> contextNameList.map(list -> list.contains(contextName)).orElse(true),
+                scopeId -> scopeIdList.map(list -> list.contains(scopeId)).orElse(true),
                 contextId -> contextIdList.map(list -> list.contains(contextId)).orElse(true),
                 fieldName -> auditFieldList.map(list -> list.contains(fieldName)).orElse(true));
     }
@@ -109,6 +112,7 @@ public interface AuditServiceInterface {
     default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass) {
         return findAuditChangeRecord(auditDisplayEntityList, auditClass,
                 contextName -> true,
+                scopeId -> true,
                 contextId -> true,
                 fieldName -> true);
     }

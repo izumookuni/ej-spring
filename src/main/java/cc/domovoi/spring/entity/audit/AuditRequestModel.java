@@ -11,6 +11,9 @@ public class AuditRequestModel {
     @ApiModelProperty(value = "关联名称")
     private List<String> contextName;
 
+    @ApiModelProperty(value = "范围ID")
+    private List<String> scopeId;
+
     @ApiModelProperty(value = "关联ID")
     private List<String> contextId;
 
@@ -26,6 +29,14 @@ public class AuditRequestModel {
 
     public void setContextName(List<String> contextName) {
         this.contextName = contextName;
+    }
+
+    public List<String> getScopeId() {
+        return scopeId;
+    }
+
+    public void setScopeId(List<String> scopeId) {
+        this.scopeId = scopeId;
     }
 
     public List<String> getContextId() {
