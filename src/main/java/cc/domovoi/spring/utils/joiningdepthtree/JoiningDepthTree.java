@@ -10,6 +10,8 @@ public class JoiningDepthTree implements JoiningDepthTreeLike {
 
     public static JoiningDepthLeaf leaf = new JoiningDepthLeaf();
 
+    public static JoiningUnlimitedDepthTree unlimitedTree = new JoiningUnlimitedDepthTree();
+
     private Map<String, JoiningDepthTreeLike> tree;
 
     public JoiningDepthTree() {
@@ -30,6 +32,11 @@ public class JoiningDepthTree implements JoiningDepthTreeLike {
         return this;
     }
 
+    public JoiningDepthTree putUnlimited(String key) {
+        this.tree.put(key, unlimitedTree);
+        return this;
+    }
+
     @Override
     public Optional<JoiningDepthTreeLike> subTree(String key) {
         return Optional.ofNullable(tree.get(key));
@@ -41,10 +48,16 @@ public class JoiningDepthTree implements JoiningDepthTreeLike {
     }
 
     @Override
+    public Boolean isUnlimitedTree() {
+        return false;
+    }
+
+    @Override
     public Boolean contains(String key) {
         return tree.containsKey(key);
     }
 
+    @Deprecated
     @Override
     public Set<String> keySet() {
         return tree.keySet();

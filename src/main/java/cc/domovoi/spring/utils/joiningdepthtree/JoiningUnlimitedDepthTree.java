@@ -1,12 +1,12 @@
 package cc.domovoi.spring.utils.joiningdepthtree;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-public class JoiningDepthLeaf implements JoiningDepthTreeLike {
+public class JoiningUnlimitedDepthTree implements JoiningDepthTreeLike {
 
-    public JoiningDepthLeaf() {
+
+    public JoiningUnlimitedDepthTree() {
     }
 
     @Override
@@ -16,27 +16,27 @@ public class JoiningDepthLeaf implements JoiningDepthTreeLike {
 
     @Override
     public Boolean isLeaf() {
-        return true;
+        return false;
     }
 
     @Override
     public Boolean isUnlimitedTree() {
-        return false;
+        return true;
     }
 
     @Override
     public Boolean contains(String key) {
-        return false;
+        return true;
     }
 
     @Deprecated
     @Override
     public Set<String> keySet() {
-        return Collections.emptySet();
+        throw new RuntimeException("no keySet");
     }
 
     @Override
     public String treeString() {
-        return "Leaf";
+        return "JoiningUnlimitedDepthTree";
     }
 }

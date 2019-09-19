@@ -5,7 +5,6 @@ import cc.domovoi.spring.geometry.converter.GeometryExporter;
 import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
 import cc.domovoi.spring.mapper.geometry.BaseGeometryRetrieveMapperInterface;
 import cc.domovoi.spring.service.BaseRetrieveJoiningServiceInterface;
-import cc.domovoi.spring.service.GeometryServiceInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 
 import java.util.*;

@@ -1,21 +1,21 @@
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
-    }
-}
+//buildscript {
+//    repositories {
+//        jcenter()
+//    }
+//    dependencies {
+//        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+//    }
+//}
 
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.jfrog.artifactory' version '4.9.8'
+//    id 'com.jfrog.artifactory' version '4.9.8'
 }
-apply from: 'bintray.gradle'
+//apply from: 'bintray.gradle'
 
 group 'cc.domovoi'
 version '0.0.7'
@@ -23,6 +23,7 @@ version '0.0.7'
 sourceCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     mavenCentral()
 //    maven {
 //        url "${artifactory_url}"
@@ -41,9 +42,9 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    compile 'cc.domovoi:ej-collection:0.0.3'
+    compile 'cc.domovoi:ej-collection:0.0.4'
     compile 'cc.domovoi:ej-lambda:0.0.2'
-    compile 'cc.domovoi:ej-tools:20190917114737-SNAPSHOT'
+    compile 'cc.domovoi:ej-tools:0.0.1'
 
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
@@ -51,8 +52,8 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-core', version: '5.1.9.RELEASE'
     compile group: 'org.springframework', name: 'spring-webmvc', version: '5.1.9.RELEASE'
 
-    compile group: 'org.mybatis', name: 'mybatis-spring', version: '2.0.2'
-    compile group: 'org.mybatis', name: 'mybatis', version: '3.5.2'
+//    compile group: 'org.mybatis', name: 'mybatis-spring', version: '2.0.2'
+//    compile group: 'org.mybatis', name: 'mybatis', version: '3.5.2'
 
     compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
@@ -63,22 +64,6 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
-
-//allprojects {
-//
-//    sourceCompatibility = 1.8
-//
-//    repositories {
-//        mavenCentral()
-//        maven {
-//            url 'https://dl.bintray.com/izumookuni/domovoi/'
-//        }
-//    }
-//
-//    tasks.withType(JavaCompile) {
-//        options.encoding = 'UTF-8'
-//    }
-//}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -92,41 +77,48 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        release(MavenPublication) {
             from components.java
             artifact sourcesJar
             artifact javadocJar
             groupId "${project.group}"
             artifactId "${project.name}"
-//            version "${project.version}"
+            version "${project.version}"
+        }
+        snapshot(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId "${project.group}"
+            artifactId "${project.name}"
             version "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}-SNAPSHOT"
         }
     }
 }
 
-artifactory {
-    contextUrl = "${artifactory_url}"
-    publish {
-        repository {
-            repoKey = 'libs-snapshot-local'
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-        }
-        defaults {
-            publications ('mavenJava')
-//            properties = ['qa.level': 'basic', 'q.os': 'win32, deb, osx']
-            publishBuildInfo = true
-            publishArtifacts = true
-            publishPom = true
-            publishIvy = false
-        }
-    }
-    resolve {
-        repository {
-            repoKey = 'libs-snapshot-local'
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-            maven = true
-        }
-    }
-}
+//artifactory {
+//    contextUrl = "${artifactory_url}"
+//    publish {
+//        repository {
+//            repoKey = 'libs-snapshot-local'
+//            username = "${artifactory_user}"
+//            password = "${artifactory_password}"
+//        }
+//        defaults {
+//            publications ('snapshot')
+////            properties = ['qa.level': 'basic', 'q.os': 'win32, deb, osx']
+//            publishBuildInfo = true
+//            publishArtifacts = true
+//            publishPom = true
+//            publishIvy = false
+//        }
+//    }
+//    resolve {
+//        repository {
+//            repoKey = 'libs-snapshot-local'
+//            username = "${artifactory_user}"
+//            password = "${artifactory_password}"
+//            maven = true
+//        }
+//    }
+//}

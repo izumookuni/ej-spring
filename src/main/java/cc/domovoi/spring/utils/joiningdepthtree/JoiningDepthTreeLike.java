@@ -13,8 +13,11 @@ public interface JoiningDepthTreeLike {
         return !isLeaf();
     }
 
+    Boolean isUnlimitedTree();
+
     Boolean contains(String key);
 
+    @Deprecated
     Set<String> keySet();
 
     String treeString();
