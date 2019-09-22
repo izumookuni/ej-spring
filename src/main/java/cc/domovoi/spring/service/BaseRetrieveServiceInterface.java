@@ -1,7 +1,7 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.spring.entity.BaseEntityInterface;
-import cc.domovoi.spring.mapper.BaseRetrieveMapperInterface;
+import cc.domovoi.spring.entity.StandardSingletonEntityInterface;
+import cc.domovoi.spring.mapper.StandardRetrieveMapperInterface;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.Map;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
-public interface BaseRetrieveServiceInterface<E extends BaseEntityInterface, M extends BaseRetrieveMapperInterface<E>> extends BaseRetrieveJoiningServiceInterface<E, M> {
+public interface BaseRetrieveServiceInterface<E extends StandardSingletonEntityInterface, M extends StandardRetrieveMapperInterface<E>> extends BaseRetrieveJoiningServiceInterface<E, M> {
 
     @Override
     default Integer depth() {

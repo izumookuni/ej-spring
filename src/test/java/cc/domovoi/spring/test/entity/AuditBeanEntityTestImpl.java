@@ -1,6 +1,6 @@
 package cc.domovoi.spring.test.entity;
 
-import cc.domovoi.spring.entity.BaseEntityInterface;
+import cc.domovoi.spring.entity.StandardSingletonEntityInterface;
 import cc.domovoi.spring.entity.audit.Audit;
 import cc.domovoi.spring.entity.audit.AuditEntityInterface;
 import cc.domovoi.spring.entity.audit.AuditRecord;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Audit(value = "日志记录测试", skip = "v5")
-public class AuditBeanEntityTestImpl implements BaseEntityInterface, AuditEntityInterface {
+public class AuditBeanEntityTestImpl implements StandardSingletonEntityInterface, AuditEntityInterface {
 
     private String id;
 

@@ -2,8 +2,8 @@ package cc.domovoi.spring.service;
 
 import cc.domovoi.collection.util.Failure;
 import cc.domovoi.collection.util.Try;
-import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
-import cc.domovoi.spring.mapper.BaseMapperInterface;
+import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
+import cc.domovoi.spring.mapper.StandardMapperInterface;
 import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.util.StringUtils;
 
@@ -18,7 +18,7 @@ import java.util.UUID;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
-public interface BaseJoiningServiceInterface<E extends BaseJoiningEntityInterface, M extends BaseMapperInterface<E>> extends BaseRetrieveJoiningServiceInterface<E, M> {
+public interface BaseJoiningServiceInterface<E extends StandardJoiningEntityInterface, M extends StandardMapperInterface<E>> extends BaseRetrieveJoiningServiceInterface<E, M> {
 
     default String idGenerator() {
         return UUID.randomUUID().toString();

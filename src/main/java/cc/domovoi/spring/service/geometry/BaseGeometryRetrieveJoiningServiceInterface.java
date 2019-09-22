@@ -1,9 +1,9 @@
 package cc.domovoi.spring.service.geometry;
 
+import cc.domovoi.spring.mapper.StandardRetrieveMapperInterface;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
 import cc.domovoi.spring.geometry.converter.GeometryExporter;
-import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
-import cc.domovoi.spring.mapper.geometry.BaseGeometryRetrieveMapperInterface;
+import cc.domovoi.spring.entity.geometry.StandardGeometryMultipleJoiningEntityInterface;
 import cc.domovoi.spring.service.BaseRetrieveJoiningServiceInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @param <E>     Entity type.
  * @param <M>     Mapper type.
  */
-public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends GeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends BaseGeometryRetrieveMapperInterface<E>>
+public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardRetrieveMapperInterface<E>>
         extends BaseRetrieveJoiningServiceInterface<E, M> {
 
     /**

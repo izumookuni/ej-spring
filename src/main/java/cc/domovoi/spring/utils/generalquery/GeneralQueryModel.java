@@ -1,6 +1,6 @@
 package cc.domovoi.spring.utils.generalquery;
 
-import cc.domovoi.spring.entity.BasePagingEntityInterface;
+import cc.domovoi.spring.entity.extension.PagingEntityInterface;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Converter;
 
@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class GeneralQueryModel implements BasePagingEntityInterface {
+public class GeneralQueryModel implements PagingEntityInterface {
 
     private static Converter<String, String> converter = CaseFormat.LOWER_UNDERSCORE.converterTo(CaseFormat.LOWER_CAMEL);
 

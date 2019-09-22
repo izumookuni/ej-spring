@@ -1,6 +1,6 @@
 package cc.domovoi.spring.test.entity;
 
-import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
+import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class EntityC extends BaseEntity implements BaseJoiningEntityInterface {
+public class EntityC extends StandardEntity implements StandardJoiningEntityInterface {
 
     private String dId;
 

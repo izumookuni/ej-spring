@@ -4,7 +4,7 @@ import cc.domovoi.spring.test.entity.EntityE;
 
 import java.util.ArrayList;
 
-public class MapperE extends BaseMapper<EntityE> {
+public class MapperE extends StandardMapper<EntityE> {
 
     public MapperE() {
         entityList = new ArrayList<>();

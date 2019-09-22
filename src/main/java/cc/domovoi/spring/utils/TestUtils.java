@@ -1,7 +1,7 @@
 package cc.domovoi.spring.utils;
 
-import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
-import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
+import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
+import cc.domovoi.spring.entity.geometry.StandardGeometryMultipleJoiningEntityInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -19,7 +19,7 @@ public class TestUtils {
 
     private static ObjectWriter writer = jackson.writerWithDefaultPrettyPrinter();
 
-    public static <E extends BaseJoiningEntityInterface, S extends BaseJoiningServiceInterface<E, ?>> void testBeanEntityService(Class<E> entityClass, S service, Logger logger, Consumer<Boolean> assertFunction, String... ignore) throws Exception {
+    public static <E extends StandardJoiningEntityInterface, S extends BaseJoiningServiceInterface<E, ?>> void testBeanEntityService(Class<E> entityClass, S service, Logger logger, Consumer<Boolean> assertFunction, String... ignore) throws Exception {
         E originEntity = RandomUtils.randomEntity(entityClass, ignore);
         logger.info(String.format("origin: %s", originEntity));
         Integer addResult = service.addEntity(originEntity).map(Tuple2::v1).getOrElse(() -> 0);
@@ -48,7 +48,7 @@ public class TestUtils {
         logger.info(writer.writeValueAsString(eList3));
     }
 
-    public static <INNER, OUTER, E extends GeometryMultipleJoiningEntityInterface<INNER, OUTER>, S extends BaseJoiningServiceInterface<E, ?>> void testGeometryEntityService(Class<E> entityClass, S service, Logger logger, Consumer<Boolean> assertFunction, Map<String, String>geometryPropertyTypeMap, String... ignore) throws Exception {
+    public static <INNER, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, S extends BaseJoiningServiceInterface<E, ?>> void testGeometryEntityService(Class<E> entityClass, S service, Logger logger, Consumer<Boolean> assertFunction, Map<String, String>geometryPropertyTypeMap, String... ignore) throws Exception {
         E originEntity = RandomUtils.randomGeometryEntity(entityClass, geometryPropertyTypeMap, ignore);
         logger.info(String.format("origin: %s", originEntity));
         originEntity.geometricGetMap().forEach((key, supplier) -> {

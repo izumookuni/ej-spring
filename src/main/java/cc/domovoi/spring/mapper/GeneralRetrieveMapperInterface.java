@@ -4,7 +4,7 @@ import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 
 import java.util.List;
 
-public interface GeneralRetrieveMapperInterface<K, E extends GeneralJoiningEntityInterface<K, ?>> {
+public interface GeneralRetrieveMapperInterface<K, E extends GeneralJoiningEntityInterface<K>> {
 
     /**
      * Find entity.

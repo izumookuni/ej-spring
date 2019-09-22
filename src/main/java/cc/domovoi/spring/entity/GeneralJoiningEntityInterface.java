@@ -1,11 +1,16 @@
 package cc.domovoi.spring.entity;
 
+import org.joor.Reflect;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public interface GeneralJoiningEntityInterface<K, T> {
+import static org.joor.Reflect.on;
+
+public interface GeneralJoiningEntityInterface<K> {
 
     /**
      * ID.
@@ -26,35 +31,35 @@ public interface GeneralJoiningEntityInterface<K, T> {
      *
      * @return The creation time of this entity.
      */
-    T getCreationTime();
+    LocalDateTime getCreationTime();
 
     /**
      * Set the creation time of this entity.
      *
      * @param creationTime The creation time of this entity.
      */
-    void setCreationTime(T creationTime);
+    void setCreationTime(LocalDateTime creationTime);
 
     /**
      * The update time of this row.
      *
      * @return The update time of this row.
      */
-    T getUpdateTime();
+    LocalDateTime getUpdateTime();
 
     /**
      * Set the update time of this row.
      *
      * @param updateTime The update time of this row.
      */
-    void setUpdateTime(T updateTime);
+    void setUpdateTime(LocalDateTime updateTime);
 
     /**
      * ID list of each joining entity. Entities of different types are distinguished using Map key.
      *
      * @return ID list of each joining entity.
      */
-    Map<String, Supplier<? extends List<K>>> joiningKeyMap();
+    Map<String, Supplier<? extends List<Object>>> joiningKeyMap();
 
     /**
      * Joining Operation of each joining entity. Entities of different types are distinguished using Map key.
@@ -62,4 +67,8 @@ public interface GeneralJoiningEntityInterface<K, T> {
      * @return Joining Operation of each joining entity.
      */
     Map<String, Consumer<? super Object>> joiningEntityMap();
+
+    default Reflect reflect() {
+        return on(this);
+    }
 }

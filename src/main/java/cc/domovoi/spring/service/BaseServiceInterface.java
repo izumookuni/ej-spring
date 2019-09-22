@@ -1,7 +1,7 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.spring.entity.BaseEntityInterface;
-import cc.domovoi.spring.mapper.BaseMapperInterface;
+import cc.domovoi.spring.entity.StandardSingletonEntityInterface;
+import cc.domovoi.spring.mapper.StandardMapperInterface;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
-public interface BaseServiceInterface<E extends BaseEntityInterface, M extends BaseMapperInterface<E>> extends BaseRetrieveServiceInterface<E, M>, BaseJoiningServiceInterface<E, M> {
+public interface BaseServiceInterface<E extends StandardSingletonEntityInterface, M extends StandardMapperInterface<E>> extends BaseRetrieveServiceInterface<E, M>, BaseJoiningServiceInterface<E, M> {
 
     @Override
     default E findEntity(String id) {

@@ -1,7 +1,7 @@
 package cc.domovoi.spring.utils;
 
 import cc.domovoi.collection.util.Try;
-import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
+import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
@@ -27,7 +27,7 @@ public class ControllerUtils {
         }
     }
 
-    public static <E extends BaseJoiningEntityInterface> Map<String, Object> deleteBatch(Logger logger, String name, List<String> idList, Class<E> entityClass, Function<E, Try<Integer>> deleteEntityFunction) {
+    public static <E extends StandardJoiningEntityInterface> Map<String, Object> deleteBatch(Logger logger, String name, List<String> idList, Class<E> entityClass, Function<E, Try<Integer>> deleteEntityFunction) {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger.info(String.format("deleteEntityBatch: %s", idList));

@@ -1,7 +1,7 @@
 package cc.domovoi.spring.service.geometry;
 
-import cc.domovoi.spring.entity.geometry.GeometryMultipleEntityInterface;
-import cc.domovoi.spring.mapper.geometry.BaseGeometryRetrieveMapperInterface;
+import cc.domovoi.spring.entity.geometry.StandardGeometryMultipleEntityInterface;
+import cc.domovoi.spring.mapper.StandardRetrieveMapperInterface;
 import cc.domovoi.spring.service.BaseRetrieveServiceInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * @param <E>     Entity type.
  * @param <M>     Mapper type.
  */
-public interface BaseGeometryRetrieveServiceInterface<INNER extends GeoContextLike, OUTER, E extends GeometryMultipleEntityInterface<INNER, OUTER>, M extends BaseGeometryRetrieveMapperInterface<E>>
+public interface BaseGeometryRetrieveServiceInterface<INNER extends GeoContextLike, OUTER, E extends StandardGeometryMultipleEntityInterface<INNER, OUTER>, M extends StandardRetrieveMapperInterface<E>>
         extends BaseGeometryRetrieveJoiningServiceInterface<INNER, OUTER, E, M>, BaseRetrieveServiceInterface<E, M> {
 
     @Override

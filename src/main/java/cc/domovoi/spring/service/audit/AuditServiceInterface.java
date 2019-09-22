@@ -64,10 +64,10 @@ public interface AuditServiceInterface {
      * @param scopeIdFilter scopeIdFilter
      * @param contextIdFilter contextIdFilter
      * @param fieldNameFilter fieldNameFilter
-     * @param <T> AuditEntityInterface
+     * @param <T> GeneralAuditEntityInterface
      * @return AuditChangeContextGroupModel List
      */
-    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super String> scopeIdFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
+    default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super String> scopeIdFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
         Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName()) && scopeIdFilter.test(auditDisplayEntity.getScopeId())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
         return auditDisplayEntityListMap.entrySet().stream().map(entry -> {
             // context group
@@ -98,10 +98,10 @@ public interface AuditServiceInterface {
      * @param scopeIdList scopeIdList
      * @param contextIdList contextIdList
      * @param auditFieldList auditFieldList
-     * @param <T> AuditEntityInterface
+     * @param <T> GeneralAuditEntityInterface
      * @return AuditChangeContextGroupModel List
      */
-    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameList, Optional<List<String>> scopeIdList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
+    default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameList, Optional<List<String>> scopeIdList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
         return findAuditChangeRecord(auditDisplayEntityList, auditClass,
                 contextName -> contextNameList.map(list -> list.contains(contextName)).orElse(true),
                 scopeId -> scopeIdList.map(list -> list.contains(scopeId)).orElse(true),
@@ -109,7 +109,7 @@ public interface AuditServiceInterface {
                 fieldName -> auditFieldList.map(list -> list.contains(fieldName)).orElse(true));
     }
 
-    default <T extends AuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass) {
+    default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass) {
         return findAuditChangeRecord(auditDisplayEntityList, auditClass,
                 contextName -> true,
                 scopeId -> true,
@@ -122,10 +122,10 @@ public interface AuditServiceInterface {
      * @param auditDisplayEntityList auditDisplayEntityList with same contextName, contextId
      * @param auditClass audit Class
      * @param auditFieldFilter auditFieldFilter
-     * @param <T> AuditEntityInterface
+     * @param <T> GeneralAuditEntityInterface
      * @return AuditChangeFieldModel List
      */
-    default <T extends AuditEntityInterface> List<AuditChangeFieldModel> initAuditChangeFieldModelList(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> auditFieldFilter) {
+    default <T extends GeneralAuditEntityInterface> List<AuditChangeFieldModel> initAuditChangeFieldModelList(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> auditFieldFilter) {
         try {
             List<AuditChangeFieldModel> auditChangeFieldModelList = new ArrayList<>();
             AuditUtils.processAuditFieldList(AuditUtils.auditFieldList(auditClass), (name, apiModelPropertyOptional) -> {

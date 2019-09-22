@@ -1,6 +1,6 @@
 package cc.domovoi.spring.utils;
 
-import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
+import cc.domovoi.spring.entity.geometry.StandardGeometryMultipleJoiningEntityInterface;
 import cc.domovoi.spring.geometry.impl.geometricmodel.GeoPoint;
 import cc.domovoi.spring.geometry.impl.geometricmodel.GeometricModel;
 import cc.domovoi.spring.geometry.impl.lgeometry.LArea;
@@ -167,7 +167,7 @@ public class RandomUtils {
         });
     }
 
-    private static <INNER, OUTER, E extends GeometryMultipleJoiningEntityInterface<INNER, OUTER>> void putGeometryProperty(E entity, Map<String, Supplier<Object>> outerModelMap, Map<String, String> geometryPropertyTypeMap) {
+    private static <INNER, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>> void putGeometryProperty(E entity, Map<String, Supplier<Object>> outerModelMap, Map<String, String> geometryPropertyTypeMap) {
         entity.geometryGetMap().forEach((key, supplier) -> {
             try {
                 String propertyType = geometryPropertyTypeMap.get(key);
@@ -203,7 +203,7 @@ public class RandomUtils {
         return randomEntity(beanClass, Arrays.asList("id", "creationTime", "updateTime"));
     }
 
-    public static <INNER, OUTER, E extends GeometryMultipleJoiningEntityInterface<INNER, OUTER>> E randomGeometryEntity(Class<E> beanClass, Map<String, String> geometryPropertyTypeMap, List<String> ignoreList) {
+    public static <INNER, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>> E randomGeometryEntity(Class<E> beanClass, Map<String, String> geometryPropertyTypeMap, List<String> ignoreList) {
         try {
             E bean = beanClass.newInstance();
             BeanWrapper beanWrapper = new BeanWrapperImpl(bean);
@@ -221,11 +221,11 @@ public class RandomUtils {
         }
     }
 
-    public static <INNER, OUTER, E extends GeometryMultipleJoiningEntityInterface<INNER, OUTER>> E randomGeometryEntity(Class<E> beanClass, Map<String, String> geometryPropertyTypeMap, String... ignore) {
+    public static <INNER, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>> E randomGeometryEntity(Class<E> beanClass, Map<String, String> geometryPropertyTypeMap, String... ignore) {
         return randomGeometryEntity(beanClass, geometryPropertyTypeMap, Stream.concat(ignoreKey.stream(), Stream.of(ignore)).collect(Collectors.toList()));
     }
 
-    public static <INNER, OUTER, E extends GeometryMultipleJoiningEntityInterface<INNER, OUTER>> E randomGeometryEntity(Class<E> beanClass, Map<String, String> geometryPropertyTypeMap) {
+    public static <INNER, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>> E randomGeometryEntity(Class<E> beanClass, Map<String, String> geometryPropertyTypeMap) {
         return randomGeometryEntity(beanClass,geometryPropertyTypeMap, ignoreKey);
     }
 }

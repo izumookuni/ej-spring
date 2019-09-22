@@ -1,6 +1,6 @@
 package cc.domovoi.spring.utils;
 
-import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
+import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Deprecated
-public interface TreeInterface<E extends TreeInterface> extends BaseJoiningEntityInterface, TreeDisplayInterface<E> {
+public interface TreeInterface<E extends TreeInterface> extends StandardJoiningEntityInterface, TreeDisplayInterface<E> {
 
     List<String> getCid();
 

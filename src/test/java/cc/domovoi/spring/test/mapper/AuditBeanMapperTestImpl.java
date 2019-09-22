@@ -1,6 +1,6 @@
 package cc.domovoi.spring.test.mapper;
 
-import cc.domovoi.spring.mapper.BaseMapperInterface;
+import cc.domovoi.spring.mapper.StandardMapperInterface;
 import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class AuditBeanMapperTestImpl implements BaseMapperInterface<AuditBeanEntityTestImpl> {
+public class AuditBeanMapperTestImpl implements StandardMapperInterface<AuditBeanEntityTestImpl> {
 
     private static Logger logger = LoggerFactory.getLogger(AuditMapperTestImpl.class);
 

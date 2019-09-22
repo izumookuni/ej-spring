@@ -19,29 +19,29 @@ import java.util.stream.Stream;
 
 public class AuditUtils {
 
-    public static List<Tuple2<Field, AuditRecord>> auditRecordList(Class<? extends AuditEntityInterface> auditClass, Predicate<? super AuditRecord> filter) {
+    public static List<Tuple2<Field, AuditRecord>> auditRecordList(Class<? extends GeneralAuditEntityInterface> auditClass, Predicate<? super AuditRecord> filter) {
         Field[] fields = auditClass.getDeclaredFields();
         return Stream.of(fields).map(field -> new Tuple2<>(field, field.getAnnotation(AuditRecord.class))).filter(t2 -> Objects.nonNull(t2.v2())).filter(t2 -> filter.test(t2.v2())).collect(Collectors.toList());
     }
 
-    public static List<Tuple2<Field, AuditRecord>> auditRecordList(Class<? extends AuditEntityInterface> auditClass) {
+    public static List<Tuple2<Field, AuditRecord>> auditRecordList(Class<? extends GeneralAuditEntityInterface> auditClass) {
         return auditRecordList(auditClass, ar -> true);
     }
 
-    public static String contextName(Class<? extends AuditEntityInterface> auditClass) {
+    public static String contextName(Class<? extends GeneralAuditEntityInterface> auditClass) {
         return audit(auditClass).flatMap(audit -> !"".equals(audit.value()) ? Optional.of(audit.value()) : Optional.empty()).orElseGet(auditClass::getSimpleName);
     }
 
-    public static Optional<Audit> audit(Class<? extends AuditEntityInterface> auditClass) {
+    public static Optional<Audit> audit(Class<? extends GeneralAuditEntityInterface> auditClass) {
         return Optional.ofNullable(auditClass.getAnnotation(Audit.class));
     }
 
-    public static Optional<Tuple2<Field, AuditRecord>> contextPidField(Class<? extends AuditEntityInterface> auditClass) {
+    public static Optional<Tuple2<Field, AuditRecord>> contextPidField(Class<? extends GeneralAuditEntityInterface> auditClass) {
         List<Tuple2<Field, AuditRecord>> contextPidList = auditRecordList(auditClass, AuditRecord::pid);
         return contextPidList.size() == 1 ? Optional.of(contextPidList.get(0)) : Optional.empty();
     }
 
-    public static Optional<Tuple2<Field, AuditRecord>> scopeIdField(Class<? extends AuditEntityInterface> auditClass) {
+    public static Optional<Tuple2<Field, AuditRecord>> scopeIdField(Class<? extends GeneralAuditEntityInterface> auditClass) {
         List<Tuple2<Field, AuditRecord>> scopeIdList = auditRecordList(auditClass, AuditRecord::scopeId);
         return scopeIdList.size() == 1 ? Optional.of(scopeIdList.get(0)) : Optional.empty();
     }
@@ -63,7 +63,7 @@ public class AuditUtils {
         });
     }
 
-    public static List<Field> auditFieldList(Class<? extends AuditEntityInterface> auditClass) {
+    public static List<Field> auditFieldList(Class<? extends GeneralAuditEntityInterface> auditClass) {
         Optional<Audit> auditOptional = audit(auditClass);
         Field[] fields = auditClass.getDeclaredFields();
         return auditOptional.map(audit -> {

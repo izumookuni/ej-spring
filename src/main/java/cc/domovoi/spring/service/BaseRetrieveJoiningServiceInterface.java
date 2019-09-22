@@ -1,7 +1,7 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.spring.entity.BaseJoiningEntityInterface;
-import cc.domovoi.spring.mapper.BaseRetrieveMapperInterface;
+import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
+import cc.domovoi.spring.mapper.StandardRetrieveMapperInterface;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
 import org.jooq.lambda.tuple.Tuple2;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
-public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntityInterface, M extends BaseRetrieveMapperInterface<E>> extends GeneralServiceInterface<M> {
+public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEntityInterface, M extends StandardRetrieveMapperInterface<E>> extends GeneralServiceInterface<M> {
 
     /**
      * Service of each joining entity. Entities of different types are distinguished using Map key.
@@ -46,6 +46,16 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
     default void afterFindEntity(E entity) {
 
     }
+
+    default void beforeFindList(List<E> entity) {
+        entity.forEach(this::beforeFindEntity);
+    }
+
+    default void afterFindList(List<E> entity) {
+        entity.forEach(this::afterFindEntity);
+    }
+
+    default Boolean findCondition()
 
     default Boolean collectCondition(E entity) {
         return true;
@@ -191,10 +201,10 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
                         List<String> keyList = e.joiningKeyMap().get(key).get();
                         return keyList != null ? keyList.stream() : Stream.empty();
                     }).collect(Collectors.toList());
-                    List<BaseJoiningEntityInterface> joiningEntityList = joiningService.findWithJoiningEntity(idList, depth - 1);
+                    List<StandardJoiningEntityInterface> joiningEntityList = joiningService.findWithJoiningEntity(idList, depth - 1);
                     entityList.forEach(e -> {
                         List<String> innerKeyList = e.joiningKeyMap().get(key).get();
-                        List<BaseJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
+                        List<StandardJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
                         innerJoiningEntityList.forEach(e.joiningEntityMap().get(key)::accept);
                     });
                 });
@@ -213,13 +223,13 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
         if (tree.isLeaf()) {
             return;
         }
-        List<Tuple2<String, List<BaseJoiningEntityInterface>>> currentEntityMap = Collections.singletonList(new Tuple2<>("_root", entityList.stream().map(e -> (BaseJoiningEntityInterface) e).collect(Collectors.toList())));
+        List<Tuple2<String, List<StandardJoiningEntityInterface>>> currentEntityMap = Collections.singletonList(new Tuple2<>("_root", entityList.stream().map(e -> (StandardJoiningEntityInterface) e).collect(Collectors.toList())));
         List<Tuple2<String, JoiningDepthTreeLike>> currentTreeMap = Collections.singletonList(new Tuple2<>("_root", tree)); // {_root -> {a -> Leaf, b -> Leaf, c -> {d -> Leaf, e -> Leaf}}}
 
         Map<String, Map<String, BaseRetrieveJoiningServiceInterface>> currentJoiningServiceMap = Collections.singletonMap("_root", joiningService());
 
 
-        List<Tuple2<String, List<BaseJoiningEntityInterface>>> currentEntityMapBuffer = new ArrayList<>();
+        List<Tuple2<String, List<StandardJoiningEntityInterface>>> currentEntityMapBuffer = new ArrayList<>();
         List<Tuple2<String, JoiningDepthTreeLike>> currentTreeMapBuffer = new ArrayList<>();
         Map<String, Map<String, BaseRetrieveJoiningServiceInterface>> currentJoiningServiceMapBuffer = new HashMap<>();
 
@@ -232,11 +242,11 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
                 String key = keyList.get(keyIdx);
                 String key2 = currentEntityMap.get(keyIdx).v1();
                 assert key.equals(key2);
-                List<BaseJoiningEntityInterface> currentEntityList = currentEntityMap.get(keyIdx).v2();
+                List<StandardJoiningEntityInterface> currentEntityList = currentEntityMap.get(keyIdx).v2();
                 JoiningDepthTreeLike currentTree = currentTreeMap.get(keyIdx).v2(); // tree
                 Map<String, BaseRetrieveJoiningServiceInterface> currentJoiningService = currentJoiningServiceMap.get(key);
 
-                List<BaseJoiningEntityInterface> joiningEntityListBuffer = Collections.emptyList();
+                List<StandardJoiningEntityInterface> joiningEntityListBuffer = Collections.emptyList();
 
                 if (currentTree.isTree()) {
 
@@ -251,13 +261,13 @@ public interface BaseRetrieveJoiningServiceInterface<E extends BaseJoiningEntity
                                 return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
                             }).collect(Collectors.toList());
 
-                            List<BaseJoiningEntityInterface> joiningEntityList = joiningService.findListUsingIdByMapper(idList);
+                            List<StandardJoiningEntityInterface> joiningEntityList = joiningService.findListUsingIdByMapper(idList);
                             currentEntityList.forEach(e -> {
 
                                 List<String> innerKeyList = e.joiningKeyMap().get(subKey).get();
                                 if (innerKeyList != null) {
 
-                                    List<BaseJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
+                                    List<StandardJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
                                     innerJoiningEntityList.forEach(e.joiningEntityMap().get(subKey)::accept);
                                 }
                             });

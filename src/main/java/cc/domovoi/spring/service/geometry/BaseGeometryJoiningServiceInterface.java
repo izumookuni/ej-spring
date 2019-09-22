@@ -3,8 +3,8 @@ package cc.domovoi.spring.service.geometry;
 import cc.domovoi.collection.util.Failure;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.geometry.converter.GeometryLoader;
-import cc.domovoi.spring.entity.geometry.GeometryMultipleJoiningEntityInterface;
-import cc.domovoi.spring.mapper.geometry.BaseGeometryMapperInterface;
+import cc.domovoi.spring.entity.geometry.StandardGeometryMultipleJoiningEntityInterface;
+import cc.domovoi.spring.mapper.StandardMapperInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 import org.jooq.lambda.tuple.Tuple2;
@@ -20,7 +20,7 @@ import java.util.List;
  * @param <E>     Entity type.
  * @param <M>     Mapper type.
  */
-public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends GeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends BaseGeometryMapperInterface<E>>
+public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardMapperInterface<E>>
         extends BaseJoiningServiceInterface<E, M>, BaseGeometryRetrieveJoiningServiceInterface<INNER, OUTER, E, M> {
 
     /**

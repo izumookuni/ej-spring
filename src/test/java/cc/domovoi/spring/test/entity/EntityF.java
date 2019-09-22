@@ -1,10 +1,10 @@
 package cc.domovoi.spring.test.entity;
 
-import cc.domovoi.spring.entity.BaseEntityInterface;
+import cc.domovoi.spring.entity.StandardSingletonEntityInterface;
 
 import java.time.LocalDateTime;
 
-public class EntityF extends BaseEntity implements BaseEntityInterface {
+public class EntityF extends StandardEntity implements StandardSingletonEntityInterface {
 
     public EntityF() {
     }
