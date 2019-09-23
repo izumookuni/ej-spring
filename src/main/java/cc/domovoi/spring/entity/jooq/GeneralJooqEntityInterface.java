@@ -22,8 +22,7 @@ public interface GeneralJooqEntityInterface<P, K> extends GeneralJoiningEntityIn
     }
 
     default Set<JoiningProperty> joiningPropertySet() {
-        Field[] fields = this.getClass().getDeclaredFields();
-        return Stream.of(fields).map(field -> field.getAnnotation(JoiningProperty.class)).filter(Objects::nonNull).collect(Collectors.toSet());
+        return joiningPropertySet(this.getClass());
     }
 
     default Map<String, Supplier<? extends List<Object>>> joiningKeyMap() {
@@ -35,15 +34,13 @@ public interface GeneralJooqEntityInterface<P, K> extends GeneralJoiningEntityIn
             if (joiningProperty != null) {
                 String name = field.getName();
                 String joiningName = "".equals(joiningProperty.value()) ? name : joiningProperty.value();
-                switch (joiningProperty.type()) {
-                    case SINGLETON:
-                        joiningKeyMap.put(joiningName, () -> Collections.singletonList(reflect.get(joiningProperty.key())));
-                        break;
-                    case LIST:
-                        joiningKeyMap.put(joiningName, () -> reflect.get(joiningProperty.key()));
-                        break;
-                    default:
-                        break;
+                Class<?> fieldClass = field.getType();
+                if (fieldClass.getSimpleName().matches("(List)|(ArrayList)")) {
+                    joiningKeyMap.put(joiningName, () -> reflect.get(joiningProperty.sourceKey()));
+
+                }
+                else {
+                    joiningKeyMap.put(joiningName, () -> Collections.singletonList(reflect.get(joiningProperty.sourceKey())));
                 }
             }
         }
@@ -60,24 +57,26 @@ public interface GeneralJooqEntityInterface<P, K> extends GeneralJoiningEntityIn
             if (joiningProperty != null) {
                 String name = field.getName();
                 String joiningName = "".equals(joiningProperty.value()) ? name : joiningProperty.value();
-                switch (joiningProperty.type()) {
-                    case SINGLETON:
-                        joiningEntityMap.put(joiningName, (Object e) -> reflect.set(name, e));
-                        break;
-                    case LIST:
-                        joiningEntityMap.put(joiningName, (Object e) -> {
-                            List<Object> list = reflect.get(name);
-                            if (list == null) {
-                                reflect.set(name, new ArrayList<>());
-                            }
-                            ((List<Object>) reflect.get(name)).add(e);
-                        });
-                        break;
-                    default:
-                        break;
+                Class<?> fieldClass = field.getType();
+                if (fieldClass.getSimpleName().matches("(List)|(ArrayList)")) {
+                    joiningEntityMap.put(joiningName, (Object e) -> {
+                        List<Object> list = reflect.get(name);
+                        if (list == null) {
+                            reflect.set(name, new ArrayList<>());
+                        }
+                        ((List<Object>) reflect.get(name)).add(e);
+                    });
+                }
+                else {
+                    joiningEntityMap.put(joiningName, (Object e) -> reflect.set(name, e));
                 }
             }
         }
         return joiningEntityMap;
+    }
+
+    static Set<JoiningProperty> joiningPropertySet(Class<? extends GeneralJooqEntityInterface> eClass) {
+        Field[] fields = eClass.getDeclaredFields();
+        return Stream.of(fields).map(field -> field.getAnnotation(JoiningProperty.class)).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 }

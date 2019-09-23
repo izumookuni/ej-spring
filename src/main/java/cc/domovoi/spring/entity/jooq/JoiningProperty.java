@@ -17,19 +17,7 @@ public @interface JoiningProperty {
      * JoiningColumn name
      * @return JoiningColumn name
      */
-    String key();
-
-    /**
-     * JoiningTable name
-     * @return JoiningTable name
-     */
-    String table();
-
-    /**
-     * JoiningType name
-     * @return JoiningType name
-     */
-    JoiningType type();
+    String sourceKey();
 
     /**
      * key in joining entity.
@@ -37,13 +25,13 @@ public @interface JoiningProperty {
      *
      * @return targetKey
      */
-    String targetKey() default "id";
+    String joiningKey() default "id";
 
     /**
      * key column in joining table.
      * name_of_column
      *
-     * @return targetColumn
+     * @return joiningColumn
      */
-    String targetColumn() default "id";
+    String joiningColumn() default "id";
 }

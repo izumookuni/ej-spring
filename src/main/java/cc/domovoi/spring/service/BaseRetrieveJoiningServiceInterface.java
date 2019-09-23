@@ -55,7 +55,9 @@ public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEn
         entity.forEach(this::afterFindEntity);
     }
 
-    default Boolean findCondition()
+    default Boolean findCondition() {
+        return true;
+    }
 
     default Boolean collectCondition(E entity) {
         return true;
@@ -197,13 +199,13 @@ public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEn
             if (entityList != null && !entityList.isEmpty()) {
                 entityList.get(0).joiningKeyMap().keySet().forEach(key -> {
                     BaseRetrieveJoiningServiceInterface joiningService = joiningService().get(key);
-                    List<String> idList = entityList.stream().flatMap(e -> {
-                        List<String> keyList = e.joiningKeyMap().get(key).get();
+                    List<Object> idList = entityList.stream().flatMap(e -> {
+                        List<Object> keyList = e.joiningKeyMap().get(key).get();
                         return keyList != null ? keyList.stream() : Stream.empty();
                     }).collect(Collectors.toList());
                     List<StandardJoiningEntityInterface> joiningEntityList = joiningService.findWithJoiningEntity(idList, depth - 1);
                     entityList.forEach(e -> {
-                        List<String> innerKeyList = e.joiningKeyMap().get(key).get();
+                        List<Object> innerKeyList = e.joiningKeyMap().get(key).get();
                         List<StandardJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
                         innerJoiningEntityList.forEach(e.joiningEntityMap().get(key)::accept);
                     });
@@ -256,15 +258,15 @@ public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEn
                         BaseRetrieveJoiningServiceInterface joiningService = currentJoiningService.get(subKey);
                         if (currentEntityList != null && !currentEntityList.isEmpty()) {
 
-                            List<String> idList = currentEntityList.stream().flatMap(e -> {
-                                List<String> innerKeyList = e.joiningKeyMap().get(subKey).get();
+                            List<Object> idList = currentEntityList.stream().flatMap(e -> {
+                                List<Object> innerKeyList = e.joiningKeyMap().get(subKey).get();
                                 return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
                             }).collect(Collectors.toList());
 
                             List<StandardJoiningEntityInterface> joiningEntityList = joiningService.findListUsingIdByMapper(idList);
                             currentEntityList.forEach(e -> {
 
-                                List<String> innerKeyList = e.joiningKeyMap().get(subKey).get();
+                                List<Object> innerKeyList = e.joiningKeyMap().get(subKey).get();
                                 if (innerKeyList != null) {
 
                                     List<StandardJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
