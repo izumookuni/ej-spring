@@ -13,7 +13,7 @@ public interface JoiningDepthTreeLike {
         return !isLeaf();
     }
 
-    Boolean isUnlimitedTree();
+    DepthTreeType type();
 
     Boolean contains(String key);
 

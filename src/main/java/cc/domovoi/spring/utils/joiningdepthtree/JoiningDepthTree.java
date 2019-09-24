@@ -48,8 +48,8 @@ public class JoiningDepthTree implements JoiningDepthTreeLike {
     }
 
     @Override
-    public Boolean isUnlimitedTree() {
-        return false;
+    public DepthTreeType type() {
+        return DepthTreeType.NORMAL;
     }
 
     @Override

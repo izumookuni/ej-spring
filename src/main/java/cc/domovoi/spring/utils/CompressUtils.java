@@ -1,9 +1,9 @@
 package cc.domovoi.spring.utils;
 
 import cc.domovoi.collection.util.*;
-import cc.domovoi.spring.utils.filetree.FileTreeInterface;
-import cc.domovoi.spring.utils.filetree.TreeFile;
-import cc.domovoi.spring.utils.filetree.TreeFolder;
+import cc.domovoi.tools.filetree.FileTreeInterface;
+import cc.domovoi.tools.filetree.TreeFile;
+import cc.domovoi.tools.filetree.TreeFolder;
 import org.apache.commons.io.IOUtils;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;
