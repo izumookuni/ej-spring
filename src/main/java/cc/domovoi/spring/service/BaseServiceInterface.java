@@ -11,6 +11,7 @@ import java.util.List;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
+@Deprecated
 public interface BaseServiceInterface<E extends StandardSingletonEntityInterface, M extends StandardMapperInterface<E>> extends BaseRetrieveServiceInterface<E, M>, BaseJoiningServiceInterface<E, M> {
 
     @Override

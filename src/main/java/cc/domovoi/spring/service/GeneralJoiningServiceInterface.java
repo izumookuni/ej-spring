@@ -1,10 +1,10 @@
 package cc.domovoi.spring.service;
 
 import cc.domovoi.collection.util.Failure;
+import cc.domovoi.collection.util.Success;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import org.jooq.lambda.tuple.Tuple2;
-import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -13,7 +13,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
 
     K idGenerator();
 
-    Boolean checkEntityExist(E entity);
+    Boolean checkEntityExists(E entity);
 
     Try<Tuple2<Integer, K>> innerAddEntity(E entity);
 
@@ -57,9 +57,22 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         if (addConditionResult.isPresent()) {
             return new Failure<>(new RuntimeException(addConditionResult.get()));
         }
+        final boolean idFlag;
+        // generate id if not exists
+        if (Objects.isNull(entity.getId())) {
+            entity.setId(idGenerator());
+            idFlag = false;
+        }
+        else {
+            idFlag = true;
+        }
         // before add
         if (Objects.nonNull(entity)) {
             beforeAdd(entity);
+        }
+        // check entity exists
+        if (idFlag && checkEntityExists(entity)) {
+            return new Success<>(new Tuple2<>(0, null));
         }
         Try<Tuple2<Integer, K>> innerAddResult = innerAddEntity(entity);
         // after add

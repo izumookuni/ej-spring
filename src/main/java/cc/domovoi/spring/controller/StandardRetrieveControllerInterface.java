@@ -1,7 +1,7 @@
 package cc.domovoi.spring.controller;
 
 import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
-import cc.domovoi.spring.service.BaseRetrieveJoiningServiceInterface;
+import cc.domovoi.spring.service.StandardRetrieveJoiningServiceInterface;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import java.util.Map;
  * @param <E> Entity type.
  * @param <S> Service type.
  */
-public interface StandardRetrieveControllerInterface<E extends StandardJoiningEntityInterface, S extends BaseRetrieveJoiningServiceInterface<E, ?>> extends GeneralRetrieveControllerInterface<E>, MvcControllerInterface<S> {
+public interface StandardRetrieveControllerInterface<E extends StandardJoiningEntityInterface, S extends StandardRetrieveJoiningServiceInterface<E>> extends GeneralRetrieveControllerInterface<E>, MvcControllerInterface<S> {
 
     @Override
     default List<E> findEntityFunction(E entity) {

@@ -17,6 +17,7 @@ import java.util.stream.Stream;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
+@Deprecated
 public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEntityInterface, M extends StandardRetrieveMapperInterface<E>> extends GeneralServiceInterface<M> {
 
     /**

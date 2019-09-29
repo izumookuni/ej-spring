@@ -18,6 +18,7 @@ import java.util.UUID;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
+@Deprecated
 public interface BaseJoiningServiceInterface<E extends StandardJoiningEntityInterface, M extends StandardMapperInterface<E>> extends BaseRetrieveJoiningServiceInterface<E, M> {
 
     default String idGenerator() {
@@ -69,7 +70,7 @@ public interface BaseJoiningServiceInterface<E extends StandardJoiningEntityInte
         });
         afterAdd(entity);
         return addResult;
-//        Boolean entityExist = checkEntityExist(entity);
+//        Boolean entityExist = checkEntityExists(entity);
 //        return entityExist ? 0 : addEntityByMapper(entity);
     }
 

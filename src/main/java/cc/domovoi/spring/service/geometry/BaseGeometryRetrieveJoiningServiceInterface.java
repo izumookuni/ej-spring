@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  * @param <E>     Entity type.
  * @param <M>     Mapper type.
  */
+@Deprecated
 public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardRetrieveMapperInterface<E>>
         extends BaseRetrieveJoiningServiceInterface<E, M> {
 

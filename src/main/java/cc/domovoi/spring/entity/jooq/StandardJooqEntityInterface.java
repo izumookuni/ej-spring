@@ -1,4 +1,6 @@
 package cc.domovoi.spring.entity.jooq;
 
-public interface StandardJooqEntityInterface<P> extends GeneralJooqEntityInterface<P, String> {
+import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
+
+public interface StandardJooqEntityInterface<P> extends GeneralJooqEntityInterface<P, String>, StandardJoiningEntityInterface {
 }

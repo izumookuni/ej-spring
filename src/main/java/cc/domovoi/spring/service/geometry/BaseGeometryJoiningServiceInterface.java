@@ -20,6 +20,7 @@ import java.util.List;
  * @param <E>     Entity type.
  * @param <M>     Mapper type.
  */
+@Deprecated
 public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardMapperInterface<E>>
         extends BaseJoiningServiceInterface<E, M>, BaseGeometryRetrieveJoiningServiceInterface<INNER, OUTER, E, M> {
 
@@ -57,7 +58,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
         });
         afterAdd(entity);
         return addResult;
-//        Boolean entityExist = checkEntityExist(entity);
+//        Boolean entityExist = checkEntityExists(entity);
 //        if (entityExist) {
 //            return 0;
 //        }

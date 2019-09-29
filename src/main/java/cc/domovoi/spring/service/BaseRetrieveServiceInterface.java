@@ -13,6 +13,7 @@ import java.util.Map;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
+@Deprecated
 public interface BaseRetrieveServiceInterface<E extends StandardSingletonEntityInterface, M extends StandardRetrieveMapperInterface<E>> extends BaseRetrieveJoiningServiceInterface<E, M> {
 
     @Override

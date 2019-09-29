@@ -1,4 +1,4 @@
-package cc.domovoi.spring.service;
+package cc.domovoi.spring.service.mvc;
 
 public interface MvcServiceInterface<M> {
 

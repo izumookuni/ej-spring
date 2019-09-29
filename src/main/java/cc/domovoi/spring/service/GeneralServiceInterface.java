@@ -1,7 +1,6 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.spring.utils.CommonLogger;
-import org.slf4j.Logger;
+import cc.domovoi.spring.service.mvc.MvcServiceInterface;
 
 /**
  * GeneralServiceInterface.
