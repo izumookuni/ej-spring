@@ -1,14 +1,15 @@
 package cc.domovoi.spring.service.jooq;
 
+import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
+import cc.domovoi.spring.entity.jooq.JoiningColumn;
+import cc.domovoi.spring.entity.jooq.JoiningProperty;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 import org.jooq.*;
 import org.joor.Reflect;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.*;
 import static org.joor.Reflect.*;
@@ -63,26 +64,72 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     @Override
     default E innerFindEntity(K id) {
-        return null;
+        return findEntityUsingIdByDao(id);
     }
 
     @Override
     default List<E> innerFindList(E entity) {
-        return null;
+        return findEntityListByDao(entity);
     }
 
     @Override
     default List<E> findListByKey(List<Object> keyList, String context) {
-        return null;
+        Set<JoiningProperty> joiningPropertySet = GeneralJooqEntityInterface.joiningPropertySet(entityClass());
+        JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> jP.value().equals(context)).findFirst().orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
+        List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()).stream().peek(this::afterFindEntity).collect(Collectors.toList());
+        processFindResult(eList);
+        return eList;
     }
 
     default P findPojoByDao(P pojo) {
         return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo)).fetchOne().into(getType());
     }
 
-    default E findEntityByDao(E entity) {
-        // Todo: ...
-        return null;
+    default List<P> findPojoListByDao(P pojo) {
+        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo)).fetch().into(getType());
     }
 
+    default E findEntityUsingIdByDao(K id) {
+        E entity = onClass(entityClass()).create().as(entityClass());
+        entity.setId(id);
+        return findEntityByDao(entity);
+    }
+
+    default E findEntityByDao(E entity) {
+        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetchOne().into(entityClass());
+    }
+
+    default List<E> findEntityListByDao(E entity) {
+        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetch().into(entityClass());
+    }
+
+    @SuppressWarnings("unchecked")
+    default void joiningColumn(List<E> entityList) {
+        if (!entityList.isEmpty()) {
+            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
+            for (java.lang.reflect.Field field : fields) {
+                JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
+                if (joiningColumn != null) {
+                    Class<? extends Table> tableClass = joiningColumn.table();
+                    Table<Record> table = onClass(tableClass).create().get();
+                    List<Object> keyList = entityList.stream().map(entity -> on(entity).get(joiningColumn.key())).collect(Collectors.toList());
+                    Field<?> foreignKeyField = table.field(joiningColumn.foreignKey());
+                    Field<?> targetKeyField = table.field(joiningColumn.targetKey());
+                    Map targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
+                    entityList.forEach(entity -> {
+                        Reflect reflect = on(entity);
+                        if (targetKeyMap.containsKey(reflect.get(joiningColumn.key()))) {
+                            Class<?> fieldClass = field.getType();
+                            if (fieldClass.getSimpleName().matches("(List)|(ArrayList)")) {
+                                reflect.set(field.getName(), targetKeyMap.get(reflect.get(joiningColumn.key())));
+                            }
+                            else {
+                                reflect.set(field.getName(), ((List<Object>) targetKeyMap.get(reflect.get(joiningColumn.key()))).get(0));
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
 }

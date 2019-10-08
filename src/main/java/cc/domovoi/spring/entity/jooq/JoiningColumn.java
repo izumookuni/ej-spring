@@ -4,6 +4,10 @@ import org.jooq.Table;
 
 import java.lang.annotation.*;
 
+/**
+ * select table().targetKey() from this_table
+ * left join table() on table().foreignKey() in this_table.key()
+ */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
@@ -36,6 +40,4 @@ public @interface JoiningColumn {
     String targetKey();
 
     Class<? extends Table> table();
-
-    JoiningType type();
 }

@@ -52,6 +52,9 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         entity.forEach(this::afterFindEntity);
     }
 
+    default void processFindResult(List<E> entity) {
+    }
+
     default Optional<String> findCondition(E entity) {
         return Optional.empty();
     }
@@ -84,6 +87,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         // after find
         if (Objects.nonNull(e)) {
             afterFindEntity(e);
+            processFindResult(Collections.singletonList(e));
             joinEntityListByTree(Collections.singletonList(e), depthTree);
         }
         Optional<String> collectConditionResult = collectCondition(e);
@@ -109,6 +113,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         // after find
         if (Objects.nonNull(e)) {
             afterFindEntity(e);
+            processFindResult(Collections.singletonList(e));
             joinEntityListByTree(Collections.singletonList(e), depthTree);
         }
         Optional<String> collectConditionResult = collectCondition(e);
@@ -137,6 +142,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 //        return eList.stream().filter(e -> !collectCondition(e).isPresent()).collect(Collectors.toList());
 
         List<E> eList = innerFindList(entity).stream().peek(this::afterFindEntity).filter(e -> !collectCondition(e).isPresent()).collect(Collectors.toList());
+        processFindResult(eList);
         joinEntityListByTree(eList, depthTree);
         return eList;
     }
@@ -182,7 +188,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                         return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
                     }).collect(Collectors.toList());
 
-                    List<GeneralJoiningEntityInterface> joiningEntityList = (List<GeneralJoiningEntityInterface>) findListByKey(keyList, subKey);
+                    List<GeneralJoiningEntityInterface> joiningEntityList = joiningService.findListByKey(keyList, subKey);
                     currentEntityList.forEach(e -> {
                         Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
                         List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();
