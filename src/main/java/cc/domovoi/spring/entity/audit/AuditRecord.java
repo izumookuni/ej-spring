@@ -3,26 +3,26 @@ package cc.domovoi.spring.entity.audit;
 import java.lang.annotation.*;
 
 /**
- * 审计记录属性
+ * Audit Record
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface AuditRecord {
 
-    // 含义
+    // value
     String value() default "";
 
-    // 关键字
+    // key
     String key() default "";
 
-    // 是否忽略（最低优先）
+    // ignore (lowest order)
     boolean ignore() default false;
 
     // pid
     boolean pid() default false;
 
-    // 范围ID
+    // scope ID
     boolean scopeId() default false;
 
 }

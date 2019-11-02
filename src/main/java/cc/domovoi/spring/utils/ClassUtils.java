@@ -12,10 +12,16 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 public class ClassUtils {
 
-    // 获取指定包名下的所有类
+    @SuppressWarnings("unchecked")
+    public static <T, U> List<T> forceCastClass(List<U> uList, Class<T> tClass) {
+        return uList.stream().map(u -> (T) u).collect(Collectors.toList());
+    }
+
+    // acquire classes from declare packageName
     public static List<Class<?>> getClassList(String packageName, boolean isRecursive) {
         List<Class<?>> classList = new ArrayList<Class<?>>();
         try {
@@ -50,7 +56,7 @@ public class ClassUtils {
         return classList;
     }
 
-    // 获取指定包名下的所有类（可根据注解进行过滤）
+    // acquire classes from declare packageName filter by annotation
     public static List<Class<?>> getClassListByAnnotation(String packageName, Class<? extends Annotation> annotationClass) {
         List<Class<?>> classList = new ArrayList<Class<?>>();
         try {

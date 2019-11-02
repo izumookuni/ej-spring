@@ -35,8 +35,8 @@ public class RootEntity extends StandardEntity implements StandardJoiningEntityI
     }
 
     @Override
-    public Map<String, Supplier<? extends List<String>>> joiningKeyMap() {
-        Map<String, Supplier<? extends List<String>>> joiningKeyMap = new HashMap<>();
+    public Map<String, Supplier<? extends List<Object>>> joiningKeyMap() {
+        Map<String, Supplier<? extends List<Object>>> joiningKeyMap = new HashMap<>();
         joiningKeyMap.put("a", () -> Collections.singletonList(getaId()));
         joiningKeyMap.put("b", () -> Collections.singletonList(getbId()));
         joiningKeyMap.put("c", () -> Collections.singletonList(getcId()));

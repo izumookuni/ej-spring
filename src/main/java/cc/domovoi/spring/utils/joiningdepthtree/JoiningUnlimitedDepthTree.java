@@ -11,7 +11,7 @@ public class JoiningUnlimitedDepthTree implements JoiningDepthTreeLike {
 
     @Override
     public Optional<JoiningDepthTreeLike> subTree(String key) {
-        return Optional.empty();
+        return Optional.of(this);
     }
 
     @Override
@@ -37,6 +37,6 @@ public class JoiningUnlimitedDepthTree implements JoiningDepthTreeLike {
 
     @Override
     public String treeString() {
-        return "JoiningUnlimitedDepthTree";
+        return "UnlimitedTree";
     }
 }

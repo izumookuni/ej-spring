@@ -6,11 +6,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * GeometricSingletonInterface.
+ * GeometrySingletonOuterInterface.
  *
  * @param <OUTER> OUTER type.
  */
-public interface GeometricSingletonInterface<OUTER> extends GeometricMultipleInterface<OUTER> {
+public interface GeometrySingletonOuterInterface<OUTER> extends GeometryMultipleOuterInterface<OUTER> {
 
     /**
      * Geometric data.
@@ -27,12 +27,12 @@ public interface GeometricSingletonInterface<OUTER> extends GeometricMultipleInt
     void setGeometricModel(OUTER geometricModel);
 
     @Override
-    default Map<String, Supplier<? extends OUTER>> geometricGetMap() {
+    default Map<String, Supplier<? extends OUTER>> geometryOuterGetMap() {
         return Collections.singletonMap("geometry", this::getGeometricModel);
     }
 
     @Override
-    default Map<String, Consumer<? super OUTER>> geometricSetMap() {
+    default Map<String, Consumer<? super OUTER>> geometryOuterSetMap() {
         return Collections.singletonMap("geometry", this::setGeometricModel);
     }
 }

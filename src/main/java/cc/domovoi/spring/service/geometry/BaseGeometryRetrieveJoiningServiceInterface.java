@@ -179,12 +179,12 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
      * @param entity Entity
      */
     default void findGeometryAndSet(E entity) {
-        entity.geometryGetMap().forEach((key, supplier) -> {
+        entity.geometryInnerGetMap().forEach((key, supplier) -> {
             INNER query = geometryService().tempInner();
             query.setContextId(entity.getId());
             query.setContextName(key);
             INNER geometry = geometryService().findGeometry(query);
-            entity.geometrySetMap().get(key).accept(geometry);
+            entity.geometryInnerSetMap().get(key).accept(geometry);
         });
     }
 
@@ -194,7 +194,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         }
         List<String> idList = entityList.stream().map(E::getId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         Map<String, E> entityMap = entityList.stream().collect(Collectors.toMap(E::getId, Function.identity()));
-        entityList.get(0).geometryGetMap().keySet().forEach(key -> {
+        entityList.get(0).geometryInnerGetMap().keySet().forEach(key -> {
             INNER query = geometryService().tempInner();
             query.setContextIdIn(idList);
             query.setContextName(key);
@@ -202,7 +202,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
             geometryList.forEach(geometry -> {
                 E entity = entityMap.get(geometry.getContextId());
                 if (Objects.nonNull(entity)) {
-                    entity.geometrySetMap().get(key).accept(geometry);
+                    entity.geometryInnerSetMap().get(key).accept(geometry);
                 }
             });
         });
@@ -214,10 +214,10 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
      * @param entity Entity
      */
     default void exp(E entity) {
-        entity.geometryGetMap().forEach((key, supplier) -> {
+        entity.geometryInnerGetMap().forEach((key, supplier) -> {
             INNER inner = supplier.get();
             OUTER outer = exporter().exportGeometry(inner);
-            entity.geometricSetMap().get(key).accept(outer);
+            entity.geometryOuterSetMap().get(key).accept(outer);
         });
     }
 }

@@ -1,7 +1,7 @@
 package cc.domovoi.spring.entity.geometry;
 
-import cc.domovoi.spring.geometry.geointerface.GeometricSingletonInterface;
-import cc.domovoi.spring.geometry.geointerface.GeometrySingletonInterface;
+import cc.domovoi.spring.geometry.geointerface.GeometrySingletonOuterInterface;
+import cc.domovoi.spring.geometry.geointerface.GeometrySingletonInnerInterface;
 
-public interface StandardGeometrySingletonJoiningEntityInterface<INNER, OUTER> extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, GeometrySingletonInterface<INNER>, GeometricSingletonInterface<OUTER> {
+public interface StandardGeometrySingletonJoiningEntityInterface<INNER, OUTER> extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, GeometrySingletonInnerInterface<INNER>, GeometrySingletonOuterInterface<OUTER> {
 }

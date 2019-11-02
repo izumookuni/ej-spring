@@ -24,7 +24,7 @@ public class EntityE extends StandardEntity implements StandardJoiningEntityInte
     private EntityF fEntity;
 
     @Override
-    public Map<String, Supplier<? extends List<String>>> joiningKeyMap() {
+    public Map<String, Supplier<? extends List<Object>>> joiningKeyMap() {
         return Collections.singletonMap("f", () -> Collections.singletonList(getfId()));
     }
 

@@ -1,6 +1,7 @@
 package cc.domovoi.spring.service.mvc;
 
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
+import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.mapper.GeneralRetrieveMapperInterface;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 
@@ -24,7 +25,7 @@ public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJ
 
     @SuppressWarnings("unchecked")
     @Override
-    default List<E> findListByKey(List<Object> keyList, String context) {
+    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
         List<K> idList = keyList.stream().map(key -> (K) key).collect(Collectors.toList());
         List<E> eList =  findListUsingIdByMapper(idList).stream().peek(this::afterFindEntity).collect(Collectors.toList());
         processFindResult(eList);

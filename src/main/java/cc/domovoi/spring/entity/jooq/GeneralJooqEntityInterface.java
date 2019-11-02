@@ -1,6 +1,7 @@
 package cc.domovoi.spring.entity.jooq;
 
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
+import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
 
 import java.lang.reflect.Field;
@@ -21,7 +22,7 @@ public interface GeneralJooqEntityInterface<P, K> extends GeneralJoiningEntityIn
         return (P) this;
     }
 
-    default Set<JoiningProperty> joiningPropertySet() {
+    default Set<Tuple2<JoiningProperty, Field>> joiningPropertySet() {
         return joiningPropertySet(this.getClass());
     }
 
@@ -75,8 +76,8 @@ public interface GeneralJooqEntityInterface<P, K> extends GeneralJoiningEntityIn
         return joiningEntityMap;
     }
 
-    static Set<JoiningProperty> joiningPropertySet(Class<? extends GeneralJooqEntityInterface> eClass) {
+    static Set<Tuple2<JoiningProperty, Field>> joiningPropertySet(Class<?> eClass) {
         Field[] fields = eClass.getDeclaredFields();
-        return Stream.of(fields).map(field -> field.getAnnotation(JoiningProperty.class)).filter(Objects::nonNull).collect(Collectors.toSet());
+        return Stream.of(fields).map(field -> new Tuple2<>(field.getAnnotation(JoiningProperty.class), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
     }
 }

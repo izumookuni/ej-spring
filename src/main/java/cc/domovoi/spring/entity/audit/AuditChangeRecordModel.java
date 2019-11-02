@@ -7,13 +7,13 @@ import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
 
-@ApiModel(value = "审计变化记录 L1")
+@ApiModel(value = "AuditChangeRecord L1")
 public class AuditChangeRecordModel extends AuditDisplayEntity {
 
-    @ApiModelProperty(value = "改变前")
+    @ApiModelProperty(value = "before")
     private Object before;
 
-    @ApiModelProperty(value = "改变后")
+    @ApiModelProperty(value = "after")
     private Object after;
 
     @Override

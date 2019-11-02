@@ -1,7 +1,6 @@
 package cc.domovoi.spring.test;
 
 import cc.domovoi.spring.entity.audit.AuditChangeContextGroupModel;
-import cc.domovoi.spring.entity.audit.AuditDisplayEntity;
 import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl;
 import cc.domovoi.spring.test.mapper.AuditBeanMapperTestImpl;
 import cc.domovoi.spring.test.mapper.AuditMapperTestImpl;
@@ -16,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AuditTest {

@@ -3,22 +3,22 @@ package cc.domovoi.spring.entity.audit;
 import java.lang.annotation.*;
 
 /**
- * 审计记录实体
+ * Audit
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface Audit {
 
-    // 含义
+    // value
     String value();
 
-    // 忽略属性（高优先）
+    // skip properties (high order)
     String[] skip() default {};
 
-    // 包含属性（低优先）
+    // include properties (low order)
     String[] include() default {};
 
-    // 包含所有属性（低优先）
+    // include all properties (low order)
     boolean containsAll() default false;
 }

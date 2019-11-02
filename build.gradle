@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 plugins {
     id 'java'
     id 'maven-publish'
-//    id 'com.jfrog.artifactory' version '4.9.8'
+    id 'com.jfrog.artifactory' version '4.9.8'
 }
 //apply from: 'bintray.gradle'
 
@@ -44,7 +44,9 @@ tasks.withType(JavaCompile) {
 dependencies {
     compile 'cc.domovoi:ej-collection:0.0.4'
     compile 'cc.domovoi:ej-lambda:0.0.2'
-    compile 'cc.domovoi:ej-tools:0.0.1'
+    compile(group: 'cc.domovoi', name: 'ej-tools', version: '20191101150224-SNAPSHOT')
+
+    compile group: 'org.jooq', name: 'jool', version: '0.9.14'
 
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
@@ -67,6 +69,10 @@ dependencies {
     compile group: 'org.jooq', name: 'jooq-codegen', version: '3.11.12'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -100,29 +106,29 @@ publishing {
     }
 }
 
-//artifactory {
-//    contextUrl = "${artifactory_url}"
-//    publish {
-//        repository {
-//            repoKey = 'libs-snapshot-local'
-//            username = "${artifactory_user}"
-//            password = "${artifactory_password}"
-//        }
-//        defaults {
-//            publications ('snapshot')
-////            properties = ['qa.level': 'basic', 'q.os': 'win32, deb, osx']
-//            publishBuildInfo = true
-//            publishArtifacts = true
-//            publishPom = true
-//            publishIvy = false
-//        }
-//    }
-//    resolve {
-//        repository {
-//            repoKey = 'libs-snapshot-local'
-//            username = "${artifactory_user}"
-//            password = "${artifactory_password}"
-//            maven = true
-//        }
-//    }
-//}
+artifactory {
+    contextUrl = "${artifactory_url}"
+    publish {
+        repository {
+            repoKey = 'libs-snapshot-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+            publications ('snapshot')
+//            properties = ['qa.level': 'basic', 'q.os': 'win32, deb, osx']
+            publishBuildInfo = true
+            publishArtifacts = true
+            publishPom = true
+            publishIvy = false
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-snapshot-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+        }
+    }
+}

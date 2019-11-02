@@ -157,7 +157,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     default List<Integer> addGeometryByGeometryService(E entity) {
         List<Integer> addGeometryResultList = new ArrayList<>();
-        entity.geometryGetMap().forEach((key, supplier) -> {
+        entity.geometryInnerGetMap().forEach((key, supplier) -> {
             INNER geometry = supplier.get();
             if (geometry != null) {
                 INNER query = geometryService().tempInner();
@@ -184,7 +184,7 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      */
     default List<Integer> updateGeometryByGeometryService(E entity) {
         List<Integer> updateGeometryResultList = new ArrayList<>();
-        entity.geometryGetMap().forEach((key, supplier) -> {
+        entity.geometryInnerGetMap().forEach((key, supplier) -> {
             INNER geometry = supplier.get();
             if (geometry != null) {
                 INNER deleteQuery = geometryService().tempInner();
@@ -209,8 +209,8 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
     default Tuple2<List<Integer>, Boolean> deleteGeometryByGeometryService(E entity) {
         List<Integer> deleteGeometryResultList = new ArrayList<>();
         // true -> delete partially; false -> delete overall
-        boolean deleteFlag = entity.geometryGetMap().values().stream().anyMatch(g -> g.get() != null);
-        entity.geometryGetMap().forEach((key, supplier) -> {
+        boolean deleteFlag = entity.geometryInnerGetMap().values().stream().anyMatch(g -> g.get() != null);
+        entity.geometryInnerGetMap().forEach((key, supplier) -> {
             // If the geometry data corresponding to this key exists, delete it.
             if (!deleteFlag || supplier.get() != null) {
                 INNER deleteQuery = geometryService().tempInner();
@@ -231,10 +231,10 @@ public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLik
      * @param entity Entity
      */
     default void imp(E entity) {
-        entity.geometricGetMap().forEach((key, supplier) -> {
+        entity.geometryOuterGetMap().forEach((key, supplier) -> {
             OUTER outer = supplier.get();
             INNER inner = loader().loadGeometry(outer);
-            entity.geometrySetMap().get(key).accept(inner);
+            entity.geometryInnerSetMap().get(key).accept(inner);
         });
     }
 }

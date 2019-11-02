@@ -37,7 +37,7 @@ public class JoiningFixedDepthTree implements JoiningDepthTreeLike {
 
     @Override
     public Optional<JoiningDepthTreeLike> subTree(String key) {
-        return Optional.empty();
+        return Optional.of(next());
     }
 
     @Override
@@ -62,6 +62,6 @@ public class JoiningFixedDepthTree implements JoiningDepthTreeLike {
 
     @Override
     public String treeString() {
-        return "JoiningFixedDepthTree";
+        return String.format("FixedTree(%s)", depth);
     }
 }

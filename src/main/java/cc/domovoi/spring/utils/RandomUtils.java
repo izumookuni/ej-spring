@@ -168,11 +168,11 @@ public class RandomUtils {
     }
 
     private static <INNER, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>> void putGeometryProperty(E entity, Map<String, Supplier<Object>> outerModelMap, Map<String, String> geometryPropertyTypeMap) {
-        entity.geometryGetMap().forEach((key, supplier) -> {
+        entity.geometryInnerGetMap().forEach((key, supplier) -> {
             try {
                 String propertyType = geometryPropertyTypeMap.get(key);
                 if (outerModelMap.containsKey(propertyType)) {
-                    entity.geometricSetMap().get(key).accept((OUTER) outerModelMap.get(propertyType).get());
+                    entity.geometryOuterSetMap().get(key).accept((OUTER) outerModelMap.get(propertyType).get());
                 }
 
             } catch (Exception e) {
@@ -211,7 +211,7 @@ public class RandomUtils {
             Map<String, Supplier<Object>> gMap = generateMap();
 //            Map<String, Supplier<Object>> gGeometryMap = generateGeometryMap();
             Map<String, Supplier<Object>> gGeometricModelMap = generateGeometricModelMap();
-            Set<String> geoKey = bean.geometricGetMap().keySet();
+            Set<String> geoKey = bean.geometryOuterGetMap().keySet();
             putBeanProperty(fieldSet, ignoreList, beanWrapper, gMap);
             putGeometryProperty(bean, gGeometricModelMap, geometryPropertyTypeMap);
             return (E) beanWrapper.getWrappedInstance();

@@ -1,6 +1,7 @@
 package cc.domovoi.spring.test.entity;
 
 import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
+import cc.domovoi.spring.utils.ClassUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -42,8 +43,8 @@ public class EntityC extends StandardEntity implements StandardJoiningEntityInte
     }
 
     @Override
-    public Map<String, Supplier<? extends List<String>>> joiningKeyMap() {
-        Map<String, Supplier<? extends List<String>>> joiningKeyMap = new HashMap<>();
+    public Map<String, Supplier<? extends List<Object>>> joiningKeyMap() {
+        Map<String, Supplier<? extends List<Object>>> joiningKeyMap = new HashMap<>();
         joiningKeyMap.put("d", () -> Collections.singletonList(getdId()));
         joiningKeyMap.put("e", () -> Collections.singletonList(geteId()));
         return joiningKeyMap;

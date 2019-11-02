@@ -8,13 +8,13 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-@ApiModel(value = "审计")
+@ApiModel(value = "Audit")
 public class AuditDisplayEntity implements AuditInterface {
 
     @ApiModelProperty(value = "ID")
     private String auditId;
 
-    @ApiModelProperty(value = "作者")
+    @ApiModelProperty(value = "Author")
     private String auditAuthor;
 
     @ApiModelProperty(value = "IP")
@@ -23,38 +23,38 @@ public class AuditDisplayEntity implements AuditInterface {
     @ApiModelProperty(value = "Uri")
     private String auditUri;
 
-    @ApiModelProperty(value = "等级", notes = "info;warn;error")
+    @ApiModelProperty(value = "Level", notes = "info;warn;error")
     private String auditLevel;
 
-    @ApiModelProperty(value = "类型")
+    @ApiModelProperty(value = "Type")
     private String auditType;
 
-    @ApiModelProperty(value = "范围", notes = "移动端;pc")
+    @ApiModelProperty(value = "Scope", notes = "mobile;pc")
     private String auditScope;
 
-    @ApiModelProperty(value = "行为", notes = "add;update;delete")
+    @ApiModelProperty(value = "Behavior", notes = "add;update;delete")
     private String auditBehavior;
 
-    @ApiModelProperty(value = "范围ID", notes = "项目ID")
+    @ApiModelProperty(value = "scope ID", notes = "project ID")
     private String scopeId;
 
-    @ApiModelProperty(value = "关联ID")
+    @ApiModelProperty(value = "context ID")
     @JsonProperty
     private String contextId;
 
-    @ApiModelProperty(value = "关联上级ID")
+    @ApiModelProperty(value = "context parent ID")
     private String contextPid;
 
-    @ApiModelProperty(value = "关联名称")
+    @ApiModelProperty(value = "context Name")
     private String contextName;
 
-    @ApiModelProperty(value = "字段")
+    @ApiModelProperty(value = "audit Field")
     private String auditField;
 
-    @ApiModelProperty(value = "内容")
+    @ApiModelProperty(value = "Content")
     private String auditContent;
 
-    @ApiModelProperty(value = "时间")
+    @ApiModelProperty(value = "Time")
     private LocalDateTime auditTime;
 
     public void init() {

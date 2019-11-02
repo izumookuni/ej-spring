@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModel;
 
 import java.util.List;
 
-@ApiModel(value = "审计表变化记录 L3")
+@ApiModel(value = "Audit Change L3")
 public class AuditChangeContextGroupModel {
 
     private String contextName;

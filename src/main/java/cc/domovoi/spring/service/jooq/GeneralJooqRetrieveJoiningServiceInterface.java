@@ -6,7 +6,9 @@ import cc.domovoi.spring.entity.jooq.JoiningColumn;
 import cc.domovoi.spring.entity.jooq.JoiningProperty;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 import org.jooq.*;
+import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,8 +25,6 @@ import static org.joor.Reflect.*;
  * @param <E> Entity
  */
 public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecord<R>, P, K, E extends GeneralJooqEntityInterface<P, K>> extends DAO<R, P, K>, GeneralRetrieveJoiningServiceInterface<K, E> {
-
-    Class<E> entityClass();
 
     DSLContext dsl();
 
@@ -56,6 +56,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
             if (joiningTable != null) {
                 String name = field.getName();
                 String joiningName = "".equals(joiningTable.value()) ? name : joiningTable.value();
+                logger().debug("joiningService.joiningName: " + joiningName);
                 joiningService.put(joiningName, reflect.get(name));
             }
         }
@@ -73,10 +74,11 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     @Override
-    default List<E> findListByKey(List<Object> keyList, String context) {
-        Set<JoiningProperty> joiningPropertySet = GeneralJooqEntityInterface.joiningPropertySet(entityClass());
-        JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> jP.value().equals(context)).findFirst().orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
+    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
+        Set<Tuple2<JoiningProperty, java.lang.reflect.Field>> joiningPropertySet = GeneralJooqEntityInterface.joiningPropertySet(entityClass);
+        JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
         List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()).stream().peek(this::afterFindEntity).collect(Collectors.toList());
+        joiningColumn(eList);
         processFindResult(eList);
         return eList;
     }
@@ -96,11 +98,15 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default E findEntityByDao(E entity) {
-        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetchOne().into(entityClass());
+        E result =  dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetchOne().into(entityClass());
+        joiningColumn(Collections.singletonList(result));
+        return result;
     }
 
     default List<E> findEntityListByDao(E entity) {
-        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetch().into(entityClass());
+        List<E> result = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetch().into(entityClass());
+        joiningColumn(result);
+        return result;
     }
 
     @SuppressWarnings("unchecked")

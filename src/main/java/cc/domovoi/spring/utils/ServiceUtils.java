@@ -18,17 +18,17 @@ public class ServiceUtils {
 
     /**
      * 分组查询
-     * @param mapper mapper实例
-     * @param query 原始查询请求
-     * @param qkF 将查询请求变成key列表（当列表长度超过500时，将分组查询）
-     * @param qkq2F 根据原始查询请求和key列表生成最终查询请求
-     * @param mq2rF 根据mapper实例和最终查询请求获得最终结果
-     * @param <M> mapper实例类型
-     * @param <K> key列表类型
-     * @param <Q> 原始查询请求类型
-     * @param <Q2> 最终查询请求类型
-     * @param <R> 最终结果类型
-     * @return 最终结果列表
+     * @param mapper mapper
+     * @param query origin request
+     * @param qkF the function convert origin request to key list (it will be grouped query if list size larger than 500)
+     * @param qkq2F the function convert origin request and key list to final request
+     * @param mq2rF the function convert convert final request to final result by mapper
+     * @param <M> mapper type
+     * @param <K> key list type
+     * @param <Q> origin request type
+     * @param <Q2> final result type
+     * @param <R> final result type
+     * @return final result
      */
     public static <M, K, Q, Q2, R> List<R> findListGrouped(M mapper,
                                                            Q query,

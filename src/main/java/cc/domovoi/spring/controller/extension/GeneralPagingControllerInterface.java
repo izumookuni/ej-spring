@@ -27,6 +27,7 @@ public interface GeneralPagingControllerInterface<E> extends OriginalControllerI
     /**
      * The function that find the Amount of entities that have certain attributes.
      *
+     * @param entity entity
      * @return Amount of entities.
      */
     Integer findCountFunction(E entity);

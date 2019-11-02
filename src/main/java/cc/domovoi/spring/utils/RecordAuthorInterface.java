@@ -4,12 +4,12 @@ import io.swagger.annotations.ApiModelProperty;
 
 public interface RecordAuthorInterface {
 
-    @ApiModelProperty(value = "作者")
+    @ApiModelProperty(value = "Author")
     String getAuthor();
 
     void setAuthor(String author);
 
-    @ApiModelProperty(value = "作者ID")
+    @ApiModelProperty(value = "AuthorId")
     String getAuthorId();
 
     void setAuthorId(String authorId);

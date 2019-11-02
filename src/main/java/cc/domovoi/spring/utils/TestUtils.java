@@ -51,12 +51,12 @@ public class TestUtils {
     public static <INNER, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, S extends BaseJoiningServiceInterface<E, ?>> void testGeometryEntityService(Class<E> entityClass, S service, Logger logger, Consumer<Boolean> assertFunction, Map<String, String>geometryPropertyTypeMap, String... ignore) throws Exception {
         E originEntity = RandomUtils.randomGeometryEntity(entityClass, geometryPropertyTypeMap, ignore);
         logger.info(String.format("origin: %s", originEntity));
-        originEntity.geometricGetMap().forEach((key, supplier) -> {
+        originEntity.geometryOuterGetMap().forEach((key, supplier) -> {
             logger.info(String.format("key: %s -> content: %s", key, supplier.get().toString()));
         });
         Integer addResult = service.addEntity(originEntity).map(Tuple2::v1).getOrElse(() -> 0);
         assertFunction.accept(1 == addResult);
-        originEntity.geometryGetMap().forEach((key, supplier) -> {
+        originEntity.geometryInnerGetMap().forEach((key, supplier) -> {
             logger.info(String.format("key: %s -> content: %s", key, supplier.get().toString()));
         });
 
@@ -72,7 +72,7 @@ public class TestUtils {
 
 //        // 使用更新操作删除某个geometry
 //        keySet.stream().findFirst().ifPresent(key -> {
-//            originEntity.geometricSetMap().get(key).accept(null);
+//            originEntity.geometryOuterSetMap().get(key).accept(null);
 //            Integer updateResult1 = service.updateEntity(originEntity);
 //            assertFunction.accept(1 == updateResult1 || 0 == updateResult1);
 //        });

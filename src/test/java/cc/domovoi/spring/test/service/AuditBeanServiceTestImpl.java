@@ -1,13 +1,13 @@
 package cc.domovoi.spring.test.service;
 
-import cc.domovoi.spring.service.BaseServiceInterface;
 import cc.domovoi.spring.service.audit.AuditServiceInterface;
 import cc.domovoi.spring.service.audit.GeneralAuditServiceInterface;
+import cc.domovoi.spring.service.mvc.StandardMvcSingletonServiceInterface;
 import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl;
 import cc.domovoi.spring.test.mapper.AuditBeanMapperTestImpl;
 import cc.domovoi.tools.utils.RandomUtils;
 
-public class AuditBeanServiceTestImpl implements BaseServiceInterface<AuditBeanEntityTestImpl, AuditBeanMapperTestImpl>, GeneralAuditServiceInterface<AuditBeanEntityTestImpl, AuditBeanMapperTestImpl> {
+public class AuditBeanServiceTestImpl implements StandardMvcSingletonServiceInterface<AuditBeanEntityTestImpl, AuditBeanMapperTestImpl>, GeneralAuditServiceInterface<String, AuditBeanEntityTestImpl> {
 
     private AuditBeanMapperTestImpl auditBeanMapperTestImpl;
 
