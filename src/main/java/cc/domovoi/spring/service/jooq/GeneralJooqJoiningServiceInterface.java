@@ -45,15 +45,18 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
         LocalDateTime now = LocalDateTime.now();
         entity.setCreationTime(now);
         entity.setUpdateTime(now);
-        return unMapper(entity.toPojo()).insert();
+        return dsl().insertInto(getTable()).values(unMapper(entity.toPojo())).execute();
+//        return unMapper(entity.toPojo()).insert();
     }
 
     default Integer updateEntityByDao(E entity) {
         entity.setUpdateTime(LocalDateTime.now());
-        return unMapper(entity.toPojo()).update();
+        return dsl().update(getTable()).set(unMapper(entity.toPojo())).execute();
+//        return unMapper(entity.toPojo()).update();
     }
 
     default Integer deleteEntityByDao(E entity) {
-        return unMapper(entity.toPojo()).delete();
+        return dsl().deleteFrom(getTable()).where(initConditionUsingPojo(entity.toPojo())).execute();
+//        return unMapper(entity.toPojo()).delete();
     }
 }
