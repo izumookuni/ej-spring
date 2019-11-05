@@ -45,7 +45,7 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
         LocalDateTime now = LocalDateTime.now();
         entity.setCreationTime(now);
         entity.setUpdateTime(now);
-        return dsl().insertInto(getTable()).values(unMapper(entity.toPojo())).execute();
+        return dsl().insertInto(getTable()).set(unMapper(entity.toPojo())).execute();
 //        return unMapper(entity.toPojo()).insert();
     }
 
