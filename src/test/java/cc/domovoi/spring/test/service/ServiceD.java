@@ -13,7 +13,7 @@ public class ServiceD implements BaseRetrieveServiceInterface<EntityD, MapperD> 
     }
 
     @Override
-    public MapperD mapper() {
+    public MapperD mvcMapper() {
         return mapper;
     }
 }

@@ -3,6 +3,7 @@ package cc.domovoi.spring.service.jooq;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.service.GeneralJoiningServiceInterface;
+import cc.domovoi.spring.utils.BeanMapUtils;
 import org.jooq.UpdatableRecord;
 import org.jooq.lambda.tuple.Tuple2;
 
@@ -51,7 +52,16 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
 
     default Integer updateEntityByDao(E entity) {
         entity.setUpdateTime(LocalDateTime.now());
-        return dsl().update(getTable()).set(unMapper(entity.toPojo())).execute();
+        E e = findEntityUsingIdByDao(entity.getId());
+        if (Objects.nonNull(e)) {
+            P p = e.toPojo();
+            BeanMapUtils.copyPropertyIgnoreNull(entity.toPojo(), p);
+            return dsl().update(getTable()).set(unMapper(p)).execute();
+        }
+        else {
+            return 0;
+        }
+//        return dsl().update(getTable()).set(unMapper(entity.toPojo())).execute();
 //        return unMapper(entity.toPojo()).update();
     }
 

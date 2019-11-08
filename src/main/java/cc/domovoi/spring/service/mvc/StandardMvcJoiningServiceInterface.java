@@ -8,8 +8,4 @@ import java.util.UUID;
 
 public interface StandardMvcJoiningServiceInterface<E extends StandardJoiningEntityInterface, M extends StandardMapperInterface<E>> extends StandardMvcRetrieveJoiningServiceInterface<E, M>, GeneralMvcJoiningServiceInterface<String, E, M>, StandardJoiningServiceInterface<E> {
 
-    @Override
-    default String idGenerator() {
-        return UUID.randomUUID().toString();
-    }
 }

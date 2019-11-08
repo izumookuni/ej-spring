@@ -11,6 +11,6 @@ public interface LegacyPagingServiceInterface<E extends GeneralJoiningEntityInte
 
     @Override
     default List<E> findPagingListByMapper(E entity) {
-        return mapper().findBaseList(entity);
+        return mvcMapper().findBaseList(entity);
     }
 }

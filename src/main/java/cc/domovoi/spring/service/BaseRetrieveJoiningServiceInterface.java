@@ -91,7 +91,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEn
      * @return Entity list.
      */
     default List<E> findListByMapper(E entity) {
-        return mapper().findBaseList(entity);
+        return mvcMapper().findBaseList(entity);
     }
 
     /**
@@ -104,7 +104,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEn
         if (!StringUtils.hasText(id)) {
             return null;
         }
-        return mapper().findBaseById(id);
+        return mvcMapper().findBaseById(id);
     }
 
     /**
@@ -124,13 +124,13 @@ public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEn
         try {
             int listSize = normalizeIdList.size();
             if (listSize <= 500) {
-                return mapper().findBaseListById(normalizeIdList);
+                return mvcMapper().findBaseListById(normalizeIdList);
             }
             else {
                 List<E> entityList = new ArrayList<>();
                 for (int i = 0; i < listSize / 500; i++) {
                     List<String> innerIdList = normalizeIdList.subList(i * 500, (i + 1) * 500);
-                    List<E> innerEntityList = mapper().findBaseListById(innerIdList);
+                    List<E> innerEntityList = mvcMapper().findBaseListById(innerIdList);
                     entityList.addAll(innerEntityList);
                 }
                 // after find
@@ -139,7 +139,7 @@ public interface BaseRetrieveJoiningServiceInterface<E extends StandardJoiningEn
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return normalizeIdList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
+            return normalizeIdList.stream().map(mvcMapper()::findBaseById).collect(Collectors.toList());
         }
 
     }

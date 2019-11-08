@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public interface LGeometryInterface extends GeoContextLike {
+public interface LGeometryInterface extends GeoContextLike<String> {
 
     List<LPoint> getPoints();
 

@@ -9,6 +9,12 @@ import cc.domovoi.tools.utils.RandomUtils;
 
 public class AuditBeanServiceTestImpl implements StandardMvcSingletonServiceInterface<AuditBeanEntityTestImpl, AuditBeanMapperTestImpl>, GeneralAuditServiceInterface<String, AuditBeanEntityTestImpl> {
 
+
+    @Override
+    public Class<AuditBeanEntityTestImpl> entityClass() {
+        return AuditBeanEntityTestImpl.class;
+    }
+
     private AuditBeanMapperTestImpl auditBeanMapperTestImpl;
 
     private AuditServiceInterface auditService;
@@ -34,7 +40,7 @@ public class AuditBeanServiceTestImpl implements StandardMvcSingletonServiceInte
     }
 
     @Override
-    public AuditBeanMapperTestImpl mapper() {
+    public AuditBeanMapperTestImpl mvcMapper() {
         return auditBeanMapperTestImpl;
     }
 }

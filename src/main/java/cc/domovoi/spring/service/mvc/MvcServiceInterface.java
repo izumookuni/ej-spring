@@ -7,5 +7,5 @@ public interface MvcServiceInterface<M> {
      *
      * @return Mapper.
      */
-    M mapper();
+    M mvcMapper();
 }

@@ -45,15 +45,15 @@ public interface GeneralMvcJoiningServiceInterface<K, E extends GeneralJoiningEn
         LocalDateTime now = LocalDateTime.now();
         entity.setCreationTime(now);
         entity.setUpdateTime(now);
-        return mapper().addBase(entity);
+        return mvcMapper().addBase(entity);
     }
 
     default Integer updateEntityByMapper(E entity) {
         entity.setUpdateTime(LocalDateTime.now());
-        return mapper().updateBase(entity);
+        return mvcMapper().updateBase(entity);
     }
 
     default Integer deleteEntityByMapper(E entity) {
-        return mapper().deleteBase(entity);
+        return mvcMapper().deleteBase(entity);
     }
 }

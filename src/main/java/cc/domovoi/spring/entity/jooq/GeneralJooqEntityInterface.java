@@ -26,7 +26,17 @@ public interface GeneralJooqEntityInterface<P, K> extends GeneralJoiningEntityIn
         return joiningPropertySet(this.getClass());
     }
 
+    @Override
     default Map<String, Supplier<? extends List<Object>>> joiningKeyMap() {
+        return innerJoiningKeyMap();
+    }
+
+    @Override
+    default Map<String, Consumer<? super Object>> joiningEntityMap() {
+        return innerJoiningEntityMap();
+    }
+
+    default Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap() {
         Map<String, Supplier<? extends List<Object>>> joiningKeyMap = new HashMap<>();
         Field[] fields = this.getClass().getDeclaredFields();
         Reflect reflect = on(this);
@@ -49,7 +59,7 @@ public interface GeneralJooqEntityInterface<P, K> extends GeneralJoiningEntityIn
     }
 
     @SuppressWarnings("unchecked")
-    default Map<String, Consumer<? super Object>> joiningEntityMap() {
+    default Map<String, Consumer<? super Object>> innerJoiningEntityMap() {
         Map<String, Consumer<? super Object>> joiningEntityMap = new HashMap<>();
         Field[] fields = this.getClass().getDeclaredFields();
         Reflect reflect = on(this);

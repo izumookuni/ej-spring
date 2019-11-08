@@ -46,7 +46,7 @@ public class RootService implements BaseRetrieveJoiningServiceInterface<RootEnti
     }
 
     @Override
-    public RootMapper mapper() {
+    public RootMapper mvcMapper() {
         return mapper;
     }
 }

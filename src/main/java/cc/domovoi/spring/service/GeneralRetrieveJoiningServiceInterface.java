@@ -1,11 +1,9 @@
 package cc.domovoi.spring.service;
 
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
-import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.utils.joiningdepthtree.DepthTreeType;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
-import cc.domovoi.spring.utils.joiningdepthtree.JoiningFixedDepthTree;
 import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.*;
@@ -56,7 +54,10 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         entity.forEach(this::afterFindEntity);
     }
 
-    default void processFindResult(List<E> entity) {
+    default <T> void processBeforeFindResult(T value, String scope) {
+    }
+
+    default void processAfterFindResult(List<E> entity) {
     }
 
     default Optional<String> findCondition(E entity) {
@@ -85,13 +86,14 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     default E findEntity(K id, JoiningDepthTreeLike depthTree) {
         // no findCondition
-        // no before find
+        // before find
+        processBeforeFindResult(id, "id");
         // find entity
         E e = innerFindEntity(id);
         // after find
         if (Objects.nonNull(e)) {
+            processAfterFindResult(Collections.singletonList(e));
             afterFindEntity(e);
-            processFindResult(Collections.singletonList(e));
             joinEntityListByTree(Collections.singletonList(e), depthTree);
         }
         Optional<String> collectConditionResult = collectCondition(e);
@@ -112,12 +114,13 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         // before find
         if (Objects.nonNull(entity)) {
             beforeFindEntity(entity);
+            processBeforeFindResult(entity, "entity");
         }
         E e = innerFindEntity(entity);
         // after find
         if (Objects.nonNull(e)) {
+            processAfterFindResult(Collections.singletonList(e));
             afterFindEntity(e);
-            processFindResult(Collections.singletonList(e));
             joinEntityListByTree(Collections.singletonList(e), depthTree);
         }
         Optional<String> collectConditionResult = collectCondition(e);
@@ -138,6 +141,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         // before find
         if (Objects.nonNull(entity)) {
             beforeFindEntity(entity);
+            processBeforeFindResult(entity, "entity");
         }
 
 //        List<E> eList = innerFindList(entity);
@@ -145,8 +149,10 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 //        joinEntityListByTree(eList, depthTree);
 //        return eList.stream().filter(e -> !collectCondition(e).isPresent()).collect(Collectors.toList());
 
-        List<E> eList = innerFindList(entity).stream().peek(this::afterFindEntity).filter(e -> !collectCondition(e).isPresent()).collect(Collectors.toList());
-        processFindResult(eList);
+        List<E> eList0 = innerFindList(entity);
+        processAfterFindResult(eList0);
+        List<E> eList = eList0.stream().peek(this::afterFindEntity).filter(e -> !collectCondition(e).isPresent()).collect(Collectors.toList());
+
         joinEntityListByTree(eList, depthTree);
         return eList;
     }

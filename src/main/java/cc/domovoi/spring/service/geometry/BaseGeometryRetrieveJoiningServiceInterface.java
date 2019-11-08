@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @param <M>     Mapper type.
  */
 @Deprecated
-public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardRetrieveMapperInterface<E>>
+public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoContextLike<String>, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardRetrieveMapperInterface<E>>
         extends BaseRetrieveJoiningServiceInterface<E, M> {
 
     /**
@@ -78,13 +78,13 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         try {
             int listSize = normalizeIdList.size();
             if (listSize <= 500) {
-                return mapper().findBaseListById(normalizeIdList);
+                return mvcMapper().findBaseListById(normalizeIdList);
             }
             else {
                 List<E> entityList = new ArrayList<>();
                 for (int i = 0; i < listSize / 500; i++) {
                     List<String> innerIdList = normalizeIdList.subList(i * 500, (i + 1) * 500);
-                    List<E> innerEntityList = mapper().findBaseListById(innerIdList);
+                    List<E> innerEntityList = mvcMapper().findBaseListById(innerIdList);
                     entityList.addAll(innerEntityList);
                 }
                 // after find
@@ -94,7 +94,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return normalizeIdList.stream().map(mapper()::findBaseById).collect(Collectors.toList());
+            return normalizeIdList.stream().map(mvcMapper()::findBaseById).collect(Collectors.toList());
         }
 
     }

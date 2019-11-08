@@ -4,22 +4,23 @@ import java.util.List;
 
 /**
  * GeoContextLike.
+ * @param <K> contextId type
  */
-public interface GeoContextLike {
+public interface GeoContextLike<K> {
 
     /**
      * Context ID.
      *
      * @return Context ID.
      */
-    String getContextId();
+    K getContextId();
 
     /**
      * Set context ID.
      *
      * @param contextId Context ID.
      */
-    void setContextId(String contextId);
+    void setContextId(K contextId);
 
     /**
      * Context name.
@@ -40,12 +41,12 @@ public interface GeoContextLike {
      *
      * @return Context ID List.
      */
-    List<String> getContextIdIn();
+    List<K> getContextIdIn();
 
     /**
      * Set context ID List for query.
      *
      * @param contextIdIn Context ID List.
      */
-    void setContextIdIn(List<String> contextIdIn);
+    void setContextIdIn(List<K> contextIdIn);
 }

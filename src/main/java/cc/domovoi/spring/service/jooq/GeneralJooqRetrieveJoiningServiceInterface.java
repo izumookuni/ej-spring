@@ -1,6 +1,5 @@
 package cc.domovoi.spring.service.jooq;
 
-import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.entity.jooq.JoiningColumn;
 import cc.domovoi.spring.entity.jooq.JoiningProperty;
@@ -48,6 +47,10 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     @Override
     default Map<String, GeneralRetrieveJoiningServiceInterface> joiningService() {
+        return innerJoiningService();
+    }
+
+    default Map<String, GeneralRetrieveJoiningServiceInterface> innerJoiningService() {
         Map<String, GeneralRetrieveJoiningServiceInterface> joiningService = new HashMap<>();
         java.lang.reflect.Field[] fields = this.getClass().getDeclaredFields();
         Reflect reflect = on(this);
@@ -79,7 +82,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
         List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()).stream().peek(this::afterFindEntity).collect(Collectors.toList());
         joiningColumn(eList);
-        processFindResult(eList);
+        processAfterFindResult(eList);
         return eList;
     }
 

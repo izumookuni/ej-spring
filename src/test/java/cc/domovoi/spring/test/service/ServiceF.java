@@ -13,7 +13,7 @@ public class ServiceF implements BaseRetrieveServiceInterface<EntityF, MapperF> 
     }
 
     @Override
-    public MapperF mapper() {
+    public MapperF mvcMapper() {
         return mapper;
     }
 }

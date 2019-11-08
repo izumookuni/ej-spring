@@ -24,7 +24,7 @@ public class ServiceE implements BaseRetrieveJoiningServiceInterface<EntityE, Ma
     }
 
     @Override
-    public MapperE mapper() {
+    public MapperE mvcMapper() {
         return mapper;
     }
 }

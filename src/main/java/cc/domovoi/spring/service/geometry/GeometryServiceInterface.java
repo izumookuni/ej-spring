@@ -33,6 +33,17 @@ public interface GeometryServiceInterface<INNER> {
     Integer addGeometry(INNER geometry);
 
     /**
+     * Update geometry entity.
+     *
+     * @param geometry The geometry entity need to be updated.
+     * @return The number of successful update operations.
+     */
+    default Integer updateGeometry(INNER geometry) {
+        deleteGeometry(geometry);
+        return addGeometry(geometry);
+    }
+
+    /**
      * Delete geometry entity.
      *
      * @param geometry The geometry entity need to be deleted.

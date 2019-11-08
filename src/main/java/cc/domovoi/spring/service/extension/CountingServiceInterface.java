@@ -29,6 +29,6 @@ public interface CountingServiceInterface<E extends GeneralJoiningEntityInterfac
      * @return Amount of entities.
      */
     default Integer findCountByMapper(E entity) {
-        return mapper().findCount(entity);
+        return mvcMapper().findCount(entity);
     }
 }

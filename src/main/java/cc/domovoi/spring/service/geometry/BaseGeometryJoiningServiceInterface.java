@@ -21,7 +21,7 @@ import java.util.List;
  * @param <M>     Mapper type.
  */
 @Deprecated
-public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLike, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardMapperInterface<E>>
+public interface BaseGeometryJoiningServiceInterface<INNER extends GeoContextLike<String>, OUTER, E extends StandardGeometryMultipleJoiningEntityInterface<INNER, OUTER>, M extends StandardMapperInterface<E>>
         extends BaseJoiningServiceInterface<E, M>, BaseGeometryRetrieveJoiningServiceInterface<INNER, OUTER, E, M> {
 
     /**

@@ -9,6 +9,6 @@ import java.util.List;
 public interface GeneralPagingServiceInterface<E extends GeneralJoiningEntityInterface<?> & PagingEntityInterface, M extends PagingMapperInterface<E>> extends PagingServiceInterface<E, M> {
 
     default List<E> findPagingListByMapper(E entity) {
-        return mapper().findPagingList(entity);
+        return mvcMapper().findPagingList(entity);
     }
 }

@@ -30,7 +30,7 @@ public class ServiceC implements BaseRetrieveJoiningServiceInterface<EntityC, Ma
     }
 
     @Override
-    public MapperC mapper() {
+    public MapperC mvcMapper() {
         return mapper;
     }
 }
