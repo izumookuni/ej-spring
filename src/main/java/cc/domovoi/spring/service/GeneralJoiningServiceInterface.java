@@ -6,6 +6,7 @@ import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import org.jooq.lambda.tuple.Tuple2;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -93,6 +94,17 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         if (idFlag && checkEntityExists(entity)) {
             return new Success<>(new Tuple2<>(0, null));
         }
+        // init default field
+        if (Objects.isNull(entity.getId())) {
+            entity.setId(idGenerator());
+        }
+        if (Objects.isNull(entity.getAvailable())) {
+            entity.setAvailable(true);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        entity.setCreationTime(now);
+        entity.setUpdateTime(now);
+
         Try<Tuple2<Integer, K>> innerAddResult = innerAddEntity(entity);
         // after add
         if (Objects.nonNull(entity)) {

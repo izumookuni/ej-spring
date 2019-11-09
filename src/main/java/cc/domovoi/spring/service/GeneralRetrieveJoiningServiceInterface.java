@@ -1,10 +1,12 @@
 package cc.domovoi.spring.service;
 
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
+import cc.domovoi.spring.service.jooq.JoiningTable;
 import cc.domovoi.spring.utils.joiningdepthtree.DepthTreeType;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
 import org.jooq.lambda.tuple.Tuple2;
+import org.joor.Reflect;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -18,13 +20,31 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     Class<E> entityClass();
 
-    Map<String, GeneralRetrieveJoiningServiceInterface> joiningService();
-
     E innerFindEntity(K id);
 
     List<E> innerFindList(E entity);
 
     List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass);
+
+    default Map<String, GeneralRetrieveJoiningServiceInterface> joiningService() {
+        return innerJoiningService();
+    }
+
+    default Map<String, GeneralRetrieveJoiningServiceInterface> innerJoiningService() {
+        Map<String, GeneralRetrieveJoiningServiceInterface> joiningService = new HashMap<>();
+        java.lang.reflect.Field[] fields = this.getClass().getDeclaredFields();
+        Reflect reflect = on(this);
+        for (java.lang.reflect.Field field : fields) {
+            JoiningTable joiningTable = field.getAnnotation(JoiningTable.class);
+            if (joiningTable != null) {
+                String name = field.getName();
+                String joiningName = "".equals(joiningTable.value()) ? name : joiningTable.value();
+                logger().debug("joiningService.joiningName: " + joiningName);
+                joiningService.put(joiningName, reflect.get(name));
+            }
+        }
+        return joiningService;
+    }
 
     default E innerFindEntity(E entity) {
         List<E> eList = innerFindList(entity);
@@ -95,13 +115,19 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
             processAfterFindResult(Collections.singletonList(e));
             afterFindEntity(e);
             joinEntityListByTree(Collections.singletonList(e), depthTree);
-        }
-        Optional<String> collectConditionResult = collectCondition(e);
-        if (collectConditionResult.isPresent()) {
-            throw new RuntimeException(collectConditionResult.get());
+            Optional<String> collectConditionResult = collectCondition(e);
+            if (collectConditionResult.isPresent()) {
+                throw new RuntimeException(collectConditionResult.get());
+            }
+            else if (Objects.nonNull(e.getAvailable()) && !e.getAvailable()) {
+                throw new RuntimeException("record is not available");
+            }
+            else {
+                return e;
+            }
         }
         else {
-            return e;
+            return null;
         }
     }
 
@@ -122,13 +148,19 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
             processAfterFindResult(Collections.singletonList(e));
             afterFindEntity(e);
             joinEntityListByTree(Collections.singletonList(e), depthTree);
-        }
-        Optional<String> collectConditionResult = collectCondition(e);
-        if (collectConditionResult.isPresent()) {
-            throw new RuntimeException(collectConditionResult.get());
+            Optional<String> collectConditionResult = collectCondition(e);
+            if (collectConditionResult.isPresent()) {
+                throw new RuntimeException(collectConditionResult.get());
+            }
+            else if (Objects.nonNull(e.getAvailable()) && !e.getAvailable()) {
+                throw new RuntimeException("record is not available");
+            }
+            else {
+                return e;
+            }
         }
         else {
-            return e;
+            return null;
         }
     }
 
@@ -151,7 +183,11 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
         List<E> eList0 = innerFindList(entity);
         processAfterFindResult(eList0);
-        List<E> eList = eList0.stream().peek(this::afterFindEntity).filter(e -> !collectCondition(e).isPresent()).collect(Collectors.toList());
+        List<E> eList = eList0.stream()
+                .filter(e -> Objects.isNull(e.getAvailable()) || e.getAvailable())
+                .peek(this::afterFindEntity)
+                .filter(e -> !collectCondition(e).isPresent())
+                .collect(Collectors.toList());
 
         joinEntityListByTree(eList, depthTree);
         return eList;
@@ -202,7 +238,8 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                         return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
                     }).collect(Collectors.toList());
 
-                    List<GeneralJoiningEntityInterface> joiningEntityList = joiningService.findListByKey(keyList, subKey, currentService.entityClass());
+                    List<GeneralJoiningEntityInterface> joiningEntityList0 = joiningService.findListByKey(keyList, subKey, currentService.entityClass());
+                    List<GeneralJoiningEntityInterface> joiningEntityList = joiningEntityList0.stream().filter(e -> Objects.isNull(e.getAvailable()) || e.getAvailable()).collect(Collectors.toList());
                     currentEntityList.forEach(e -> {
                         Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
                         List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();

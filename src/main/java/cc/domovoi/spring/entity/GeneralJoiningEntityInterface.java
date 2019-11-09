@@ -27,6 +27,20 @@ public interface GeneralJoiningEntityInterface<K> {
     void setId(K id);
 
     /**
+     * The available of this row.
+     *
+     * @return The available of this row.
+     */
+    Boolean getAvailable();
+
+    /**
+     * Set the available of this row.
+     *
+     * @param available The available of this row.
+     */
+    void setAvailable(Boolean available);
+
+    /**
      * The creation time of this entity.
      *
      * @return The creation time of this entity.

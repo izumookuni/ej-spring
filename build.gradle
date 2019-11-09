@@ -46,7 +46,7 @@ dependencies {
     compile 'cc.domovoi:ej-lambda:0.0.2'
     compile(group: 'cc.domovoi', name: 'ej-tools', version: '20191101150224-SNAPSHOT')
 
-    compile group: 'org.jooq', name: 'jool', version: '0.9.14'
+    compile group: 'org.jooq', name: 'jool-java-8', version: '0.9.14'
 
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'

@@ -1,5 +1,6 @@
 package cc.domovoi.spring.service.jooq;
 
+import cc.domovoi.spring.entity.GeneralAnnotationEntityInterface;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.entity.jooq.JoiningColumn;
 import cc.domovoi.spring.entity.jooq.JoiningProperty;
@@ -46,27 +47,6 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     @Override
-    default Map<String, GeneralRetrieveJoiningServiceInterface> joiningService() {
-        return innerJoiningService();
-    }
-
-    default Map<String, GeneralRetrieveJoiningServiceInterface> innerJoiningService() {
-        Map<String, GeneralRetrieveJoiningServiceInterface> joiningService = new HashMap<>();
-        java.lang.reflect.Field[] fields = this.getClass().getDeclaredFields();
-        Reflect reflect = on(this);
-        for (java.lang.reflect.Field field : fields) {
-            JoiningTable joiningTable = field.getAnnotation(JoiningTable.class);
-            if (joiningTable != null) {
-                String name = field.getName();
-                String joiningName = "".equals(joiningTable.value()) ? name : joiningTable.value();
-                logger().debug("joiningService.joiningName: " + joiningName);
-                joiningService.put(joiningName, reflect.get(name));
-            }
-        }
-        return joiningService;
-    }
-
-    @Override
     default E innerFindEntity(K id) {
         return findEntityUsingIdByDao(id);
     }
@@ -78,7 +58,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     @Override
     default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
-        Set<Tuple2<JoiningProperty, java.lang.reflect.Field>> joiningPropertySet = GeneralJooqEntityInterface.joiningPropertySet(entityClass);
+        Set<Tuple2<JoiningProperty, java.lang.reflect.Field>> joiningPropertySet = GeneralAnnotationEntityInterface.joiningPropertySet(entityClass);
         JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
         List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()).stream().peek(this::afterFindEntity).collect(Collectors.toList());
         joiningColumn(eList);

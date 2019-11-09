@@ -1,5 +1,7 @@
 package cc.domovoi.spring.service.jooq;
 
+import cc.domovoi.collection.util.Failure;
+import cc.domovoi.collection.util.Success;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.service.GeneralJoiningServiceInterface;
@@ -23,10 +25,13 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
 
     @Override
     default Try<Tuple2<Integer, K>> innerAddEntity(E entity) {
-        return Try.apply(() -> {
+        try {
             Integer addResult = addEntityByDao(entity);
-            return new Tuple2<>(addResult, entity.getId());
-        });
+            return new Success<>(new Tuple2<>(addResult, entity.getId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Failure<>(e);
+        }
     }
 
     @Override
@@ -40,12 +45,15 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
     }
 
     default Integer addEntityByDao(E entity) {
-        if (Objects.isNull(entity.getId())) {
-            entity.setId(idGenerator());
-        }
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreationTime(now);
-        entity.setUpdateTime(now);
+//        if (Objects.isNull(entity.getId())) {
+//            entity.setId(idGenerator());
+//        }
+//        if (Objects.isNull(entity.getAvailable())) {
+//            entity.setAvailable(true);
+//        }
+//        LocalDateTime now = LocalDateTime.now();
+//        entity.setCreationTime(now);
+//        entity.setUpdateTime(now);
         return dsl().insertInto(getTable()).set(unMapper(entity.toPojo())).execute();
 //        return unMapper(entity.toPojo()).insert();
     }
