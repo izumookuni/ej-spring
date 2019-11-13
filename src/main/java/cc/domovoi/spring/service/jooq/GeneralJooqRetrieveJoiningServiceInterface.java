@@ -8,6 +8,7 @@ import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 import org.jooq.*;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -32,6 +33,16 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         R record = getTable().newRecord();
         record.from(pojo);
         return record;
+    }
+
+    default E convertEntityToPojo(P pojo) {
+        E entity = onClass(entityClass()).create().as(entityClass());
+        BeanUtils.copyProperties(pojo, entity);
+        return entity;
+    }
+
+    default P convertPojoToEntity(E entity) {
+        return entity.toPojo();
     }
 
     default Condition initConditionUsingPojo(P pojo) {
