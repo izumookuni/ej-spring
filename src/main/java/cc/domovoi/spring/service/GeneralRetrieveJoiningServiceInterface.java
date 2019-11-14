@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.joor.Reflect.on;
+import static org.joor.Reflect.onClass;
 
 public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoiningEntityInterface<K>> extends OriginalServiceInterface {
 
@@ -169,6 +170,11 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         }
     }
 
+    default E findEntity(Supplier<? extends E> supplier, JoiningDepthTreeLike depthTree) {
+        E entity = onClass(entityClass()).create().as(entityClass());
+        return findEntity(entity, e -> supplier.get(), depthTree);
+    }
+
     default E findEntity(E entity, JoiningDepthTreeLike depthTree) {
         return findEntity(entity, this::innerFindEntity, depthTree);
     }
@@ -200,6 +206,11 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
         joinEntityListByTree(eList, depthTree);
         return eList;
+    }
+
+    default List<E> findList(Supplier<? extends List<E>> supplier, JoiningDepthTreeLike depthTree) {
+        E entity = onClass(entityClass()).create().as(entityClass());
+        return findList(entity, e -> supplier.get(), depthTree);
     }
 
     default List<E> findList(E entity, JoiningDepthTreeLike depthTree) {
