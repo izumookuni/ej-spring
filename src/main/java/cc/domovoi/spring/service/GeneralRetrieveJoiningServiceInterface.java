@@ -39,10 +39,27 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         for (java.lang.reflect.Field field : fields) {
             JoiningTable joiningTable = field.getAnnotation(JoiningTable.class);
             if (joiningTable != null) {
+                int valueLength = joiningTable.value().length;
                 String name = field.getName();
-                String joiningName = "".equals(joiningTable.value()) ? name : joiningTable.value();
-                logger().debug("joiningService.joiningName: " + joiningName);
-                joiningService.put(joiningName, reflect.get(name));
+                if (valueLength == 1) {
+                    String joiningName = "".equals(joiningTable.value()[0]) ? name : joiningTable.value()[0];
+                    logger().debug("joiningService.joiningName: " + joiningName);
+                    joiningService.put(joiningName, reflect.get(name));
+                }
+                else if (valueLength > 1) {
+                    for (String joiningName : joiningTable.value()) {
+                        logger().debug("joiningService.joiningName: " + joiningName);
+                        joiningService.put(joiningName, reflect.get(name));
+                    }
+                }
+                else {
+                    logger().debug("joiningService.joiningName: " + name);
+                    joiningService.put(name, reflect.get(name));
+                }
+//                String name = field.getName();
+//                String joiningName = "".equals(joiningTable.value()) ? name : joiningTable.value();
+//                logger().debug("joiningService.joiningName: " + joiningName);
+//                joiningService.put(joiningName, reflect.get(name));
             }
         }
         return joiningService;

@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Inherited
 public @interface JoiningTable {
 
-    String value() default "";
+    String[] value() default "";
 }
