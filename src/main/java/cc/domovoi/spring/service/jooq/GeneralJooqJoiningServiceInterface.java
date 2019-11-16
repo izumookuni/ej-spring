@@ -62,9 +62,8 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
         entity.setUpdateTime(LocalDateTime.now());
         E e = findEntityUsingIdByDao(entity.getId());
         if (Objects.nonNull(e)) {
-            P p = e.toPojo();
-            BeanMapUtils.copyPropertyIgnoreNull(entity.toPojo(), p);
-            return dsl().update(getTable()).set(unMapper(p)).execute();
+            P p = BeanMapUtils.copyPropertyIgnoreNull(e.toPojo(), entity.toPojo());
+            return dsl().update(getTable()).set(unMapper(p)).where(initConditionUsingPojoIncludingField(p, "id")).execute();
         }
         else {
             return 0;

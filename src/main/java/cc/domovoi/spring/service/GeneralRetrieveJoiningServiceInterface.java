@@ -5,6 +5,7 @@ import cc.domovoi.spring.service.jooq.JoiningTable;
 import cc.domovoi.spring.utils.joiningdepthtree.DepthTreeType;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
+import cc.domovoi.spring.utils.joiningdepthtree.JoiningFixedDepthTree;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
 
@@ -108,7 +109,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default JoiningDepthTreeLike depthTree() {
-        return JoiningDepthTree.leaf;
+        return JoiningFixedDepthTree.singleLayer();
     }
 
     default E findEntity(K id) {
@@ -188,7 +189,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default E findEntity(Supplier<? extends E> supplier, JoiningDepthTreeLike depthTree) {
-        E entity = onClass(entityClass()).create().as(entityClass());
+        E entity = onClass(entityClass()).create().get();
         return findEntity(entity, e -> supplier.get(), depthTree);
     }
 
@@ -226,7 +227,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default List<E> findList(Supplier<? extends List<E>> supplier, JoiningDepthTreeLike depthTree) {
-        E entity = onClass(entityClass()).create().as(entityClass());
+        E entity = onClass(entityClass()).create().get();
         return findList(entity, e -> supplier.get(), depthTree);
     }
 
@@ -234,7 +235,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         return findList(entity, this::innerFindList, depthTree);
     }
 
-//    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     default void joinEntityListByTree(List<E> entityList, JoiningDepthTreeLike tree) {
         // When depthTree is the default (leaf), return directly
         logger().debug("tree: " + tree.treeString());
@@ -273,60 +274,65 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                 for (String subKey : joiningKeySet) {
                     logger().debug("subKey: " + subKey);
                     GeneralRetrieveJoiningServiceInterface joiningService = currentJoiningService.get(subKey);
-                    List<Object> keyList = currentEntityList.stream().flatMap(e -> {
-                        Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
-                        List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();
-                        return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
-                    }).collect(Collectors.toList());
+                    if (Objects.nonNull(joiningService)) {
+                        List<Object> keyList = currentEntityList.stream().flatMap(e -> {
+                            Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
+                            List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();
+                            return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
+                        }).collect(Collectors.toList());
 
-                    List<GeneralJoiningEntityInterface> joiningEntityList0 = joiningService.findListByKey(keyList, subKey, currentService.entityClass());
-                    List<GeneralJoiningEntityInterface> joiningEntityList = joiningEntityList0.stream().filter(e -> Objects.isNull(e.getAvailable()) || e.getAvailable()).collect(Collectors.toList());
-                    currentEntityList.forEach(e -> {
-                        Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
-                        List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();
-                        if (innerKeyList != null) {
-                            List<GeneralJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(on(je).get("id"))).collect(Collectors.toList());
-                            Map<String, Consumer<? super Object>> joiningEntityMap = e.joiningEntityMap();
-                            innerJoiningEntityList.forEach(joiningEntityMap.get(subKey));
-                        }
-                    });
-                    joiningEntityListBuffer = joiningEntityList;
+                        List<GeneralJoiningEntityInterface> joiningEntityList0 = joiningService.findListByKey(keyList, subKey, currentService.entityClass());
+                        List<GeneralJoiningEntityInterface> joiningEntityList = joiningEntityList0.stream().filter(e -> Objects.isNull(e.getAvailable()) || e.getAvailable()).collect(Collectors.toList());
+                        currentEntityList.forEach(e -> {
+                            Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
+                            List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();
+                            if (innerKeyList != null) {
+                                List<GeneralJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(on(je).get("id"))).collect(Collectors.toList());
+                                Map<String, Consumer<? super Object>> joiningEntityMap = e.joiningEntityMap();
+                                innerJoiningEntityList.forEach(joiningEntityMap.get(subKey));
+                            }
+                        });
+                        joiningEntityListBuffer = joiningEntityList;
 
-                    Optional<JoiningDepthTreeLike> subTree = currentTree.subTree(subKey);
-                    if (subTree.map(JoiningDepthTreeLike::isTree).orElse(false)) {
-                        // tree
-                        DepthTreeType depthTreeType = subTree.map(JoiningDepthTreeLike::type).orElse(DepthTreeType.DEFAULT);
-                        switch (depthTreeType) {
-                            case UNLIMITED:
-                                if (Objects.nonNull(joiningEntityList) && !joiningEntityList.isEmpty()) {
-                                    Set<String> innerJoiningKeySet = joiningEntityList.get(0).joiningEntityMap().keySet();
-                                    JoiningDepthTree subTree2 = new JoiningDepthTree();
-                                    for (String joiningSubKey : innerJoiningKeySet) {
-                                        subTree2.put(joiningSubKey, JoiningDepthTree.unlimitedTree);
+                        Optional<JoiningDepthTreeLike> subTree = currentTree.subTree(subKey);
+                        if (subTree.map(JoiningDepthTreeLike::isTree).orElse(false)) {
+                            // tree
+                            DepthTreeType depthTreeType = subTree.map(JoiningDepthTreeLike::type).orElse(DepthTreeType.DEFAULT);
+                            switch (depthTreeType) {
+                                case UNLIMITED:
+                                    if (Objects.nonNull(joiningEntityList) && !joiningEntityList.isEmpty()) {
+                                        Set<String> innerJoiningKeySet = joiningEntityList.get(0).joiningEntityMap().keySet();
+                                        JoiningDepthTree subTree2 = new JoiningDepthTree();
+                                        for (String joiningSubKey : innerJoiningKeySet) {
+                                            subTree2.put(joiningSubKey, JoiningDepthTree.unlimitedTree);
+                                        }
+                                        currentTreeMapBuffer.put(subKey, subTree2);
                                     }
-                                    currentTreeMapBuffer.put(subKey, subTree2);
-                                }
-                                break;
-                            case FIXED:
-                                if (Objects.nonNull(joiningEntityList) && !joiningEntityList.isEmpty()) {
-                                    Set<String> innerJoiningKeySet = joiningEntityList.get(0).joiningEntityMap().keySet();
-                                    JoiningDepthTree subTree2 = new JoiningDepthTree();
-                                    for (String joiningSubKey : innerJoiningKeySet) {
-                                        subTree2.put(joiningSubKey, subTree.get());
+                                    break;
+                                case FIXED:
+                                    if (Objects.nonNull(joiningEntityList) && !joiningEntityList.isEmpty()) {
+                                        Set<String> innerJoiningKeySet = joiningEntityList.get(0).joiningEntityMap().keySet();
+                                        JoiningDepthTree subTree2 = new JoiningDepthTree();
+                                        for (String joiningSubKey : innerJoiningKeySet) {
+                                            subTree2.put(joiningSubKey, subTree.get());
+                                        }
+                                        currentTreeMapBuffer.put(subKey, subTree2);
                                     }
-                                    currentTreeMapBuffer.put(subKey, subTree2);
-                                }
-                                break;
-                            case NORMAL:
-                                currentTreeMapBuffer.put(subKey, subTree.get());
-                                break;
-                            default:
-                                throw new RuntimeException(String.format("can't process depthTreeType: %s", depthTreeType.name()));
+                                    break;
+                                case NORMAL:
+                                    currentTreeMapBuffer.put(subKey, subTree.get());
+                                    break;
+                                default:
+                                    throw new RuntimeException(String.format("can't process depthTreeType: %s", depthTreeType.name()));
 
+                            }
+
+                            currentEntityMapBuffer.put(subKey, joiningEntityListBuffer);
+                            currentJoiningServiceMapBuffer.putIfAbsent(subKey, new Tuple2<>(joiningService, joiningService.joiningService()));
                         }
-
-                        currentEntityMapBuffer.put(subKey, joiningEntityListBuffer);
-                        currentJoiningServiceMapBuffer.putIfAbsent(subKey, new Tuple2<>(joiningService, joiningService.joiningService()));
+                    }
+                    else {
+                        logger().warn("no joiningService for subKey: " + subKey);
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package cc.domovoi.spring.service.jooq;
 
+import cc.domovoi.lambda.EJLambda;
 import cc.domovoi.spring.entity.GeneralAnnotationEntityInterface;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.entity.jooq.JoiningColumn;
@@ -12,7 +13,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.jooq.impl.DSL.*;
 import static org.joor.Reflect.*;
@@ -36,7 +39,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default E convertEntityToPojo(P pojo) {
-        E entity = onClass(entityClass()).create().as(entityClass());
+        E entity = onClass(entityClass()).create().get();
         BeanUtils.copyProperties(pojo, entity);
         return entity;
     }
@@ -45,16 +48,27 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return entity.toPojo();
     }
 
-    default Condition initConditionUsingPojo(P pojo) {
+    default Condition initConditionUsingPojo(P pojo, Predicate<? super org.jooq.Field<?>> predicate) {
         Record record = unMapper(pojo);
         Map<org.jooq.Field<?>, Object> conditionMap = new HashMap<>();
         for (org.jooq.Field<?> field : record.fields()) {
-            Object value = field.getValue(record);
-            if (Objects.nonNull(value)) {
-                conditionMap.put(field, value);
+            if (predicate.test(field)) {
+                Object value = field.getValue(record);
+                if (Objects.nonNull(value)) {
+                    conditionMap.put(field, value);
+                }
             }
         }
         return condition(conditionMap);
+    }
+
+    default Condition initConditionUsingPojo(P pojo) {
+        return initConditionUsingPojo(pojo, EJLambda.predicateTrue());
+    }
+
+    default Condition initConditionUsingPojoIncludingField(P pojo, String... filedName) {
+        List<String> filedNameList = Stream.of(filedName).collect(Collectors.toList());
+        return initConditionUsingPojo(pojo, field -> filedNameList.contains(field.getName()));
     }
 
     @Override
@@ -86,7 +100,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default E findEntityUsingIdByDao(K id) {
-        E entity = onClass(entityClass()).create().as(entityClass());
+        E entity = onClass(entityClass()).create().get();
         entity.setId(id);
         return findEntityByDao(entity);
     }
