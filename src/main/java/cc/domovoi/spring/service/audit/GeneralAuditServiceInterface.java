@@ -6,22 +6,26 @@ import cc.domovoi.spring.mapper.GeneralMapperInterface;
 import cc.domovoi.spring.mapper.StandardMapperInterface;
 import cc.domovoi.spring.service.BaseJoiningServiceInterface;
 import cc.domovoi.spring.service.GeneralJoiningServiceInterface;
+import cc.domovoi.spring.service.annotation.after.AfterAdd;
+import cc.domovoi.spring.service.annotation.after.AfterDelete;
+import cc.domovoi.spring.service.annotation.after.AfterUpdate;
 import cc.domovoi.spring.utils.audit.GeneralAuditInterface;
 import org.jooq.lambda.tuple.Tuple2;
 
 public interface GeneralAuditServiceInterface<K, E extends GeneralAuditEntityInterface<K>> extends GeneralJoiningServiceInterface<K, E>, GeneralAuditInterface<E> {
-    @Override
-    default void afterAdd(E entity, Try<Tuple2<Integer, K>> result) {
+
+    @AfterAdd(order = -100)
+    default void processingAddAudit(E entity, Try<Tuple2<Integer, K>> result) {
         recordAddAuditEntity(entity);
     }
 
-    @Override
-    default void afterUpdate(E entity, Try<Integer> result) {
+    @AfterUpdate(order = -100)
+    default void processingUpdateAudit(E entity, Try<Integer> result) {
         recordUpdateAuditEntity(entity);
     }
 
-    @Override
-    default void afterDelete(E entity, Try<Integer> result) {
+    @AfterDelete(order = -100)
+    default void processingDeleteAudit(E entity, Try<Integer> result) {
         recordDeleteAuditEntity(entity);
     }
 

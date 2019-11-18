@@ -4,7 +4,10 @@ import cc.domovoi.spring.entity.geometry.GeneralGeometryMultipleJoiningEntityInt
 import cc.domovoi.spring.geometry.converter.GeometryExporter;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
+import cc.domovoi.spring.service.annotation.after.AfterFind;
+import cc.domovoi.spring.service.annotation.after.AfterFindList;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,10 +30,15 @@ public interface GeneralGeometryRetrieveServiceInterface<INNER extends GeoContex
      */
     GeometryExporter<INNER, OUTER> exporter();
 
-    @Override
-    default void processAfterFindResult(List<E> entity) {
+    @AfterFindList(order = -100)
+    default void processingJoiningGeometryList(List<E> entity) {
         findGeometryListAndSet(entity);
         entity.forEach(this::exp);
+    }
+
+    @AfterFind(order = -100)
+    default void processingJoiningGeometry(E entity) {
+        processingJoiningGeometryList(Collections.singletonList(entity));
     }
 
     /**

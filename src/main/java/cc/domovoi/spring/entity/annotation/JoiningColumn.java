@@ -1,4 +1,4 @@
-package cc.domovoi.spring.entity.jooq;
+package cc.domovoi.spring.entity.annotation;
 
 import org.jooq.Table;
 

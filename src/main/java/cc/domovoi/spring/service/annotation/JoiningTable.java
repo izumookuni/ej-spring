@@ -1,4 +1,4 @@
-package cc.domovoi.spring.service.jooq;
+package cc.domovoi.spring.service.annotation;
 
 import java.lang.annotation.*;
 

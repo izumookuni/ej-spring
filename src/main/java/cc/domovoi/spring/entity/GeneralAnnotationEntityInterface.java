@@ -1,10 +1,12 @@
 package cc.domovoi.spring.entity;
 
-import cc.domovoi.spring.entity.jooq.JoiningProperty;
+import cc.domovoi.spring.entity.annotation.JoiningProperty;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -83,4 +85,16 @@ public interface GeneralAnnotationEntityInterface<K> extends GeneralJoiningEntit
         Field[] fields = eClass.getDeclaredFields();
         return Stream.of(fields).map(field -> new Tuple2<>(field.getAnnotation(JoiningProperty.class), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
     }
+
+    static <T extends Annotation> Set<Tuple2<T, Field>> fieldAnnotationSet(Class<?> eClass, Class<T> aClass) {
+        Field[] fields = eClass.getDeclaredFields();
+        return Stream.of(fields).map(field -> new Tuple2<>(field.getAnnotation(aClass), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
+    }
+
+    static <T extends Annotation> Set<Tuple2<T, Method>>  methodAnnotationSet(Class<?> eClass, Class<T> aClass) {
+        Method[] methods = eClass.getDeclaredMethods();
+        return Stream.of(methods).map(method -> new Tuple2<>(method.getAnnotation(aClass), method)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
+    }
+
+
 }

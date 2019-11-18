@@ -4,6 +4,9 @@ import cc.domovoi.spring.entity.geometry.GeneralGeometryMultipleJoiningEntityInt
 import cc.domovoi.spring.geometry.converter.GeometryLoader;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 import cc.domovoi.spring.service.GeneralJoiningServiceInterface;
+import cc.domovoi.spring.service.annotation.before.BeforeAdd;
+import cc.domovoi.spring.service.annotation.before.BeforeDelete;
+import cc.domovoi.spring.service.annotation.before.BeforeUpdate;
 import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.ArrayList;
@@ -18,20 +21,20 @@ public interface GeneralGeometryServiceInterface<INNER extends GeoContextLike<K>
      */
     GeometryLoader<INNER, OUTER> loader();
 
-    @Override
-    default void processBeforeAdd(E entity) {
+    @BeforeAdd(order = -100)
+    default void processingAddGemetry(E entity) {
         imp(entity);
         addGeometryByGeometryService(entity);
     }
 
-    @Override
-    default void processBeforeUpdate(E entity) {
+    @BeforeUpdate(order = -100)
+    default void processingUpdateGemetry(E entity) {
         imp(entity);
         updateGeometryByGeometryService(entity);
     }
 
-    @Override
-    default void processBeforeDelete(E entity) {
+    @BeforeDelete(order = -100)
+    default void processingDeleteGemetry(E entity) {
         imp(entity);
         deleteGeometryByGeometryService(entity);
     }
