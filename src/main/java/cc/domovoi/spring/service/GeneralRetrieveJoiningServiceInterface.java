@@ -1,8 +1,5 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.collection.util.Either;
-import cc.domovoi.collection.util.Left;
-import cc.domovoi.collection.util.Right;
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import cc.domovoi.spring.service.annotation.JoiningTable;
 import cc.domovoi.spring.service.annotation.after.AfterFind;
@@ -101,8 +98,10 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     default <T extends Annotation> void doFindAnnotationMethod(Class<T> aClass, Object... args) {
         List<Tuple2<T, Method>> methodAnnotationList = methodAnnotationOrdered(this.getClass(), aClass);
+//        logger().debug("methodAnnotationList size: " + methodAnnotationList.size());
         methodAnnotationList.forEach(t2 -> {
             try {
+                logger().debug("method: " + t2.v2().getName());
                 on(this).call(t2.v2().getName(), args);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -111,11 +110,13 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default void doBeforeFindEntity(E entity) {
+        logger().debug("doBeforeFindEntity");
         beforeFindEntity(entity);
         doFindAnnotationMethod(BeforeFind.class, entity);
     }
 
     default void doAfterFindEntity(E entity) {
+        logger().debug("doAfterFindEntity");
         afterFindEntity(entity);
         doFindAnnotationMethod(AfterFind.class, entity);
     }
@@ -402,8 +403,12 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     static <T extends Annotation> List<Tuple2<T, Method>> methodAnnotationOrdered(Class<?> sClass, Class<T> aClass) {
-        Method[] methods = sClass.getDeclaredMethods();
-        return Stream.of(methods).map(method -> new Tuple2<>(method.getAnnotation(aClass), method)).filter(t2 -> Objects.nonNull(t2.v1())).sorted(Comparator.comparing(t2 -> on(t2.v1()).call("order").get(), Comparator.naturalOrder())).collect(Collectors.toList());
+        Method[] methods = sClass.getMethods();
+        return Stream.of(methods)
+                .map(method -> new Tuple2<>(method.getAnnotation(aClass), method))
+                .filter(t2 -> Objects.nonNull(t2.v1()))
+                .sorted(Comparator.comparing(t2 -> (Integer) on(t2.v1()).call("order").get(), Comparator.naturalOrder()))
+                .collect(Collectors.toList());
 //        Stream.of(methods).map(method -> {
 //            Order order = method.getAnnotation(Order.class);
 //            return new Tuple3<>(method.getAnnotation(aClass), Objects.nonNull(order) ? order.value() : Integer.MAX_VALUE, method);

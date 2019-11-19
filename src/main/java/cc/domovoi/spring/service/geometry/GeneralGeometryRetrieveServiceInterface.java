@@ -32,6 +32,7 @@ public interface GeneralGeometryRetrieveServiceInterface<INNER extends GeoContex
 
     @AfterFindList(order = -100)
     default void processingJoiningGeometryList(List<E> entity) {
+        logger().debug("processingJoiningGeometryList");
         findGeometryListAndSet(entity);
         entity.forEach(this::exp);
     }

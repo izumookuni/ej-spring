@@ -92,7 +92,7 @@ public interface GeneralAnnotationEntityInterface<K> extends GeneralJoiningEntit
     }
 
     static <T extends Annotation> Set<Tuple2<T, Method>>  methodAnnotationSet(Class<?> eClass, Class<T> aClass) {
-        Method[] methods = eClass.getDeclaredMethods();
+        Method[] methods = eClass.getMethods();
         return Stream.of(methods).map(method -> new Tuple2<>(method.getAnnotation(aClass), method)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
     }
 
