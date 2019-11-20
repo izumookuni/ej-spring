@@ -91,9 +91,9 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
         Set<Tuple2<JoiningProperty, java.lang.reflect.Field>> joiningPropertySet = GeneralAnnotationEntityInterface.joiningPropertySet(entityClass);
         JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
-        List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()).stream().peek(this::afterFindEntity).collect(Collectors.toList());
+        List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()); // .stream().peek(e -> this.doAfterFindEntity(0, e)).collect(Collectors.toList());
         joiningColumn(eList);
-        doAfterFindList(eList);
+        doAfterFindList(0, eList);
 //        processAfterFindResult(eList);
         return eList;
     }

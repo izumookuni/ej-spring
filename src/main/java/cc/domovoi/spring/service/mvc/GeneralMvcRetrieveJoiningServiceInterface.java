@@ -26,8 +26,8 @@ public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJ
     @Override
     default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
         List<K> idList = keyList.stream().map(key -> (K) key).collect(Collectors.toList());
-        List<E> eList =  findListUsingIdByMapper(idList).stream().peek(this::afterFindEntity).collect(Collectors.toList());
-        doAfterFindList(eList);
+        List<E> eList =  findListUsingIdByMapper(idList); // .stream().peek(this::doAfterFindEntity).collect(Collectors.toList());
+        doAfterFindList(0, eList);
 //        processAfterFindResult(eList);
         return eList;
     }

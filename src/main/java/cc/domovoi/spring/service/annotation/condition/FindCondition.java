@@ -10,4 +10,6 @@ public @interface FindCondition {
     String value() default "";
 
     int order() default Integer.MAX_VALUE;
+
+    int scope() default 0;
 }

@@ -34,6 +34,18 @@ public class AuditBeanEntityTestImpl implements StandardSingletonEntityInterface
 
     private LocalDateTime updateTime;
 
+    private Boolean available;
+
+    @Override
+    public Boolean getAvailable() {
+        return available;
+    }
+
+    @Override
+    public void setAvailable(Boolean available) {
+        this.available = available;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

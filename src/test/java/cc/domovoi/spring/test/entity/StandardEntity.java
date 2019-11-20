@@ -13,6 +13,8 @@ public abstract class StandardEntity implements StandardJoiningEntityInterface {
 
     protected LocalDateTime updateTime;
 
+    private Boolean available;
+
     public StandardEntity() {
     }
 
@@ -51,5 +53,15 @@ public abstract class StandardEntity implements StandardJoiningEntityInterface {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    @Override
+    public Boolean getAvailable() {
+        return available;
+    }
+
+    @Override
+    public void setAvailable(Boolean available) {
+        this.available = available;
     }
 }

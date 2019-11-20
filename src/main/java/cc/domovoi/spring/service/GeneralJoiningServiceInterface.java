@@ -59,34 +59,46 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     default void afterDelete(E entity, Try<Integer> result) {
     }
 
-    default void doBeforeAdd(E entity) {
-        beforeAdd(entity);
-        doFindAnnotationMethod(BeforeAdd.class, entity);
+    default void doBeforeAdd(Integer scope, E entity) {
+        if (0 == scope) {
+            beforeAdd(entity);
+        }
+        doFindAnnotationMethod(BeforeAdd.class, scope, entity);
     }
 
-    default void doBeforeUpdate(E entity) {
-        beforeUpdate(entity);
-        doFindAnnotationMethod(BeforeUpdate.class, entity);
+    default void doBeforeUpdate(Integer scope, E entity) {
+        if (0 == scope) {
+            beforeUpdate(entity);
+        }
+        doFindAnnotationMethod(BeforeUpdate.class, scope, entity);
     }
 
-    default void doBeforeDelete(E entity) {
-        beforeDelete(entity);
-        doFindAnnotationMethod(BeforeDelete.class, entity);
+    default void doBeforeDelete(Integer scope, E entity) {
+        if (0 == scope) {
+            beforeDelete(entity);
+        }
+        doFindAnnotationMethod(BeforeDelete.class, scope, entity);
     }
 
-    default void doAfterAdd(E entity, Try<Tuple2<Integer, K>> result) {
-        afterAdd(entity, result);
-        doFindAnnotationMethod(AfterAdd.class, entity, result);
+    default void doAfterAdd(Integer scope, E entity, Try<Tuple2<Integer, K>> result) {
+        if (0 == scope) {
+            afterAdd(entity, result);
+        }
+        doFindAnnotationMethod(AfterAdd.class, scope, entity, result);
     }
 
-    default void doAfterUpdate(E entity, Try<Integer> result) {
-        afterUpdate(entity, result);
-        doFindAnnotationMethod(AfterUpdate.class, entity, result);
+    default void doAfterUpdate(Integer scope, E entity, Try<Integer> result) {
+        if (0 == scope) {
+            afterUpdate(entity, result);
+        }
+        doFindAnnotationMethod(AfterUpdate.class, scope, entity, result);
     }
 
-    default void doAfterDelete(E entity, Try<Integer> result) {
-        afterDelete(entity, result);
-        doFindAnnotationMethod(AfterDelete.class, entity, result);
+    default void doAfterDelete(Integer scope, E entity, Try<Integer> result) {
+        if (0 == scope) {
+            afterDelete(entity, result);
+        }
+        doFindAnnotationMethod(AfterDelete.class, scope, entity, result);
     }
 
     @Deprecated
@@ -127,7 +139,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         }
         // before add
         if (Objects.nonNull(entity)) {
-            doBeforeAdd(entity);
+            doBeforeAdd(0, entity);
 //            processBeforeAdd(entity);
         }
         // check entity exists
@@ -149,7 +161,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         // after add
         if (Objects.nonNull(entity)) {
 //            processAfterAdd(entity, innerAddResult);
-            doAfterAdd(entity, innerAddResult);
+            doAfterAdd(0, entity, innerAddResult);
         }
         return innerAddResult;
     }
@@ -162,14 +174,14 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         }
         // before update
         if (Objects.nonNull(entity)) {
-            doBeforeUpdate(entity);
+            doBeforeUpdate(0, entity);
 //            processBeforeUpdate(entity);
         }
         Try<Integer> innerUpdateResult = innerUpdateEntity(entity);
         // after update
         if (Objects.nonNull(entity)) {
 //            processAfterUpdate(entity, innerUpdateResult);
-            doAfterUpdate(entity, innerUpdateResult);
+            doAfterUpdate(0, entity, innerUpdateResult);
         }
         return innerUpdateResult;
     }
@@ -182,14 +194,14 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         }
         // before delete
         if (Objects.nonNull(entity)) {
-            doBeforeDelete(entity);
+            doBeforeDelete(0, entity);
 //            processBeforeDelete(entity);
         }
         Try<Integer> innerDeleteResult = innerDeleteEntity(entity);
         // after delete
         if (Objects.nonNull(entity)) {
 //            processAfterDelete(entity, innerDeleteResult);
-            doAfterDelete(entity, innerDeleteResult);
+            doAfterDelete(0, entity, innerDeleteResult);
         }
         return innerDeleteResult;
     }
