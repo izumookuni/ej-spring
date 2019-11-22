@@ -331,7 +331,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                     continue;
                 }
 
-                Set<String> joiningKeySet = currentEntityList.get(0).joiningEntityMap().keySet();
+                Set<String> joiningKeySet = ((Set<String>) currentEntityList.get(0).joiningEntityMap().keySet()).stream().filter(currentTree::contains).collect(Collectors.toSet());
                 for (String subKey : joiningKeySet) {
                     logger().debug("subKey: " + subKey);
                     GeneralRetrieveJoiningServiceInterface joiningService = currentJoiningService.get(subKey);
@@ -349,7 +349,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                             Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
                             List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();
                             if (innerKeyList != null) {
-                                List<GeneralJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(on(je).get("id"))).collect(Collectors.toList());
+                                List<GeneralJoiningEntityInterface> innerJoiningEntityList = joiningEntityList.stream().filter(je -> innerKeyList.contains(je.getId())).collect(Collectors.toList());
                                 Map<String, Consumer<? super Object>> joiningEntityMap = e.joiningEntityMap();
                                 innerJoiningEntityList.forEach(joiningEntityMap.get(subKey));
                             }

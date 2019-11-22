@@ -1,28 +1,13 @@
 package cc.domovoi.spring.service.geometry;
 
-import java.util.List;
+import java.util.Objects;
 
 /**
  * GeometryServiceInterface.
  *
  * @param <INNER> Inner geometry type.
  */
-public interface GeometryServiceInterface<INNER> {
-
-    /**
-     * An empty Inner geometry, used to create a query request
-     *
-     * @return An empty Inner geometry
-     */
-    INNER tempInner();
-
-    /**
-     * Find geometry entity.
-     *
-     * @param geometry Query conditions.
-     * @return Geometry entity.
-     */
-    INNER findGeometry(INNER geometry);
+public interface GeometryServiceInterface<INNER> extends GeometryRetrieveServiceInterface<INNER> {
 
     /**
      * Add geometry entity.
@@ -52,11 +37,11 @@ public interface GeometryServiceInterface<INNER> {
     Integer deleteGeometry(INNER geometry);
 
     /**
-     * Find geometry entity list.
-     *
-     * @param geometry Query conditions.
-     * @return Geometry entity list.
+     * Check whether geometry exists
+     * @param geometry The geometry entity need to be checked.
+     * @return Whether Geometry Exists
      */
-    List<INNER> findGeometryList(INNER geometry);
-
+    default Boolean checkGeometryExists(INNER geometry) {
+        return Objects.nonNull(findGeometry(geometry));
+    }
 }
