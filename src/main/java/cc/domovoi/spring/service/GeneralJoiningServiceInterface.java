@@ -4,15 +4,15 @@ import cc.domovoi.collection.util.Failure;
 import cc.domovoi.collection.util.Success;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
-import cc.domovoi.spring.service.annotation.after.AfterAdd;
-import cc.domovoi.spring.service.annotation.after.AfterDelete;
-import cc.domovoi.spring.service.annotation.after.AfterUpdate;
-import cc.domovoi.spring.service.annotation.before.BeforeAdd;
-import cc.domovoi.spring.service.annotation.before.BeforeDelete;
-import cc.domovoi.spring.service.annotation.before.BeforeUpdate;
+import cc.domovoi.spring.annotation.after.AfterAdd;
+import cc.domovoi.spring.annotation.after.AfterDelete;
+import cc.domovoi.spring.annotation.after.AfterUpdate;
+import cc.domovoi.spring.annotation.before.BeforeAdd;
+import cc.domovoi.spring.annotation.before.BeforeDelete;
+import cc.domovoi.spring.annotation.before.BeforeUpdate;
+import cc.domovoi.spring.utils.GeneralUtils;
 import org.jooq.lambda.tuple.Tuple2;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -63,42 +63,42 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         if (0 == scope) {
             beforeAdd(entity);
         }
-        doFindAnnotationMethod(BeforeAdd.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, BeforeAdd.class, scope, entity);
     }
 
     default void doBeforeUpdate(Integer scope, E entity) {
         if (0 == scope) {
             beforeUpdate(entity);
         }
-        doFindAnnotationMethod(BeforeUpdate.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, BeforeUpdate.class, scope, entity);
     }
 
     default void doBeforeDelete(Integer scope, E entity) {
         if (0 == scope) {
             beforeDelete(entity);
         }
-        doFindAnnotationMethod(BeforeDelete.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, BeforeDelete.class, scope, entity);
     }
 
     default void doAfterAdd(Integer scope, E entity, Try<Tuple2<Integer, K>> result) {
         if (0 == scope) {
             afterAdd(entity, result);
         }
-        doFindAnnotationMethod(AfterAdd.class, scope, entity, result);
+        GeneralUtils.doFindAnnotationMethod(this, AfterAdd.class, scope, entity, result);
     }
 
     default void doAfterUpdate(Integer scope, E entity, Try<Integer> result) {
         if (0 == scope) {
             afterUpdate(entity, result);
         }
-        doFindAnnotationMethod(AfterUpdate.class, scope, entity, result);
+        GeneralUtils.doFindAnnotationMethod(this, AfterUpdate.class, scope, entity, result);
     }
 
     default void doAfterDelete(Integer scope, E entity, Try<Integer> result) {
         if (0 == scope) {
             afterDelete(entity, result);
         }
-        doFindAnnotationMethod(AfterDelete.class, scope, entity, result);
+        GeneralUtils.doFindAnnotationMethod(this, AfterDelete.class, scope, entity, result);
     }
 
     @Deprecated
@@ -113,12 +113,15 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     default void processBeforeDelete(E entity) {
     }
 
+    @Deprecated
     default void processAfterAdd(E entity, Try<Tuple2<Integer, K>> result) {
     }
 
+    @Deprecated
     default void processAfterUpdate(E entity, Try<Integer> result) {
     }
 
+    @Deprecated
     default void processAfterDelete(E entity, Try<Integer> result) {
     }
 

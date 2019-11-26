@@ -1,11 +1,11 @@
-package cc.domovoi.spring.service.annotation.after;
+package cc.domovoi.spring.annotation.condition;
 
 import java.lang.annotation.*;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface AfterAdd {
+public @interface UpdateCondition {
 
     String value() default "";
 

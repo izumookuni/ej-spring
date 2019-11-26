@@ -1,5 +1,9 @@
 package cc.domovoi.spring.controller.audit;
 
+import cc.domovoi.collection.util.Try;
+import cc.domovoi.spring.annotation.after.AfterAdd;
+import cc.domovoi.spring.annotation.after.AfterDelete;
+import cc.domovoi.spring.annotation.after.AfterUpdate;
 import cc.domovoi.spring.controller.GeneralCRUDControllerInterface;
 import cc.domovoi.spring.entity.audit.*;
 import cc.domovoi.spring.utils.ControllerUtils;
@@ -7,6 +11,7 @@ import cc.domovoi.spring.utils.audit.GeneralAuditInterface;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,20 +23,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface GeneralAuditControllerInterface<E extends GeneralAuditEntityInterface<?>> extends GeneralCRUDControllerInterface<E>, GeneralAuditInterface<E> {
+public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntityInterface<K>> extends GeneralCRUDControllerInterface<K, E>, GeneralAuditInterface<E> {
 
-    @Override
-    default void afterAdd(E entity, HttpServletRequest request, HttpServletResponse response) {
+    @AfterAdd(order = -100)
+    default void recordAddAuditEntity(E entity, HttpServletRequest request, HttpServletResponse response, Try<Tuple2<Integer, K>> result) {
         recordAddAuditEntity(entity, request);
     }
 
-    @Override
-    default void afterUpdate(E entity, HttpServletRequest request, HttpServletResponse response) {
+    @AfterUpdate(order = -100)
+    default void recordUpdateAuditEntity(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
         recordUpdateAuditEntity(entity, request);
     }
 
-    @Override
-    default void afterDelete(E entity, HttpServletRequest request, HttpServletResponse response) {
+    @AfterDelete(order = -100)
+    default void recordDeleteAuditEntity(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
         recordDeleteAuditEntity(entity, request);
     }
 

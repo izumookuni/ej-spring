@@ -10,7 +10,9 @@ public class JoiningDepthTree implements JoiningDepthTreeLike {
 
     public static JoiningDepthLeaf leaf = new JoiningDepthLeaf();
 
-    public static JoiningUnlimitedDepthTree unlimitedTree = new JoiningUnlimitedDepthTree();
+    public static JoiningUnlimitedDepthTree unlimitedTree() {
+        return new JoiningUnlimitedDepthTree();
+    }
 
     private Map<String, JoiningDepthTreeLike> tree;
 
@@ -33,7 +35,7 @@ public class JoiningDepthTree implements JoiningDepthTreeLike {
     }
 
     public JoiningDepthTree putUnlimited(String key) {
-        this.tree.put(key, unlimitedTree);
+        this.tree.put(key, unlimitedTree());
         return this;
     }
 

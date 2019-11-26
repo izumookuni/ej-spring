@@ -2,13 +2,10 @@ package cc.domovoi.spring.service.audit;
 
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.audit.*;
-import cc.domovoi.spring.mapper.GeneralMapperInterface;
-import cc.domovoi.spring.mapper.StandardMapperInterface;
-import cc.domovoi.spring.service.BaseJoiningServiceInterface;
 import cc.domovoi.spring.service.GeneralJoiningServiceInterface;
-import cc.domovoi.spring.service.annotation.after.AfterAdd;
-import cc.domovoi.spring.service.annotation.after.AfterDelete;
-import cc.domovoi.spring.service.annotation.after.AfterUpdate;
+import cc.domovoi.spring.annotation.after.AfterAdd;
+import cc.domovoi.spring.annotation.after.AfterDelete;
+import cc.domovoi.spring.annotation.after.AfterUpdate;
 import cc.domovoi.spring.utils.audit.GeneralAuditInterface;
 import org.jooq.lambda.tuple.Tuple2;
 

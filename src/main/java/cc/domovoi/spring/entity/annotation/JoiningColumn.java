@@ -1,5 +1,7 @@
 package cc.domovoi.spring.entity.annotation;
 
+import cc.domovoi.spring.service.jooq.JoiningColumnFunctionInterface;
+import cc.domovoi.spring.service.jooq.JoiningColumnFunctionInterfaceImpl;
 import org.jooq.Table;
 
 import java.lang.annotation.*;
@@ -40,4 +42,6 @@ public @interface JoiningColumn {
     String targetKey();
 
     Class<? extends Table> table();
+
+    Class<? extends JoiningColumnFunctionInterface> custom() default JoiningColumnFunctionInterfaceImpl.class;
 }

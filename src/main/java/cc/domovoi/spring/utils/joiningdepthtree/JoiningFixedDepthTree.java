@@ -1,14 +1,22 @@
 package cc.domovoi.spring.utils.joiningdepthtree;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class JoiningFixedDepthTree implements JoiningDepthTreeLike {
 
     private final Integer depth;
 
+    private final List<String> exclude;
+
     public JoiningFixedDepthTree(Integer depth) {
         this.depth = depth;
+        this.exclude = new ArrayList<>();
+    }
+
+    public JoiningFixedDepthTree(Integer depth, List<String> exclude) {
+        this.depth = depth;
+        this.exclude = exclude;
     }
 
     public static JoiningFixedDepthTree singleLayer() {
@@ -35,6 +43,16 @@ public class JoiningFixedDepthTree implements JoiningDepthTreeLike {
         return depth;
     }
 
+    public JoiningFixedDepthTree exclude(String... exclude) {
+        this.exclude.addAll(Arrays.stream(exclude).collect(Collectors.toList()));
+        return this;
+    }
+
+    public JoiningFixedDepthTree exclude(Collection<String> exclude) {
+        this.exclude.addAll(exclude);
+        return this;
+    }
+
     @Override
     public Optional<JoiningDepthTreeLike> subTree(String key) {
         return Optional.of(next());
@@ -52,9 +70,10 @@ public class JoiningFixedDepthTree implements JoiningDepthTreeLike {
 
     @Override
     public Boolean contains(String key) {
-        return hasNext();
+        return !exclude.contains(key) && hasNext();
     }
 
+    @Deprecated
     @Override
     public Set<String> keySet() {
         throw new RuntimeException("no keySet");

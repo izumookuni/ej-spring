@@ -1,6 +1,9 @@
 package cc.domovoi.spring.controller;
 
+import cc.domovoi.spring.annotation.after.AfterFindList;
+import cc.domovoi.spring.annotation.before.BeforeFind;
 import cc.domovoi.spring.utils.CommonLogger;
+import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -31,6 +34,28 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
      */
     List<E> findEntityFunction(E entity);
 
+    default void beforeFindEntity(E entity) {
+
+    }
+
+    default void afterFindList(List<E> entity) {
+
+    }
+
+    default void doBeforeFindEntity(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+        if (0 == scope) {
+            beforeFindEntity(entity);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, BeforeFind.class, scope, entity, request, response);
+    }
+
+    default void doAfterFindList(Integer scope, List<E> entityList, HttpServletRequest request, HttpServletResponse response) {
+        if (0 == scope) {
+            afterFindList(entityList);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, AfterFindList.class, scope, entityList, request, response);
+    }
+
     /**
      * Find entity list.
      *
@@ -49,7 +74,9 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("findEntity: %s", entity));
+            doBeforeFindEntity(0, entity, request, response);
             List<E> entityList = findEntityFunction(entity);
+            doAfterFindList(0, entityList, request, response);
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, entityList);
 
         } catch (Exception e) {

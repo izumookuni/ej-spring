@@ -1,11 +1,11 @@
-package cc.domovoi.spring.service.annotation.condition;
+package cc.domovoi.spring.annotation.condition;
 
 import java.lang.annotation.*;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface DeleteCondition {
+public @interface FindCondition {
 
     String value() default "";
 

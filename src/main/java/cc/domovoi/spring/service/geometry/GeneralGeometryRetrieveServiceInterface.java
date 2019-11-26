@@ -5,8 +5,8 @@ import cc.domovoi.spring.geometry.joining.GeometryExporterJoiningInterface;
 import cc.domovoi.spring.geometry.joining.GeometryRetrieveServiceJoiningInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
-import cc.domovoi.spring.service.annotation.after.AfterFind;
-import cc.domovoi.spring.service.annotation.after.AfterFindList;
+import cc.domovoi.spring.annotation.after.AfterFind;
+import cc.domovoi.spring.annotation.after.AfterFindList;
 
 import java.util.Collections;
 import java.util.List;

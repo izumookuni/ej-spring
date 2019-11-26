@@ -1,11 +1,11 @@
-package cc.domovoi.spring.service.annotation.condition;
+package cc.domovoi.spring.annotation.after;
 
 import java.lang.annotation.*;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface FindCondition {
+public @interface AfterFindList {
 
     String value() default "";
 

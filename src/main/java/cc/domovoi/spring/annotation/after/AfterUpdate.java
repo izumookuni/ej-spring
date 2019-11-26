@@ -1,4 +1,4 @@
-package cc.domovoi.spring.service.annotation.after;
+package cc.domovoi.spring.annotation.after;
 
 import java.lang.annotation.*;
 

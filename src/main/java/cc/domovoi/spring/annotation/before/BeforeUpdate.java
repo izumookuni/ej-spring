@@ -1,11 +1,11 @@
-package cc.domovoi.spring.service.annotation.after;
+package cc.domovoi.spring.annotation.before;
 
 import java.lang.annotation.*;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface AfterDelete {
+public @interface BeforeUpdate {
 
     String value() default "";
 

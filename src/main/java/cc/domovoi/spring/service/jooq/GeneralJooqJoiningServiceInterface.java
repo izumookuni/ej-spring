@@ -73,7 +73,7 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
     }
 
     default Integer deleteEntityByDao(E entity) {
-        return dsl().deleteFrom(getTable()).where(initConditionUsingPojo(entity.toPojo())).execute();
+        return dsl().deleteFrom(getTable()).where(initConditionUsingEntity(entity)).execute();
 //        return unMapper(entity.toPojo()).delete();
     }
 }

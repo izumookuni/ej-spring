@@ -1,11 +1,11 @@
-package cc.domovoi.spring.service.annotation.before;
+package cc.domovoi.spring.annotation.before;
 
 import java.lang.annotation.*;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface BeforeUpdate {
+public @interface BeforeAdd {
 
     String value() default "";
 

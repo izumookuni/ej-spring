@@ -1,12 +1,28 @@
 package cc.domovoi.spring.utils.joiningdepthtree;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class JoiningUnlimitedDepthTree implements JoiningDepthTreeLike {
 
+    private final List<String> exclude;
 
     public JoiningUnlimitedDepthTree() {
+        this.exclude = new ArrayList<>();
+    }
+
+    public JoiningUnlimitedDepthTree(List<String> exclude) {
+        this.exclude = exclude;
+    }
+
+    public JoiningUnlimitedDepthTree exclude(String... exclude) {
+        this.exclude.addAll(Arrays.stream(exclude).collect(Collectors.toList()));
+        return this;
+    }
+
+    public JoiningUnlimitedDepthTree exclude(Collection<String> exclude) {
+        this.exclude.addAll(exclude);
+        return this;
     }
 
     @Override
@@ -26,7 +42,7 @@ public class JoiningUnlimitedDepthTree implements JoiningDepthTreeLike {
 
     @Override
     public Boolean contains(String key) {
-        return true;
+        return !this.exclude.contains(key);
     }
 
     @Deprecated

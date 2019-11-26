@@ -1,6 +1,13 @@
 package cc.domovoi.spring.controller;
 
 import cc.domovoi.collection.util.Try;
+import cc.domovoi.spring.annotation.after.AfterAdd;
+import cc.domovoi.spring.annotation.after.AfterDelete;
+import cc.domovoi.spring.annotation.after.AfterUpdate;
+import cc.domovoi.spring.annotation.before.BeforeAdd;
+import cc.domovoi.spring.annotation.before.BeforeDelete;
+import cc.domovoi.spring.annotation.before.BeforeUpdate;
+import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
 import org.jooq.lambda.tuple.Tuple2;
@@ -20,7 +27,7 @@ import java.util.Map;
  *
  * @param <E> Entity type.
  */
-public interface GeneralCRUDControllerInterface<E> extends GeneralRetrieveControllerInterface<E> {
+public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveControllerInterface<E> {
 
     /**
      * The function that add Entity.
@@ -28,7 +35,7 @@ public interface GeneralCRUDControllerInterface<E> extends GeneralRetrieveContro
      * @param entity entity
      * @return The number of successful insert operations.
      */
-    Try<Tuple2<Integer, String>> addEntityFunction(E entity);
+    Try<Tuple2<Integer, K>> addEntityFunction(E entity);
 
     /**
      * The function that update Entity.
@@ -52,11 +59,53 @@ public interface GeneralCRUDControllerInterface<E> extends GeneralRetrieveContro
 
     default void beforeDelete(E entity, HttpServletRequest request, HttpServletResponse response) { }
 
-    default void afterAdd(E entity, HttpServletRequest request, HttpServletResponse response) { }
+    default void afterAdd(E entity, HttpServletRequest request, HttpServletResponse response, Try<Tuple2<Integer, K>> result) { }
 
-    default void afterUpdate(E entity, HttpServletRequest request, HttpServletResponse response) { }
+    default void afterUpdate(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) { }
 
-    default void afterDelete(E entity, HttpServletRequest request, HttpServletResponse response) { }
+    default void afterDelete(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) { }
+
+    default void doBeforeAdd(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+        if (0 == scope) {
+            beforeAdd(entity, request, response);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, BeforeAdd.class, scope, entity, request, response);
+    }
+
+    default void doBeforeUpdate(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+        if (0 == scope) {
+            beforeUpdate(entity, request, response);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, BeforeUpdate.class, scope, entity, request, response);
+    }
+
+    default void doBeforeDelete(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+        if (0 == scope) {
+            beforeDelete(entity, request, response);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, BeforeDelete.class, scope, entity, request, response);
+    }
+
+    default void doAfterAdd(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response, Try<Tuple2<Integer, K>> result) {
+        if (0 == scope) {
+            afterAdd(entity, request, response, result);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, AfterAdd.class, scope, entity, request, response, result);
+    }
+
+    default void doAfterUpdate(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
+        if (0 == scope) {
+            afterUpdate(entity, request, response, result);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, AfterUpdate.class, scope, entity, request, response, result);
+    }
+
+    default void doAfterDelete(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
+        if (0 == scope) {
+            afterDelete(entity, request, response, result);
+        }
+        GeneralUtils.doFindAnnotationMethod(this, AfterDelete.class, scope, entity, request, response, result);
+    }
 
     /**
      * Add Entity.
@@ -76,11 +125,13 @@ public interface GeneralCRUDControllerInterface<E> extends GeneralRetrieveContro
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("addEntity: %s", entity));
-            beforeAdd(entity, request, response);
-            Try<Tuple2<Integer, String>> result = addEntityFunction(entity);
-            afterAdd(entity, request, response);
+            doBeforeAdd(0, entity, request, response);
+//            beforeAdd(entity, request, response);
+            Try<Tuple2<Integer, K>> result = addEntityFunction(entity);
+            doAfterAdd(0, entity, request, response, result);
+//            afterAdd(entity, request, response);
             if (result.isSuccess()) {
-                Tuple2<Integer, String> data = result.get();
+                Tuple2<Integer, K> data = result.get();
                 Map<String, Object> dataMap = new HashMap<>();
                 dataMap.put("result", data.v1());
                 dataMap.put("id", data.v2());
@@ -115,9 +166,11 @@ public interface GeneralCRUDControllerInterface<E> extends GeneralRetrieveContro
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("jsonMap: %s", entity));
-            beforeUpdate(entity, request, response);
+            doBeforeUpdate(0, entity, request, response);
+//            beforeUpdate(entity, request, response);
             Try<Integer> result = updateEntityFunction(entity);
-            afterUpdate(entity, request, response);
+            doAfterUpdate(0, entity, request, response, result);
+//            afterUpdate(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
@@ -150,9 +203,11 @@ public interface GeneralCRUDControllerInterface<E> extends GeneralRetrieveContro
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("deleteEntity: %s", entity));
-            beforeDelete(entity, request, response);
+            doBeforeDelete(0, entity, request, response);
+//            beforeDelete(entity, request, response);
             Try<Integer> result = deleteEntityFunction(entity);
-            afterDelete(entity, request, response);
+            doAfterDelete(0, entity, request, response, result);
+//            afterDelete(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }

@@ -7,6 +7,7 @@ import cc.domovoi.spring.entity.annotation.JoiningColumn;
 import cc.domovoi.spring.entity.annotation.JoiningProperty;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 import org.jooq.*;
+import org.jooq.lambda.function.Function3;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
 import org.springframework.beans.BeanUtils;
@@ -33,9 +34,11 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     DSLContext dsl();
 
+    @SuppressWarnings("unchecked")
     default R unMapper(P pojo) {
         R record = getTable().newRecord();
-        record.from(pojo);
+        BeanUtils.copyProperties(pojo, record);
+//        record.from(pojo);
         return record;
     }
 
@@ -49,7 +52,40 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return entity.toPojo();
     }
 
-    default Condition initConditionUsingPojo(P pojo, BiFunction<? super Condition, ? super Record, Condition> addition, Predicate<? super org.jooq.Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
+    default Condition initConditionUsingEntity(E entity, Function3<? super Condition, ? super Record, ? super E, ? extends Condition> addition, Predicate<? super org.jooq.Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
+        return initConditionUsingPojo(entity.toPojo(), (c, r) -> addition.apply(c, r, entity), predicateIncluding, predicateExcluding);
+//        Record record = unMapper(entity.toPojo());
+//        Map<org.jooq.Field<?>, Object> conditionMap = new HashMap<>();
+//        for (org.jooq.Field<?> field : record.fields()) {
+//            if (!predicateExcluding.test(field) && predicateIncluding.test(field)) {
+//                Object value = field.getValue(record);
+//                if (Objects.nonNull(value)) {
+//                    conditionMap.put(field, value);
+//                }
+//            }
+//        }
+//        Condition condition0 = condition(conditionMap);
+//        return addition.apply(condition0, record, entity);
+    }
+
+    default Condition initConditionUsingEntity(E entity) {
+        return initConditionUsingEntity(entity, (c, r, e) -> c, EJLambda.predicateTrue(), EJLambda.predicateFalse());
+    }
+
+    default Condition initConditionUsingEntity(E entity, Function3<? super Condition, ? super Record, ? super E, ? extends Condition> addition) {
+        return initConditionUsingEntity(entity, addition, EJLambda.predicateTrue(), EJLambda.predicateFalse());
+    }
+
+    default Condition initConditionUsingEntityIncludingField(E entity, Function3<? super Condition, ? super Record, ? super E, ? extends Condition> addition, String... filedName) {
+        List<String> filedNameList = Stream.of(filedName).collect(Collectors.toList());
+        return initConditionUsingEntity(entity, addition, field -> filedNameList.contains(field.getName()), EJLambda.predicateFalse());
+    }
+
+    default Condition initConditionUsingEntityIncludingField(E entity, String... filedName) {
+        return  initConditionUsingEntityIncludingField(entity, (c, r, e) -> c, filedName);
+    }
+
+    default Condition initConditionUsingPojo(P pojo, BiFunction<? super Condition, ? super Record, ? extends Condition> addition, Predicate<? super org.jooq.Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
         Record record = unMapper(pojo);
         Map<org.jooq.Field<?>, Object> conditionMap = new HashMap<>();
         for (org.jooq.Field<?> field : record.fields()) {
@@ -68,9 +104,13 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return initConditionUsingPojo(pojo, (c, r) -> c, EJLambda.predicateTrue(), EJLambda.predicateFalse());
     }
 
-    default Condition initConditionUsingPojoIncludingField(P pojo, BiFunction<? super Condition, ? super Record, Condition> after, String... filedName) {
+    default Condition initConditionUsingPojo(P pojo, BiFunction<? super Condition, ? super Record, ? extends Condition> addition) {
+        return initConditionUsingPojo(pojo, addition, EJLambda.predicateTrue(), EJLambda.predicateFalse());
+    }
+
+    default Condition initConditionUsingPojoIncludingField(P pojo, BiFunction<? super Condition, ? super Record, ? extends Condition> addition, String... filedName) {
         List<String> filedNameList = Stream.of(filedName).collect(Collectors.toList());
-        return initConditionUsingPojo(pojo, after, field -> filedNameList.contains(field.getName()), EJLambda.predicateFalse());
+        return initConditionUsingPojo(pojo, addition, field -> filedNameList.contains(field.getName()), EJLambda.predicateFalse());
     }
 
     default Condition initConditionUsingPojoIncludingField(P pojo, String... filedName) {
@@ -89,6 +129,9 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     @Override
     default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
+        if (keyList.isEmpty()) {
+            return Collections.emptyList();
+        }
         Set<Tuple2<JoiningProperty, java.lang.reflect.Field>> joiningPropertySet = GeneralAnnotationEntityInterface.joiningPropertySet(entityClass);
         JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
         List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()); // .stream().peek(e -> this.doAfterFindEntity(0, e)).collect(Collectors.toList());
@@ -113,13 +156,13 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default E findEntityByDao(E entity) {
-        E result =  dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetchOne().into(entityClass());
+        E result =  dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetchOne().into(entityClass());
         joiningColumn(Collections.singletonList(result));
         return result;
     }
 
     default List<E> findEntityListByDao(E entity) {
-        List<E> result = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(entity.toPojo())).fetch().into(entityClass());
+        List<E> result = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetch().into(entityClass());
         joiningColumn(result);
         return result;
     }
@@ -131,12 +174,20 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
             for (java.lang.reflect.Field field : fields) {
                 JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
                 if (joiningColumn != null) {
-                    Class<? extends Table> tableClass = joiningColumn.table();
-                    Table<Record> table = onClass(tableClass).create().get();
+
                     List<Object> keyList = entityList.stream().map(entity -> on(entity).get(joiningColumn.key())).collect(Collectors.toList());
-                    Field<?> foreignKeyField = table.field(joiningColumn.foreignKey());
-                    Field<?> targetKeyField = table.field(joiningColumn.targetKey());
-                    Map targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
+                    Map targetKeyMap;
+                    if (!joiningColumn.custom().equals(JoiningColumnFunctionInterfaceImpl.class)) {
+                        targetKeyMap = onClass(joiningColumn.custom()).create().call("apply", dsl(), keyList).get();
+                    }
+                    else {
+                        Class<? extends Table> tableClass = joiningColumn.table();
+                        Table<Record> table = onClass(tableClass).create().get();
+                        Field<?> foreignKeyField = table.field(joiningColumn.foreignKey());
+                        Field<?> targetKeyField = table.field(joiningColumn.targetKey());
+                        targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
+                    }
+//                    Map targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
                     entityList.forEach(entity -> {
                         Reflect reflect = on(entity);
                         if (targetKeyMap.containsKey(reflect.get(joiningColumn.key()))) {

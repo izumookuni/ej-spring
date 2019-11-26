@@ -2,10 +2,11 @@ package cc.domovoi.spring.service;
 
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import cc.domovoi.spring.service.annotation.JoiningTable;
-import cc.domovoi.spring.service.annotation.after.AfterFind;
-import cc.domovoi.spring.service.annotation.after.AfterFindList;
-import cc.domovoi.spring.service.annotation.before.BeforeFind;
-import cc.domovoi.spring.service.annotation.condition.FindCondition;
+import cc.domovoi.spring.annotation.after.AfterFind;
+import cc.domovoi.spring.annotation.after.AfterFindList;
+import cc.domovoi.spring.annotation.before.BeforeFind;
+import cc.domovoi.spring.annotation.condition.FindCondition;
+import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.spring.utils.joiningdepthtree.DepthTreeType;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
@@ -13,7 +14,6 @@ import cc.domovoi.spring.utils.joiningdepthtree.JoiningFixedDepthTree;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
@@ -96,41 +96,25 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         entityList.forEach(this::afterFindEntity);
     }
 
-    default <T extends Annotation> void doFindAnnotationMethod(Class<T> aClass, Integer scope, Object... args) {
-        logger().debug(String.format("doFindAnnotationMethod(%s %s)", aClass.getSimpleName(), scope));
-        List<Tuple2<T, Method>> methodAnnotationList = methodAnnotationOrdered(this.getClass(), aClass, scope);
-//        logger().debug("methodAnnotationList size: " + methodAnnotationList.size());
-        methodAnnotationList.forEach(t2 -> {
-            try {
-                logger().debug("method: " + t2.v2().getName());
-                on(this).call(t2.v2().getName(), args);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
     default void doBeforeFindEntity(Integer scope, E entity) {
-        logger().debug("doBeforeFindEntity");
         if (0 == scope) {
             beforeFindEntity(entity);
         }
-        doFindAnnotationMethod(BeforeFind.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, BeforeFind.class, scope, entity);
     }
 
     default void doAfterFindEntity(Integer scope, E entity) {
-        logger().debug("doAfterFindEntity");
         if (0 == scope) {
             afterFindEntity(entity);
         }
-        doFindAnnotationMethod(AfterFind.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, AfterFind.class, scope, entity);
     }
 
     default void doAfterFindList(Integer scope, List<E> entityList) {
         if (0 == scope) {
             afterFindList(entityList);
         }
-        doFindAnnotationMethod(AfterFindList.class, scope, entityList);
+        GeneralUtils.doFindAnnotationMethod(this, AfterFindList.class, scope, entityList);
     }
 
     default Optional<String> findCondition(E entity) {
@@ -142,7 +126,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         if (findCondition.isPresent()) {
             return findCondition;
         }
-        List<Tuple2<FindCondition, Method>> conditionMethodList = methodAnnotationOrdered(this.getClass(), FindCondition.class, 0);
+        List<Tuple2<FindCondition, Method>> conditionMethodList = GeneralUtils.methodAnnotationOrdered(this.getClass(), FindCondition.class, 0);
         for (Tuple2<FindCondition, Method> t2 : conditionMethodList) {
             try {
                 Optional<String> findCondition1 = on(this).call(t2.v2().getName(), entity).get();
@@ -366,7 +350,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                                         Set<String> innerJoiningKeySet = joiningEntityList.get(0).joiningEntityMap().keySet();
                                         JoiningDepthTree subTree2 = new JoiningDepthTree();
                                         for (String joiningSubKey : innerJoiningKeySet) {
-                                            subTree2.put(joiningSubKey, JoiningDepthTree.unlimitedTree);
+                                            subTree2.put(joiningSubKey, JoiningDepthTree.unlimitedTree());
                                         }
                                         currentTreeMapBuffer.put(subKey, subTree2);
                                     }
@@ -409,16 +393,5 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         }
     }
 
-    static <T extends Annotation> List<Tuple2<T, Method>> methodAnnotationOrdered(Class<?> sClass, Class<T> aClass, int scope) {
-        Method[] methods = sClass.getMethods();
-        return Stream.of(methods)
-                .map(method -> new Tuple2<>(method.getAnnotation(aClass), method))
-                .filter(t2 -> Objects.nonNull(t2.v1()) && on(t2.v1()).call("scope").get().equals(scope))
-                .sorted(Comparator.comparing(t2 -> (Integer) on(t2.v1()).call("order").get(), Comparator.naturalOrder()))
-                .collect(Collectors.toList());
-//        Stream.of(methods).map(method -> {
-//            Order order = method.getAnnotation(Order.class);
-//            return new Tuple3<>(method.getAnnotation(aClass), Objects.nonNull(order) ? order.value() : Integer.MAX_VALUE, method);
-//        }).filter(t3 -> Objects.nonNull(t3.v1())).sorted(Comparator.comparing(Tuple3::v2, Comparator.naturalOrder())).collect(Collectors.toList())
-    }
+
 }

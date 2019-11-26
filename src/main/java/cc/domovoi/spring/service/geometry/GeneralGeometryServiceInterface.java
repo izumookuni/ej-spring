@@ -5,9 +5,9 @@ import cc.domovoi.spring.geometry.joining.GeometryLoaderJoiningInterface;
 import cc.domovoi.spring.geometry.joining.GeometryServiceJoiningInterface;
 import cc.domovoi.spring.geometry.model.GeoContextLike;
 import cc.domovoi.spring.service.GeneralJoiningServiceInterface;
-import cc.domovoi.spring.service.annotation.before.BeforeAdd;
-import cc.domovoi.spring.service.annotation.before.BeforeDelete;
-import cc.domovoi.spring.service.annotation.before.BeforeUpdate;
+import cc.domovoi.spring.annotation.before.BeforeAdd;
+import cc.domovoi.spring.annotation.before.BeforeDelete;
+import cc.domovoi.spring.annotation.before.BeforeUpdate;
 import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.ArrayList;

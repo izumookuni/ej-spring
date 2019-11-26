@@ -25,6 +25,9 @@ public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJ
     @SuppressWarnings("unchecked")
     @Override
     default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
+        if (keyList.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<K> idList = keyList.stream().map(key -> (K) key).collect(Collectors.toList());
         List<E> eList =  findListUsingIdByMapper(idList); // .stream().peek(this::doAfterFindEntity).collect(Collectors.toList());
         doAfterFindList(0, eList);
