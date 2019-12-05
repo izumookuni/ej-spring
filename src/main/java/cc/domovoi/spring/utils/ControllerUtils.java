@@ -2,6 +2,7 @@ package cc.domovoi.spring.utils;
 
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
+import org.jooq.lambda.tuple.Tuple2;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
@@ -74,5 +75,14 @@ public class ControllerUtils {
 
     public static <E> Map<String, Object> commonTryFunction(Logger logger, String name, Supplier<? extends Try<E>> data) {
         return commonTryFunction(logger, name, data, Function.identity());
+    }
+
+    public static <K> Map<String, Object> addBatchTryFunction(Logger logger, String name, Supplier<? extends Try<Tuple2<Integer, List<K>>>> data) {
+        return commonTryFunction(logger, name, data, t2 -> {
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("result", t2.v1());
+            dataMap.put("id", t2.v2());
+            return dataMap;
+        });
     }
 }

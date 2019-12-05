@@ -156,7 +156,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default E findEntityByDao(E entity) {
-        E result =  dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetchOne().into(entityClass());
+        E result = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetchOne().into(entityClass());
         joiningColumn(Collections.singletonList(result));
         return result;
     }
