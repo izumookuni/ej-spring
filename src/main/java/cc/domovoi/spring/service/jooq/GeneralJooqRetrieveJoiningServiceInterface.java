@@ -142,7 +142,13 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default P findPojoByDao(P pojo) {
-        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo)).fetchOne().into(getType());
+        Record record = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo)).fetchOne();
+        if (Objects.nonNull(record)) {
+            return record.into(getType());
+        }
+        else {
+            return null;
+        }
     }
 
     default List<P> findPojoListByDao(P pojo) {
@@ -156,9 +162,15 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default E findEntityByDao(E entity) {
-        E result = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetchOne().into(entityClass());
-        joiningColumn(Collections.singletonList(result));
-        return result;
+        Record record = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetchOne();
+        if (Objects.nonNull(record)) {
+            E result = record.into(entityClass());
+            joiningColumn(Collections.singletonList(result));
+            return result;
+        }
+        else {
+            return null;
+        }
     }
 
     default List<E> findEntityListByDao(E entity) {
@@ -174,8 +186,10 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
             for (java.lang.reflect.Field field : fields) {
                 JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
                 if (joiningColumn != null) {
-
-                    List<Object> keyList = entityList.stream().map(entity -> on(entity).get(joiningColumn.key())).collect(Collectors.toList());
+                    List<Object> keyList = entityList.stream().map(entity -> on(entity).get(joiningColumn.key())).filter(Objects::nonNull).collect(Collectors.toList());
+                    if (keyList.isEmpty()) {
+                        return;
+                    }
                     Map targetKeyMap;
                     if (!joiningColumn.custom().equals(JoiningColumnFunctionInterfaceImpl.class)) {
                         targetKeyMap = onClass(joiningColumn.custom()).create().call("apply", dsl(), keyList).get();

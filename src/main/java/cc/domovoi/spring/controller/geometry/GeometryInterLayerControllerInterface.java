@@ -49,8 +49,7 @@ public interface GeometryInterLayerControllerInterface<INNER extends GeoInterLay
     default Integer addGeometry(@RequestBody INNER geometry) {
         if (Objects.nonNull(geometry) && Objects.nonNull(geometry.getOuter())) {
             INNER inner = loader().loadGeometry(geometry.getOuter());
-            BeanMapUtils.copyPropertyIgnoreNull(geometry, inner);
-            return geometryService().addGeometry(geometry);
+            return geometryService().addGeometry(BeanMapUtils.copyPropertyIgnoreNull(geometry, inner));
         }
         else {
             return -1;
