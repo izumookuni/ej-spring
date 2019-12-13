@@ -1,17 +1,14 @@
 package cc.domovoi.spring.geometry.geointerface;
 
+import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.geometry.annotation.GeometryInner;
 import org.jooq.lambda.tuple.Tuple2;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.joor.Reflect.*;
 
@@ -57,7 +54,8 @@ public interface GeometryMultipleInnerInterface<INNER> {
     }
 
     default Set<Tuple2<GeometryInner, Field>> geometryInnerSet(Class<? extends GeometryMultipleInnerInterface> eClass) {
-        Field[] fields = eClass.getDeclaredFields();
-        return Stream.of(fields).map(field -> new Tuple2<>(field.getAnnotation(GeometryInner.class), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
+//        Field[] fields = eClass.getDeclaredFields();
+        List<Field> fields = AuditUtils.allFieldList(eClass);
+        return fields.stream().map(field -> new Tuple2<>(field.getAnnotation(GeometryInner.class), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
     }
 }

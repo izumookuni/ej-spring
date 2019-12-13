@@ -2,6 +2,7 @@ package cc.domovoi.spring.service.jooq;
 
 import cc.domovoi.lambda.EJLambda;
 import cc.domovoi.spring.entity.GeneralAnnotationEntityInterface;
+import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.entity.annotation.JoiningColumn;
 import cc.domovoi.spring.entity.annotation.JoiningProperty;
@@ -182,7 +183,8 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     @SuppressWarnings("unchecked")
     default void joiningColumn(List<E> entityList) {
         if (!entityList.isEmpty()) {
-            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
+//            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
+            List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(entityClass());
             for (java.lang.reflect.Field field : fields) {
                 JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
                 if (joiningColumn != null) {

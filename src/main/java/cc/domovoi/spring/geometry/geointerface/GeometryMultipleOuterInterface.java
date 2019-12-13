@@ -1,18 +1,14 @@
 package cc.domovoi.spring.geometry.geointerface;
 
-import cc.domovoi.spring.geometry.annotation.GeometryInner;
+import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.geometry.annotation.GeometryOuter;
 import org.jooq.lambda.tuple.Tuple2;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.joor.Reflect.on;
 
@@ -58,7 +54,8 @@ public interface GeometryMultipleOuterInterface<OUTER> {
     }
 
     default Set<Tuple2<GeometryOuter, Field>> geometryOuterSet(Class<? extends GeometryMultipleOuterInterface> eClass) {
-        Field[] fields = eClass.getDeclaredFields();
-        return Stream.of(fields).map(field -> new Tuple2<>(field.getAnnotation(GeometryOuter.class), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
+//        Field[] fields = eClass.getDeclaredFields();
+        List<Field> fields = AuditUtils.allFieldList(eClass);
+        return fields.stream().map(field -> new Tuple2<>(field.getAnnotation(GeometryOuter.class), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
     }
 }

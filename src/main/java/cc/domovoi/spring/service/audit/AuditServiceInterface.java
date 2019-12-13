@@ -128,7 +128,7 @@ public interface AuditServiceInterface {
     default <T extends GeneralAuditEntityInterface> List<AuditChangeFieldModel> initAuditChangeFieldModelList(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> auditFieldFilter) {
         try {
             List<AuditChangeFieldModel> auditChangeFieldModelList = new ArrayList<>();
-            AuditUtils.processAuditFieldList(AuditUtils.auditFieldList(auditClass), (name, apiModelPropertyOptional) -> {
+            AuditUtils.processAuditFieldListV2(AuditUtils.auditFieldListV2(auditClass), (name, apiModelPropertyOptional) -> {
                 if (!auditFieldFilter.test(name)) {
                     return;
                 }
@@ -179,7 +179,7 @@ public interface AuditServiceInterface {
                 e.printStackTrace();
                 return null;
             }
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<AuditChangeRecordModel> auditChangeRecordModelList = new ArrayList<>();
         keyContentList.stream().reduce(null, (z, m) -> {

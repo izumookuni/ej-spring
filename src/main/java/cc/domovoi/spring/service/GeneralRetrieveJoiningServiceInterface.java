@@ -1,6 +1,7 @@
 package cc.domovoi.spring.service;
 
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
+import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.service.annotation.JoiningTable;
 import cc.domovoi.spring.annotation.after.AfterFind;
 import cc.domovoi.spring.annotation.after.AfterFindList;
@@ -41,7 +42,8 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     default Map<String, GeneralRetrieveJoiningServiceInterface> innerJoiningService() {
         Map<String, GeneralRetrieveJoiningServiceInterface> joiningService = new HashMap<>();
-        java.lang.reflect.Field[] fields = this.getClass().getDeclaredFields();
+//        java.lang.reflect.Field[] fields = this.getClass().getDeclaredFields();
+        List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(this.getClass());
         Reflect reflect = on(this);
         for (java.lang.reflect.Field field : fields) {
             JoiningTable joiningTable = field.getAnnotation(JoiningTable.class);

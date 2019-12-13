@@ -21,4 +21,7 @@ public @interface Audit {
 
     // include all properties (low order)
     boolean containsAll() default false;
+
+    // include properties
+    AuditRecord[] record() default {};
 }

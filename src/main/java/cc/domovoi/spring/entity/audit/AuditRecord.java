@@ -25,4 +25,7 @@ public @interface AuditRecord {
     // scope ID
     boolean scopeId() default false;
 
+    // target field, if @AuditRecord in @Audit
+    String target() default "";
+
 }

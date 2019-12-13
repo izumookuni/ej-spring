@@ -79,6 +79,7 @@ public interface GeneralAuditEntityInterface<K> extends GeneralJoiningEntityInte
         return AuditUtils.scopeIdField(this.getClass());
     }
 
+    @Deprecated
     default <T> void insertAuditRecordMap(Map<String, T> auditRecordMap, List<Field> auditFieldList, Function2<? super Reflect, ? super String, ? extends T> op) {
         Reflect reflect = on(this);
         processAuditFieldList(auditFieldList,
@@ -88,12 +89,31 @@ public interface GeneralAuditEntityInterface<K> extends GeneralJoiningEntityInte
                 auditRecord -> "".equals(auditRecord.key()));
     }
 
+    default <T> void insertAuditRecordMapV2(Map<String, T> auditRecordMap, List<Tuple2<Field, Optional<AuditRecord>>> auditFieldList, Function2<? super Reflect, ? super String, ? extends T> op) {
+        Reflect reflect = on(this);
+        processAuditFieldListV2(auditFieldList,
+                (name, apiModelPropertyOptional) -> auditRecordMap.put(name, op.apply(reflect, name)),
+                (name, auditRecord, apiModelPropertyOptional) -> auditRecordMap.put(name, op.apply(reflect, name)),
+                (name, auditRecord, apiModelPropertyOptional) -> auditRecordMap.put(auditRecord.key(), op.apply(reflect, name)),
+                auditRecord -> "".equals(auditRecord.key()));
+    }
+
+    @Deprecated
     default void processAuditFieldList(List<Field> auditFieldList, Consumer2<String, Optional<ApiModelProperty>> noAuditRecordOp, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp1, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp2, Predicate<? super AuditRecord> auditRecordPredicate) {
         AuditUtils.processAuditFieldList(auditFieldList, noAuditRecordOp, fieldNameAuditRecordOp1, fieldNameAuditRecordOp2, auditRecordPredicate);
     }
 
+    default void processAuditFieldListV2(List<Tuple2<Field, Optional<AuditRecord>>> auditFieldList, Consumer2<String, Optional<ApiModelProperty>> noAuditRecordOp, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp1, Consumer3<String, AuditRecord, Optional<ApiModelProperty>> fieldNameAuditRecordOp2, Predicate<? super AuditRecord> auditRecordPredicate) {
+        AuditUtils.processAuditFieldListV2(auditFieldList, noAuditRecordOp, fieldNameAuditRecordOp1, fieldNameAuditRecordOp2, auditRecordPredicate);
+    }
+
+    @Deprecated
     default List<Field> auditFieldList() {
         return AuditUtils.auditFieldList(this.getClass());
+    }
+
+    default List<Tuple2<Field, Optional<AuditRecord>>> auditFieldListV2() {
+        return AuditUtils.auditFieldListV2(this.getClass());
     }
 
 //    default Map<String, Supplier<Object>> auditRecordGetMap() {
@@ -105,8 +125,9 @@ public interface GeneralAuditEntityInterface<K> extends GeneralJoiningEntityInte
 
     default Map<String, Object> auditRecordMap() {
         Map<String, Object> auditRecordMap = new HashMap<>();
-        List<Field> auditFieldList = auditFieldList();
-        insertAuditRecordMap(auditRecordMap, auditFieldList, Reflect::get);
+//        List<Field> auditFieldList = auditFieldList();
+        List<Tuple2<Field, Optional<AuditRecord>>> auditFieldList = auditFieldListV2();
+        insertAuditRecordMapV2(auditRecordMap, auditFieldList, Reflect::get);
         return auditRecordMap;
     }
 }

@@ -1,7 +1,9 @@
 package cc.domovoi.spring.test;
 
 import cc.domovoi.spring.entity.audit.AuditChangeContextGroupModel;
+import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl;
+import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl2;
 import cc.domovoi.spring.test.mapper.AuditBeanMapperTestImpl;
 import cc.domovoi.spring.test.mapper.AuditMapperTestImpl;
 import cc.domovoi.spring.test.service.AuditBeanServiceTestImpl;
@@ -14,6 +16,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -41,8 +44,8 @@ public class AuditTest {
 
     @Test
     public void testAddChangeRecord() throws Exception {
-        AuditBeanEntityTestImpl auditBeanEntity1 = new AuditBeanEntityTestImpl(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime());
-        AuditBeanEntityTestImpl auditBeanEntity2 = new AuditBeanEntityTestImpl(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime());
+        AuditBeanEntityTestImpl auditBeanEntity1 = new AuditBeanEntityTestImpl(RandomUtils.randomString(), RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime());
+        AuditBeanEntityTestImpl auditBeanEntity2 = new AuditBeanEntityTestImpl(RandomUtils.randomString(), RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime());
         auditBeanService.addEntity(auditBeanEntity1);
         auditBeanService.addEntity(auditBeanEntity2);
         auditMapper.showAllData();
@@ -50,7 +53,7 @@ public class AuditTest {
 
     @Test
     public void testFindChangeRecord() throws Exception {
-        AuditBeanEntityTestImpl rootAuditBeanEntityTest = new AuditBeanEntityTestImpl(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime());
+        AuditBeanEntityTestImpl rootAuditBeanEntityTest = new AuditBeanEntityTestImpl(RandomUtils.randomString(), RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime());
         auditBeanService.addEntity(rootAuditBeanEntityTest);
         IntStream.range(0, 5).forEach(idx -> {
             AuditBeanEntityTestImpl auditBeanEntityTest = new AuditBeanEntityTestImpl();
@@ -61,6 +64,9 @@ public class AuditTest {
 //            auditBeanEntityTest.setV4(rootAuditBeanEntityTest.getV4());
 //            auditBeanEntityTest.setV5(rootAuditBeanEntityTest.getV5());
 
+            if (RandomUtils.randomBoolean()) {
+                auditBeanEntityTest.setV0(RandomUtils.randomString());
+            }
             if (RandomUtils.randomBoolean()) {
                 auditBeanEntityTest.setV1(RandomUtils.randomString());
             }
@@ -86,5 +92,22 @@ public class AuditTest {
 
         List<AuditChangeContextGroupModel> auditChangeContextGroupModelList = auditBeanService.findAuditChangeContextGroupModel();
         logger.debug(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(auditChangeContextGroupModelList));
+    }
+
+    @Test
+    public void testAllFieldList() {
+        AuditBeanEntityTestImpl2 entity = new AuditBeanEntityTestImpl2();
+        List<Field> fieldList = AuditUtils.allFieldList(entity.getClass());
+        logger.debug("fieldList size " + fieldList.size());
+        fieldList.forEach(field -> logger.debug("field " + field.getName()));
+    }
+
+    @Test
+    public void testAddChangeRecord2() throws Exception {
+        AuditBeanEntityTestImpl2 auditBeanEntity1 = new AuditBeanEntityTestImpl2(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime(), RandomUtils.randomString());
+        AuditBeanEntityTestImpl2 auditBeanEntity2 = new AuditBeanEntityTestImpl2(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime(), RandomUtils.randomString());
+        auditBeanService.addEntity(auditBeanEntity1);
+        auditBeanService.addEntity(auditBeanEntity2);
+        auditMapper.showAllData();
     }
 }
