@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * OriginalCRUDControllerInterface.
@@ -33,25 +34,31 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * The function that add Entity.
      *
      * @param entity entity
+     * @param request request
+     * @param response request
      * @return The number of successful insert operations.
      */
-    Try<Tuple2<Integer, K>> addEntityFunction(E entity);
+    Try<Tuple2<Integer, K>> addEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response);
 
     /**
      * The function that update Entity.
      *
      * @param entity entity
+     * @param request request
+     * @param response request
      * @return The number of successful update operations.
      */
-    Try<Integer> updateEntityFunction(E entity);
+    Try<Integer> updateEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response);
 
     /**
      * The function that delete Entity.
      *
      * @param entity entity
+     * @param request request
+     * @param response request
      * @return The number of successful delete operations.
      */
-    Try<Integer> deleteEntityFunction(E entity);
+    Try<Integer> deleteEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response);
 
     default void beforeAdd(E entity, HttpServletRequest request, HttpServletResponse response) { }
 
@@ -127,7 +134,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             logger().info(String.format("addEntity: %s", entity));
             doBeforeAdd(0, entity, request, response);
 //            beforeAdd(entity, request, response);
-            Try<Tuple2<Integer, K>> result = addEntityFunction(entity);
+            Try<Tuple2<Integer, K>> result = addEntityFunction(entity, Optional.of(request), Optional.of(response));
             doAfterAdd(0, entity, request, response, result);
 //            afterAdd(entity, request, response);
             if (result.isSuccess()) {
@@ -138,6 +145,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, dataMap);
             }
             else {
+                result.failed().get().printStackTrace();
                 throw new RuntimeException(result.failed().get().getMessage());
             }
 //            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
@@ -168,20 +176,21 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             logger().info(String.format("jsonMap: %s", entity));
             doBeforeUpdate(0, entity, request, response);
 //            beforeUpdate(entity, request, response);
-            Try<Integer> result = updateEntityFunction(entity);
+            Try<Integer> result = updateEntityFunction(entity, Optional.of(request), Optional.of(response));
             doAfterUpdate(0, entity, request, response, result);
 //            afterUpdate(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
             else {
+                result.failed().get().printStackTrace();
                 throw new RuntimeException(result.failed().get().getMessage());
             }
 //            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
             e.printStackTrace();
-            logger().error(String.format("error in updateEntity, message: %s", e.getLocalizedMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            logger().error(String.format("error in updateEntity, message: %s", e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -205,20 +214,21 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             logger().info(String.format("deleteEntity: %s", entity));
             doBeforeDelete(0, entity, request, response);
 //            beforeDelete(entity, request, response);
-            Try<Integer> result = deleteEntityFunction(entity);
+            Try<Integer> result = deleteEntityFunction(entity, Optional.of(request), Optional.of(response));
             doAfterDelete(0, entity, request, response, result);
 //            afterDelete(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
             else {
+                result.failed().get().printStackTrace();
                 throw new RuntimeException(result.failed().get().getMessage());
             }
 //            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
             e.printStackTrace();
-            logger().error(String.format("error in deleteEntity, message: %s", e.getLocalizedMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            logger().error(String.format("error in deleteEntity, message: %s", e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

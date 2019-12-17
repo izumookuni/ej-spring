@@ -81,8 +81,8 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
 
         } catch (Exception e) {
             e.printStackTrace();
-            logger().error(String.format("error in findEntity, message: %s", e.getLocalizedMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            logger().error(String.format("error in findEntity, message: %s", e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -105,8 +105,8 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, String.format("Your input is %s", content));
         } catch (Exception e) {
             e.printStackTrace();
-            logger().error(String.format("error in testGet, message: %s", e.getLocalizedMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            logger().error(String.format("error in testGet, message: %s", e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -129,8 +129,8 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, String.format("Your input is %s", body));
         } catch (Exception e) {
             e.printStackTrace();
-            logger().error(String.format("error in testPost, message: %s", e.getLocalizedMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            logger().error(String.format("error in testPost, message: %s", e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

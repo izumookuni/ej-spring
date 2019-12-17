@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @ApiModel(value = "AuditChangeRecord L1")
 public class AuditChangeRecordModel extends AuditDisplayEntity {
@@ -96,6 +97,7 @@ public class AuditChangeRecordModel extends AuditDisplayEntity {
     }
 
     @Override
+    @Deprecated
     @JsonIgnore
     public String getScopeId() {
         return super.getScopeId();
@@ -135,5 +137,11 @@ public class AuditChangeRecordModel extends AuditDisplayEntity {
     @JsonIgnore
     public LocalDateTime getAuditTime() {
         return super.getAuditTime();
+    }
+
+    @Override
+    @JsonIgnore
+    public List<String> getScopeIdList() {
+        return super.getScopeIdList();
     }
 }

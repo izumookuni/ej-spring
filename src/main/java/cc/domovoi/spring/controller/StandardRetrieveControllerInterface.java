@@ -65,8 +65,8 @@ public interface StandardRetrieveControllerInterface<E extends StandardJoiningEn
 
         } catch (Exception e) {
             e.printStackTrace();
-            logger().error(String.format("error in findById, message: %s", e.getLocalizedMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            logger().error(String.format("error in findById, message: %s", e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

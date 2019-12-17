@@ -13,6 +13,8 @@ import cc.domovoi.spring.annotation.before.BeforeUpdate;
 import cc.domovoi.spring.utils.GeneralUtils;
 import org.jooq.lambda.tuple.Tuple2;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,76 +31,76 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
 
     Try<Integer> innerDeleteEntity(E entity);
 
-    default Optional<String> addCondition(E entity) {
+    default Optional<String> addCondition(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         return Optional.empty();
     }
 
-    default Optional<String> updateCondition(E entity) {
+    default Optional<String> updateCondition(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         return Optional.empty();
     }
 
-    default Optional<String> deleteCondition(E entity) {
+    default Optional<String> deleteCondition(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         return Objects.nonNull(entity) && Objects.nonNull(entity.getId()) ? Optional.empty() : Optional.of("id must not be null");
     }
 
-    default void beforeAdd(E entity) {
+    default void beforeAdd(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
     }
 
-    default void beforeUpdate(E entity) {
+    default void beforeUpdate(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
     }
 
-    default void beforeDelete(E entity) {
+    default void beforeDelete(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
     }
 
-    default void afterAdd(E entity, Try<Tuple2<Integer, K>> result) {
+    default void afterAdd(E entity, Try<Tuple2<Integer, K>> result, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
     }
 
-    default void afterUpdate(E entity, Try<Integer> result) {
+    default void afterUpdate(E entity, Try<Integer> result, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
     }
 
-    default void afterDelete(E entity, Try<Integer> result) {
+    default void afterDelete(E entity, Try<Integer> result, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
     }
 
-    default void doBeforeAdd(Integer scope, E entity) {
+    default void doBeforeAdd(Integer scope, E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         if (0 == scope) {
-            beforeAdd(entity);
+            beforeAdd(entity, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeAdd.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, BeforeAdd.class, scope, entity, request, response);
     }
 
-    default void doBeforeUpdate(Integer scope, E entity) {
+    default void doBeforeUpdate(Integer scope, E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         if (0 == scope) {
-            beforeUpdate(entity);
+            beforeUpdate(entity, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeUpdate.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, BeforeUpdate.class, scope, entity, request, response);
     }
 
-    default void doBeforeDelete(Integer scope, E entity) {
+    default void doBeforeDelete(Integer scope, E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         if (0 == scope) {
-            beforeDelete(entity);
+            beforeDelete(entity, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeDelete.class, scope, entity);
+        GeneralUtils.doFindAnnotationMethod(this, BeforeDelete.class, scope, entity, request, response);
     }
 
-    default void doAfterAdd(Integer scope, E entity, Try<Tuple2<Integer, K>> result) {
+    default void doAfterAdd(Integer scope, E entity, Try<Tuple2<Integer, K>> result, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         if (0 == scope) {
-            afterAdd(entity, result);
+            afterAdd(entity, result, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterAdd.class, scope, entity, result);
+        GeneralUtils.doFindAnnotationMethod(this, AfterAdd.class, scope, entity, result, request, response);
     }
 
-    default void doAfterUpdate(Integer scope, E entity, Try<Integer> result) {
+    default void doAfterUpdate(Integer scope, E entity, Try<Integer> result, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         if (0 == scope) {
-            afterUpdate(entity, result);
+            afterUpdate(entity, result, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterUpdate.class, scope, entity, result);
+        GeneralUtils.doFindAnnotationMethod(this, AfterUpdate.class, scope, entity, result, request, response);
     }
 
-    default void doAfterDelete(Integer scope, E entity, Try<Integer> result) {
+    default void doAfterDelete(Integer scope, E entity, Try<Integer> result, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         if (0 == scope) {
-            afterDelete(entity, result);
+            afterDelete(entity, result, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterDelete.class, scope, entity, result);
+        GeneralUtils.doFindAnnotationMethod(this, AfterDelete.class, scope, entity, result, request, response);
     }
 
     @Deprecated
@@ -126,8 +128,12 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Tuple2<Integer, K>> addEntity(E entity) {
+        return addEntity(entity, Optional.empty(), Optional.empty());
+    }
+
+    default Try<Tuple2<Integer, K>> addEntity(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         // addCondition
-        Optional<String> addConditionResult = addCondition(entity);
+        Optional<String> addConditionResult = addCondition(entity, request, response);
         if (addConditionResult.isPresent()) {
             return new Failure<>(new RuntimeException(addConditionResult.get()));
         }
@@ -142,7 +148,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         }
         // before add
         if (Objects.nonNull(entity)) {
-            doBeforeAdd(0, entity);
+            doBeforeAdd(0, entity, request, response);
 //            processBeforeAdd(entity);
         }
         // check entity exists
@@ -164,47 +170,55 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         // after add
         if (Objects.nonNull(entity)) {
 //            processAfterAdd(entity, innerAddResult);
-            doAfterAdd(0, entity, innerAddResult);
+            doAfterAdd(0, entity, innerAddResult, request, response);
         }
         return innerAddResult;
     }
 
     default Try<Integer> updateEntity(E entity) {
+        return updateEntity(entity, Optional.empty(), Optional.empty());
+    }
+
+    default Try<Integer> updateEntity(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         // updateCondition
-        Optional<String> updateConditionResult = updateCondition(entity);
+        Optional<String> updateConditionResult = updateCondition(entity, request, response);
         if (updateConditionResult.isPresent()) {
             return new Failure<>(new RuntimeException(updateConditionResult.get()));
         }
         // before update
         if (Objects.nonNull(entity)) {
-            doBeforeUpdate(0, entity);
+            doBeforeUpdate(0, entity, request, response);
 //            processBeforeUpdate(entity);
         }
         Try<Integer> innerUpdateResult = innerUpdateEntity(entity);
         // after update
         if (Objects.nonNull(entity)) {
 //            processAfterUpdate(entity, innerUpdateResult);
-            doAfterUpdate(0, entity, innerUpdateResult);
+            doAfterUpdate(0, entity, innerUpdateResult, request, response);
         }
         return innerUpdateResult;
     }
 
     default Try<Integer> deleteEntity(E entity) {
+        return deleteEntity(entity, Optional.empty(), Optional.empty());
+    }
+
+    default Try<Integer> deleteEntity(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
         // deleteCondition
-        Optional<String> deleteConditionResult = deleteCondition(entity);
+        Optional<String> deleteConditionResult = deleteCondition(entity, request, response);
         if (deleteConditionResult.isPresent()) {
             return new Failure<>(new RuntimeException(deleteConditionResult.get()));
         }
         // before delete
         if (Objects.nonNull(entity)) {
-            doBeforeDelete(0, entity);
+            doBeforeDelete(0, entity, request, response);
 //            processBeforeDelete(entity);
         }
         Try<Integer> innerDeleteResult = innerDeleteEntity(entity);
         // after delete
         if (Objects.nonNull(entity)) {
 //            processAfterDelete(entity, innerDeleteResult);
-            doAfterDelete(0, entity, innerDeleteResult);
+            doAfterDelete(0, entity, innerDeleteResult, request, response);
         }
         return innerDeleteResult;
     }

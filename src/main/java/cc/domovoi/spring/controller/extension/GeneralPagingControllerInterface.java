@@ -57,7 +57,7 @@ public interface GeneralPagingControllerInterface<E> extends OriginalControllerI
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ public class AuditDisplayEntity implements AuditInterface {
     @ApiModelProperty(value = "Behavior", notes = "add;update;delete")
     private String auditBehavior;
 
+    @Deprecated
     @ApiModelProperty(value = "scope ID", notes = "project ID")
     private String scopeId;
 
@@ -56,6 +58,9 @@ public class AuditDisplayEntity implements AuditInterface {
 
     @ApiModelProperty(value = "Time")
     private LocalDateTime auditTime;
+
+    @ApiModelProperty(value = "scope ID List", notes = "project ID")
+    private List<String> scopeIdList;
 
     public void init() {
         if (Objects.isNull(auditId)) {
@@ -93,6 +98,7 @@ public class AuditDisplayEntity implements AuditInterface {
                 ", auditField='" + auditField + '\'' +
                 ", auditContent='" + (Objects.nonNull(auditContent) ? (auditContent.length() <= 300) ? auditContent : auditContent.substring(0, 300) + "..." : null) + '\'' +
                 ", auditTime=" + auditTime +
+                ", scopeIdList=" + scopeIdList +
                 '}';
     }
 
@@ -176,10 +182,12 @@ public class AuditDisplayEntity implements AuditInterface {
         this.auditBehavior = auditBehavior;
     }
 
+    @Deprecated
     public String getScopeId() {
         return scopeId;
     }
 
+    @Deprecated
     public void setScopeId(String scopeId) {
         this.scopeId = scopeId;
     }
@@ -230,5 +238,13 @@ public class AuditDisplayEntity implements AuditInterface {
 
     public void setAuditTime(LocalDateTime auditTime) {
         this.auditTime = auditTime;
+    }
+
+    public List<String> getScopeIdList() {
+        return scopeIdList;
+    }
+
+    public void setScopeIdList(List<String> scopeIdList) {
+        this.scopeIdList = scopeIdList;
     }
 }

@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.joor.Reflect.on;
 
@@ -38,7 +40,24 @@ public interface GeneralAuditEntityInterface<K> extends GeneralJoiningEntityInte
             auditDisplayEntity.setContextName(contextName());
 
             contextPidField().ifPresent(contextPidField -> auditDisplayEntity.setContextPid(reflect.get(contextPidField.v1().getName())));
-            scopeIdField().ifPresent(scopeIdField -> auditDisplayEntity.setScopeId(reflect.get(scopeIdField.v1().getName())));
+//            scopeIdField().ifPresent(scopeIdField -> auditDisplayEntity.setScopeId(reflect.get(scopeIdField.v1().getName())));
+            auditDisplayEntity.setScopeIdList(scopeIdFieldList().stream().flatMap(scopeIdField -> {
+                Object scopeId = reflect.get(scopeIdField.v1().getName());
+                if (Objects.nonNull(scopeId)) {
+                    if (scopeId instanceof Collection) {
+                        return ((Collection<?>) scopeId).stream().map(Object::toString);
+                    }
+                    else if (scopeId instanceof Map) {
+                        return ((Map<?, ?>) scopeId).values().stream().map(Object::toString);
+                    }
+                    else {
+                        return Stream.of(scopeId.toString());
+                    }
+                }
+                else {
+                    return Stream.empty();
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList()));
 
             try {
                 auditDisplayEntity.setAuditContent(objectMapper.writeValueAsString(auditRecordMap()));
@@ -75,8 +94,13 @@ public interface GeneralAuditEntityInterface<K> extends GeneralJoiningEntityInte
         return AuditUtils.contextPidField(this.getClass());
     }
 
+    @Deprecated
     default Optional<Tuple2<Field, AuditRecord>> scopeIdField() {
         return AuditUtils.scopeIdField(this.getClass());
+    }
+
+    default List<Tuple2<Field, AuditRecord>> scopeIdFieldList() {
+        return AuditUtils.scopeIdFieldList(this.getClass());
     }
 
     @Deprecated

@@ -1,25 +1,21 @@
-package cc.domovoi.spring.entity.audit;
+package cc.domovoi.spring.entity.audit.batch;
 
-import io.swagger.annotations.ApiModel;
+import cc.domovoi.spring.entity.audit.GeneralAuditEntityInterface;
 
 import java.util.List;
 
-@ApiModel(value = "Audit Change L4")
-public class AuditChangeContextGroupModel {
+public class AuditChangeContextGroupBatchModel<T extends GeneralAuditEntityInterface> {
 
     private String contextName;
 
-    private List<AuditChangeContextModel> changeContext;
+    private List<AuditChangeScopeBatchModel<T>> changeContext;
 
     @Override
     public String toString() {
-        return "AuditChangeContextGroupModel{" +
+        return "AuditChangeContextGroupBatchModel{" +
                 "contextName='" + contextName + '\'' +
                 ", changeContext=" + changeContext +
                 '}';
-    }
-
-    public AuditChangeContextGroupModel() {
     }
 
     public String getContextName() {
@@ -30,11 +26,11 @@ public class AuditChangeContextGroupModel {
         this.contextName = contextName;
     }
 
-    public List<AuditChangeContextModel> getChangeContext() {
+    public List<AuditChangeScopeBatchModel<T>> getChangeContext() {
         return changeContext;
     }
 
-    public void setChangeContext(List<AuditChangeContextModel> changeContext) {
+    public void setChangeContext(List<AuditChangeScopeBatchModel<T>> changeContext) {
         this.changeContext = changeContext;
     }
 }

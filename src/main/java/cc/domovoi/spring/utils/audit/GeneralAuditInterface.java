@@ -4,6 +4,7 @@ import cc.domovoi.collection.util.Failure;
 import cc.domovoi.collection.util.Success;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.audit.*;
+import cc.domovoi.spring.entity.audit.batch.AuditChangeContextGroupBatchModel;
 import cc.domovoi.spring.service.audit.AuditServiceInterface;
 import cc.domovoi.spring.utils.RecordAuthorInterface;
 import org.slf4j.Logger;
@@ -25,9 +26,9 @@ public interface GeneralAuditInterface<E extends GeneralAuditEntityInterface<?>>
 
     String auditAuthorGetter();
 
-    default List<AuditChangeContextGroupModel> findAuditChangeContextGroupModel(Predicate<? super String> contextNameFilter, Predicate<? super String> scopeIdFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> auditFieldFilter) {
+    default List<AuditChangeContextGroupModel> findAuditChangeContextGroupModel(Predicate<? super String> contextNameFilter, Predicate<? super List<String>> scopeIdListFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> auditFieldFilter) {
         List<AuditDisplayEntity> auditDisplayEntityList = auditService().auditMapper().findListByContextName(AuditUtils.contextName(auditClass()));
-        return auditService().findAuditChangeRecord(auditDisplayEntityList, auditClass(), contextNameFilter, scopeIdFilter, contextIdFilter, auditFieldFilter);
+        return auditService().findAuditChangeRecord(auditDisplayEntityList, auditClass(), contextNameFilter, scopeIdListFilter, contextIdFilter, auditFieldFilter);
     }
 
     default List<AuditChangeContextGroupModel> findAuditChangeContextGroupModel(Optional<List<String>> contextNameList, Optional<List<String>> scopeIdList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
@@ -67,4 +68,28 @@ public interface GeneralAuditInterface<E extends GeneralAuditEntityInterface<?>>
             return new Failure<>(e);
         }
     }
+
+    default List<AuditChangeContextGroupBatchModel<E>> findAuditChangeContextGroupBatchModel(Predicate<? super String> contextNameFilter, Predicate<? super List<String>> scopeIdListFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
+        List<AuditDisplayEntity> auditDisplayEntityList = auditService().auditMapper().findListByContextName(AuditUtils.contextName(auditClass()));
+        return auditService().findAuditBatchChangeRecord(auditDisplayEntityList, auditClass(), contextNameFilter, scopeIdListFilter, contextIdFilter, fieldNameFilter);
+    }
+
+    default List<AuditChangeContextGroupBatchModel<E>> findAuditChangeContextGroupBatchModel(Optional<List<String>> contextNameList, Optional<List<String>> scopeIdList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
+        List<AuditDisplayEntity> auditDisplayEntityList = auditService().auditMapper().findListByContextName(AuditUtils.contextName(auditClass()));
+        return auditService().findAuditBatchChangeRecord(auditDisplayEntityList, auditClass(),
+                contextName -> contextNameList.map(list -> list.contains(contextName)).orElse(true),
+                scopeId -> scopeIdList.map(list -> list.containsAll(scopeId)).orElse(true),
+                contextId -> contextIdList.map(list -> list.contains(contextId)).orElse(true),
+                fieldName -> auditFieldList.map(list -> list.contains(fieldName)).orElse(true));
+    }
+
+    default List<AuditChangeContextGroupBatchModel<E>> findAuditChangeContextGroupBatchModel() {
+        List<AuditDisplayEntity> auditDisplayEntityList = auditService().auditMapper().findListByContextName(AuditUtils.contextName(auditClass()));
+        return auditService().findAuditBatchChangeRecord(auditDisplayEntityList, auditClass(),
+                contextName -> true,
+                scopeId -> true,
+                contextId -> true,
+                fieldName -> true);
+    }
+
 }

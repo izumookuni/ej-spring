@@ -7,19 +7,20 @@ import cc.domovoi.spring.entity.audit.AuditRecord;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 //@Audit(value = "日志记录测试", skip = "v5")
 @Audit(value = "日志记录测试",
         skip = "v5",
         record = {
-                @AuditRecord(target = "v0", value = "值0", key = "VALUE0"),
-                @AuditRecord(target = "v1", value = "值1", key = "VALUE1"),
+                @AuditRecord(target = "v0", value = "值0", key = "VALUE0", scopeId = true),
+                @AuditRecord(target = "v1", value = "值1", key = "VALUE1", scopeId = true),
                 @AuditRecord(target = "v2"),
                 @AuditRecord(target = "v3"),
                 @AuditRecord(target = "v4", value = "值4", key = "VALUE4"),
                 @AuditRecord(target = "v5", value = "值5"),
-                @AuditRecord(target = "v6", value = "值6"),
+                @AuditRecord(target = "v6", value = "值6", scopeId = true),
         })
 public class AuditBeanEntityTestImpl extends AuditBeanEntityTestImpl0 implements StandardSingletonEntityInterface, AuditEntityInterface {
 
@@ -40,6 +41,8 @@ public class AuditBeanEntityTestImpl extends AuditBeanEntityTestImpl0 implements
 
 //    @AuditRecord("值5")
     private LocalDateTime v5;
+
+    private List<Integer> v6;
 
     private LocalDateTime creationTime;
 
@@ -80,6 +83,7 @@ public class AuditBeanEntityTestImpl extends AuditBeanEntityTestImpl0 implements
                 ", v3=" + v3 +
                 ", v4=" + v4 +
                 ", v5=" + v5 +
+                ", v6=" + v6 +
                 ", creationTime=" + creationTime +
                 ", updateTime=" + updateTime +
                 '}';
@@ -103,6 +107,16 @@ public class AuditBeanEntityTestImpl extends AuditBeanEntityTestImpl0 implements
         this.v3 = v3;
         this.v4 = v4;
         this.v5 = v5;
+    }
+
+    public AuditBeanEntityTestImpl(String v0, String v1, Integer v2, Double v3, Boolean v4, LocalDateTime v5, List<Integer> v6) {
+        super(v0);
+        this.v1 = v1;
+        this.v2 = v2;
+        this.v3 = v3;
+        this.v4 = v4;
+        this.v5 = v5;
+        this.v6 = v6;
     }
 
     @Override
@@ -153,6 +167,14 @@ public class AuditBeanEntityTestImpl extends AuditBeanEntityTestImpl0 implements
 
     public void setV5(LocalDateTime v5) {
         this.v5 = v5;
+    }
+
+    public List<Integer> getV6() {
+        return v6;
+    }
+
+    public void setV6(List<Integer> v6) {
+        this.v6 = v6;
     }
 
     @Override

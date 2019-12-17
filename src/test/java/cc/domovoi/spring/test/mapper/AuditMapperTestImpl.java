@@ -2,6 +2,7 @@ package cc.domovoi.spring.test.mapper;
 
 import cc.domovoi.spring.entity.audit.AuditDisplayEntity;
 import cc.domovoi.spring.mapper.audit.AuditMapperInterface;
+import org.jooq.lambda.tuple.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,24 +17,36 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
 
     private List<AuditDisplayEntity> auditDisplayEntityList;
 
+    private List<Tuple2<String, String>> auditScopeList;
+
     public AuditMapperTestImpl() {
         auditDisplayEntityList = new ArrayList<>();
+        auditScopeList = new ArrayList<>();
     }
 
     @Override
     public AuditDisplayEntity findEntityById(String id) {
-        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity.getAuditId(), id)).findFirst().orElse(null);
+        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity.getAuditId(), id)).peek(auditDisplayEntity -> {
+            List<String> scopeIdList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
+            auditDisplayEntity.setScopeIdList(scopeIdList);
+        }).findFirst().orElse(null);
     }
 
     @Deprecated
     @Override
     public List<AuditDisplayEntity> findList(AuditDisplayEntity entity) {
-        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity, entity)).collect(Collectors.toList());
+        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity, entity)).peek(auditDisplayEntity -> {
+            List<String> scopeIdList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
+            auditDisplayEntity.setScopeIdList(scopeIdList);
+        }).collect(Collectors.toList());
     }
 
     @Override
     public List<AuditDisplayEntity> findListById(List<String> idList) {
-        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> idList.contains(auditDisplayEntity.getAuditId())).collect(Collectors.toList());
+        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> idList.contains(auditDisplayEntity.getAuditId())).peek(auditDisplayEntity -> {
+            List<String> scopeIdList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
+            auditDisplayEntity.setScopeIdList(scopeIdList);
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -41,6 +54,7 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
         logger.debug("addEntity: " + entity);
         if (findEntityById(entity.getAuditId()) == null) {
             auditDisplayEntityList.add(entity);
+            auditScopeList.addAll(entity.getScopeIdList().stream().map(scopeId -> new Tuple2<>(entity.getAuditId(), scopeId)).collect(Collectors.toList()));
             return 1;
         }
         else {
@@ -54,7 +68,10 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
         AuditDisplayEntity auditDisplayEntity = findEntityById(entity.getAuditId());
         if (auditDisplayEntity != null) {
             auditDisplayEntityList.remove(auditDisplayEntity);
+            List<Tuple2<String, String>> removedList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).collect(Collectors.toList());
+            auditScopeList.removeAll(removedList);
             auditDisplayEntityList.add(entity);
+            auditScopeList.addAll(entity.getScopeIdList().stream().map(scopeId -> new Tuple2<>(entity.getAuditId(), scopeId)).collect(Collectors.toList()));
             return 1;
         }
         else {
@@ -68,6 +85,8 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
         AuditDisplayEntity auditDisplayEntity = findEntityById(entity.getAuditId());
         if (auditDisplayEntity != null) {
             auditDisplayEntityList.remove(auditDisplayEntity);
+            List<Tuple2<String, String>> removedList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).collect(Collectors.toList());
+            auditScopeList.removeAll(removedList);
             return 1;
         }
         else {
@@ -76,13 +95,19 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
     }
 
     @Override
-    public List<AuditDisplayEntity> findListByScopeId(String scopeId) {
-        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity.getScopeId(), scopeId)).collect(Collectors.toList());
+    public List<AuditDisplayEntity> findListByScopeId(List<String> scopeIdList) {
+        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> scopeIdList.containsAll(auditDisplayEntity.getScopeIdList())).peek(auditDisplayEntity -> {
+            List<String> scopeIdList0 = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
+            auditDisplayEntity.setScopeIdList(scopeIdList0);
+        }).collect(Collectors.toList());
     }
 
     @Override
     public List<AuditDisplayEntity> findListByContextName(String contextName) {
-        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity.getContextName(), contextName)).collect(Collectors.toList());
+        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity.getContextName(), contextName)).peek(auditDisplayEntity -> {
+            List<String> scopeIdList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
+            auditDisplayEntity.setScopeIdList(scopeIdList);
+        }).collect(Collectors.toList());
     }
 
     public List<AuditDisplayEntity> findAllList() {

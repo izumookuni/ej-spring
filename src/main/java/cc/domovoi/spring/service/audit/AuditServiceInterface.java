@@ -1,13 +1,20 @@
 package cc.domovoi.spring.service.audit;
 
 import cc.domovoi.spring.entity.audit.*;
+import cc.domovoi.spring.entity.audit.batch.AuditChangeContextGroupBatchModel;
+import cc.domovoi.spring.entity.audit.batch.AuditChangeScopeBatchModel;
 import cc.domovoi.spring.mapper.audit.AuditMapperInterface;
+import cc.domovoi.spring.utils.CommonLogger;
 import cc.domovoi.spring.utils.ServiceUtils;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
+import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;
+import org.joor.Reflect;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -61,14 +68,14 @@ public interface AuditServiceInterface {
      * @param auditDisplayEntityList auditDisplayEntityList
      * @param auditClass auditClass
      * @param contextNameFilter contextNameFilter
-     * @param scopeIdFilter scopeIdFilter
+     * @param scopeIdListFilter scopeIdListFilter
      * @param contextIdFilter contextIdFilter
      * @param fieldNameFilter fieldNameFilter
      * @param <T> GeneralAuditEntityInterface
      * @return AuditChangeContextGroupModel List
      */
-    default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super String> scopeIdFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
-        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName()) && scopeIdFilter.test(auditDisplayEntity.getScopeId())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
+    default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super List<String>> scopeIdListFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
+        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName()) && scopeIdListFilter.test(auditDisplayEntity.getScopeIdList())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
         return auditDisplayEntityListMap.entrySet().stream().map(entry -> {
             // context group
             String contextName = entry.getKey();
@@ -104,7 +111,7 @@ public interface AuditServiceInterface {
     default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameList, Optional<List<String>> scopeIdList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
         return findAuditChangeRecord(auditDisplayEntityList, auditClass,
                 contextName -> contextNameList.map(list -> list.contains(contextName)).orElse(true),
-                scopeId -> scopeIdList.map(list -> list.contains(scopeId)).orElse(true),
+                scopeId -> scopeIdList.map(list -> list.containsAll(scopeId)).orElse(true),
                 contextId -> contextIdList.map(list -> list.contains(contextId)).orElse(true),
                 fieldName -> auditFieldList.map(list -> list.contains(fieldName)).orElse(true));
     }
@@ -197,5 +204,74 @@ public interface AuditServiceInterface {
             }
         }, (l, r) -> Objects.nonNull(r) ? r : l);
         return auditChangeRecordModelList;
+    }
+
+    default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupBatchModel<T>> findAuditBatchChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super List<String>> scopeIdListFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
+        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName()) && scopeIdListFilter.test(auditDisplayEntity.getScopeIdList())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
+        return auditDisplayEntityListMap.entrySet().stream().map(entry -> {
+            // context group
+            String contextName = entry.getKey();
+            List<List<AuditDisplayEntity>> auditDisplayEntityList2 = new ArrayList<>();
+            List<AuditDisplayEntity> buffer = new ArrayList<>();
+            Optional<AuditDisplayEntity> last = Optional.empty();
+            for (AuditDisplayEntity auditDisplayEntity : entry.getValue()) {
+                if (contextIdFilter.test(auditDisplayEntity.getContextId())) {
+                    if ("add".equals(auditDisplayEntity.getAuditBehavior())) {
+                        buffer.add(auditDisplayEntity);
+                        last = Optional.of(auditDisplayEntity);
+                    }
+                    else if ("delete".equals(auditDisplayEntity.getAuditBehavior())) {
+                        if (last.map(l -> "add".equals(l.getAuditBehavior())).orElse(false)) {
+                            auditDisplayEntityList2.add(new ArrayList<>(buffer));
+                            buffer.clear();
+                            last = Optional.of(auditDisplayEntity);
+                        }
+                    }
+                }
+
+            }
+            List<AuditChangeScopeBatchModel<T>> auditChangeScopeBatchModelList = initAuditChangeScopeBatchModelList(auditDisplayEntityList2, auditClass, fieldNameFilter);
+            AuditChangeContextGroupBatchModel<T> auditChangeContextGroupBatchModel = new AuditChangeContextGroupBatchModel<>();
+            auditChangeContextGroupBatchModel.setContextName(contextName);
+            auditChangeContextGroupBatchModel.setChangeContext(auditChangeScopeBatchModelList);
+            return auditChangeContextGroupBatchModel;
+        }).collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    default <T extends GeneralAuditEntityInterface> List<AuditChangeScopeBatchModel<T>> initAuditChangeScopeBatchModelList(List<List<AuditDisplayEntity>> auditDisplayEntityList2, Class<T> auditClass, Predicate<? super String> auditFieldFilter) {
+        try {
+            List<List<T>> auditEntityList2 = auditDisplayEntityList2.stream().map(auditEntityList -> auditEntityList.stream().map(auditEntity -> {
+                try {
+                    Map<String, Object> entityMap = Objects.nonNull(auditEntity.getAuditContent()) ? (Map<String, Object>) objectMapper().readValue(auditEntity.getAuditContent(), Map.class) : Collections.emptyMap();
+                    Reflect reflect = Reflect.onClass(auditClass).create();
+                    AuditUtils.processAuditFieldListV2(AuditUtils.auditFieldListV2(auditClass), (name, apiModelPropertyOptional) -> {
+                        if (!auditFieldFilter.test(name)) {
+                            return;
+                        }
+                        reflect.set(name, entityMap.get(name));
+                    }, (name, auditRecord, apiModelPropertyOptional) -> {
+                        if (!auditFieldFilter.test(name)) {
+                            return;
+                        }
+                        reflect.set(name, entityMap.get(name));
+                    }, (name, auditRecord, apiModelPropertyOptional) -> {
+                        if (!auditFieldFilter.test(name)) {
+                            return;
+                        }
+                        reflect.set(name, entityMap.get(auditRecord.key()));
+                    }, auditRecord -> "".equals(auditRecord.key()));
+                    return reflect.<T>get();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList())).collect(Collectors.toList());
+            return Seq.scanLeft(auditEntityList2.stream(), new Tuple2<>(Collections.<T>emptyList(), Collections.<T>emptyList()), (z, eL) -> new Tuple2<>(z.v2(), eL))
+                    .drop(1).map(t2 -> new AuditChangeScopeBatchModel<>(t2.v1(), t2.v2())).toList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 }

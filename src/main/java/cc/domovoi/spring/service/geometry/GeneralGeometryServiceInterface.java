@@ -10,9 +10,12 @@ import cc.domovoi.spring.annotation.before.BeforeDelete;
 import cc.domovoi.spring.annotation.before.BeforeUpdate;
 import org.jooq.lambda.tuple.Tuple2;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -20,21 +23,27 @@ import java.util.function.Supplier;
 public interface GeneralGeometryServiceInterface<INNER extends GeoContextLike<K>, OUTER, K, E extends GeneralGeometryMultipleJoiningEntityInterface<K, INNER, OUTER>> extends GeneralGeometryRetrieveServiceInterface<INNER, OUTER, K, E>, GeneralJoiningServiceInterface<K, E>, GeometryServiceJoiningInterface<INNER>, GeometryLoaderJoiningInterface<INNER, OUTER> {
 
     @BeforeAdd(order = -100)
-    default void processingAddGemetry(E entity) {
-        imp(entity);
-        addGeometryByGeometryService(entity);
+    default void processingAddGemetry(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
+        if (checkEntityExists(entity)) {
+            imp(entity);
+            addGeometryByGeometryService(entity);
+        }
     }
 
     @BeforeUpdate(order = -100)
-    default void processingUpdateGemetry(E entity) {
-        imp(entity);
-        updateGeometryByGeometryService(entity);
+    default void processingUpdateGemetry(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
+        if (checkEntityExists(entity)) {
+            imp(entity);
+            updateGeometryByGeometryService(entity);
+        }
     }
 
     @BeforeDelete(order = -100)
-    default void processingDeleteGemetry(E entity) {
-        imp(entity);
-        deleteGeometryByGeometryService(entity);
+    default void processingDeleteGemetry(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
+        if (checkEntityExists(entity)) {
+            imp(entity);
+            deleteGeometryByGeometryService(entity);
+        }
     }
 
     /**
