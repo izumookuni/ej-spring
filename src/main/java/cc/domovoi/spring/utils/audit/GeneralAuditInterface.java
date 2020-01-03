@@ -78,7 +78,7 @@ public interface GeneralAuditInterface<E extends GeneralAuditEntityInterface<?>>
         List<AuditDisplayEntity> auditDisplayEntityList = auditService().auditMapper().findListByContextName(AuditUtils.contextName(auditClass()));
         return auditService().findAuditBatchChangeRecord(auditDisplayEntityList, auditClass(),
                 contextName -> contextNameList.map(list -> list.contains(contextName)).orElse(true),
-                scopeId -> scopeIdList.map(list -> list.containsAll(scopeId)).orElse(true),
+                scopeId -> scopeIdList.map(list -> scopeId.containsAll(list)).orElse(true),
                 contextId -> contextIdList.map(list -> list.contains(contextId)).orElse(true),
                 fieldName -> auditFieldList.map(list -> list.contains(fieldName)).orElse(true));
     }

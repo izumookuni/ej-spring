@@ -106,14 +106,14 @@ public class AuditTest {
         fieldList.forEach(field -> logger.debug("field " + field.getName()));
     }
 
-    @Test
-    public void testAddChangeRecord2() throws Exception {
-        AuditBeanEntityTestImpl2 auditBeanEntity1 = new AuditBeanEntityTestImpl2(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime(), RandomUtils.randomString());
-        AuditBeanEntityTestImpl2 auditBeanEntity2 = new AuditBeanEntityTestImpl2(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime(), RandomUtils.randomString());
-        auditBeanService.addEntity(auditBeanEntity1);
-        auditBeanService.addEntity(auditBeanEntity2);
-        auditMapper.showAllData();
-    }
+//    @Test
+//    public void testAddChangeRecord2() throws Exception {
+//        AuditBeanEntityTestImpl2 auditBeanEntity1 = new AuditBeanEntityTestImpl2(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime(), RandomUtils.randomString(), RandomUtils.randomString());
+//        AuditBeanEntityTestImpl2 auditBeanEntity2 = new AuditBeanEntityTestImpl2(RandomUtils.randomString(), RandomUtils.randomInteger(), RandomUtils.randomDouble(), RandomUtils.randomBoolean(), RandomUtils.randomLocalDateTime(), RandomUtils.randomString());
+//        auditBeanService.addEntity(auditBeanEntity1);
+//        auditBeanService.addEntity(auditBeanEntity2);
+//        auditMapper.showAllData();
+//    }
 
     @Test
     public void testFindBatchChangeRecord() throws Exception {

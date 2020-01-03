@@ -4,9 +4,7 @@ import cc.domovoi.spring.entity.audit.*;
 import cc.domovoi.spring.entity.audit.batch.AuditChangeContextGroupBatchModel;
 import cc.domovoi.spring.entity.audit.batch.AuditChangeScopeBatchModel;
 import cc.domovoi.spring.mapper.audit.AuditMapperInterface;
-import cc.domovoi.spring.utils.CommonLogger;
 import cc.domovoi.spring.utils.ServiceUtils;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
 import org.jooq.lambda.Seq;
@@ -111,7 +109,7 @@ public interface AuditServiceInterface {
     default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Optional<List<String>> contextNameList, Optional<List<String>> scopeIdList, Optional<List<String>> contextIdList, Optional<List<String>> auditFieldList) {
         return findAuditChangeRecord(auditDisplayEntityList, auditClass,
                 contextName -> contextNameList.map(list -> list.contains(contextName)).orElse(true),
-                scopeId -> scopeIdList.map(list -> list.containsAll(scopeId)).orElse(true),
+                scopeId -> scopeIdList.map(list -> scopeId.containsAll(list)).orElse(true),
                 contextId -> contextIdList.map(list -> list.contains(contextId)).orElse(true),
                 fieldName -> auditFieldList.map(list -> list.contains(fieldName)).orElse(true));
     }

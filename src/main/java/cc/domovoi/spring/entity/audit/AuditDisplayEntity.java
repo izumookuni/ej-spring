@@ -41,7 +41,6 @@ public class AuditDisplayEntity implements AuditInterface {
     private String scopeId;
 
     @ApiModelProperty(value = "context ID")
-    @JsonProperty
     private String contextId;
 
     @ApiModelProperty(value = "context parent ID")

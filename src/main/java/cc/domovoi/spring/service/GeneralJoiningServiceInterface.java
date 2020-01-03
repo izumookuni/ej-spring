@@ -131,7 +131,24 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         return addEntity(entity, Optional.empty(), Optional.empty());
     }
 
+    default void initDefaultField(E entity) {
+        // init default field
+        if (Objects.isNull(entity.getId())) {
+            entity.setId(idGenerator());
+        }
+        if (Objects.isNull(entity.getAvailable())) {
+            entity.setAvailable(true);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        entity.setCreationTime(now);
+        entity.setUpdateTime(now);
+    }
+
     default Try<Tuple2<Integer, K>> addEntity(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
+        // before add 1
+        if (Objects.nonNull(entity)) {
+            doBeforeAdd(1, entity, request, response);
+        }
         // addCondition
         Optional<String> addConditionResult = addCondition(entity, request, response);
         if (addConditionResult.isPresent()) {
@@ -146,7 +163,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         else {
             idFlag = true;
         }
-        // before add
+        // before add 0
         if (Objects.nonNull(entity)) {
             doBeforeAdd(0, entity, request, response);
 //            processBeforeAdd(entity);
@@ -156,15 +173,16 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
             return new Success<>(new Tuple2<>(0, null));
         }
         // init default field
-        if (Objects.isNull(entity.getId())) {
-            entity.setId(idGenerator());
-        }
-        if (Objects.isNull(entity.getAvailable())) {
-            entity.setAvailable(true);
-        }
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreationTime(now);
-        entity.setUpdateTime(now);
+        initDefaultField(entity);
+//        if (Objects.isNull(entity.getId())) {
+//            entity.setId(idGenerator());
+//        }
+//        if (Objects.isNull(entity.getAvailable())) {
+//            entity.setAvailable(true);
+//        }
+//        LocalDateTime now = LocalDateTime.now();
+//        entity.setCreationTime(now);
+//        entity.setUpdateTime(now);
 
         Try<Tuple2<Integer, K>> innerAddResult = innerAddEntity(entity);
         // after add
@@ -180,12 +198,16 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Integer> updateEntity(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
+        // before update 1
+        if (Objects.nonNull(entity)) {
+            doBeforeUpdate(1, entity, request, response);
+        }
         // updateCondition
         Optional<String> updateConditionResult = updateCondition(entity, request, response);
         if (updateConditionResult.isPresent()) {
             return new Failure<>(new RuntimeException(updateConditionResult.get()));
         }
-        // before update
+        // before update 0
         if (Objects.nonNull(entity)) {
             doBeforeUpdate(0, entity, request, response);
 //            processBeforeUpdate(entity);
@@ -204,12 +226,16 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Integer> deleteEntity(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
+        // before delete 1
+        if (Objects.nonNull(entity)) {
+            doBeforeDelete(1, entity, request, response);
+        }
         // deleteCondition
         Optional<String> deleteConditionResult = deleteCondition(entity, request, response);
         if (deleteConditionResult.isPresent()) {
             return new Failure<>(new RuntimeException(deleteConditionResult.get()));
         }
-        // before delete
+        // before delete 0
         if (Objects.nonNull(entity)) {
             doBeforeDelete(0, entity, request, response);
 //            processBeforeDelete(entity);

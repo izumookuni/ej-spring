@@ -25,6 +25,11 @@ import java.util.Map;
 public interface StandardRetrieveControllerInterface<E extends StandardJoiningEntityInterface, S extends StandardRetrieveJoiningServiceInterface<E>> extends GeneralRetrieveControllerInterface<E>, MvcControllerInterface<S> {
 
     @Override
+    default Class<E> entityClass() {
+        return service().entityClass();
+    }
+
+    @Override
     default List<E> findEntityFunction(E entity) {
         return service().findList(entity);
     }

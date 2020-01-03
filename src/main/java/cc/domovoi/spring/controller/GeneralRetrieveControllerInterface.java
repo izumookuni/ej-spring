@@ -26,6 +26,8 @@ import java.util.Map;
  */
 public interface GeneralRetrieveControllerInterface<E> extends OriginalControllerInterface {
 
+    Class<E> entityClass();
+
     /**
      * The function that find entity list.
      *

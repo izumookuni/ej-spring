@@ -96,7 +96,7 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
 
     @Override
     public List<AuditDisplayEntity> findListByScopeId(List<String> scopeIdList) {
-        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> scopeIdList.containsAll(auditDisplayEntity.getScopeIdList())).peek(auditDisplayEntity -> {
+        return auditDisplayEntityList.stream().filter(auditDisplayEntity -> auditDisplayEntity.getScopeIdList().containsAll(scopeIdList)).peek(auditDisplayEntity -> {
             List<String> scopeIdList0 = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
             auditDisplayEntity.setScopeIdList(scopeIdList0);
         }).collect(Collectors.toList());

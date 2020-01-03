@@ -55,13 +55,13 @@ public class AuditChangeRecordModel extends AuditDisplayEntity {
     }
 
     @Override
-    @JsonIgnore
+//    @JsonIgnore
     public String getAuditAuthor() {
         return super.getAuditAuthor();
     }
 
     @Override
-    @JsonIgnore
+//    @JsonIgnore
     public String getAuditIp() {
         return super.getAuditIp();
     }
@@ -134,7 +134,7 @@ public class AuditChangeRecordModel extends AuditDisplayEntity {
     }
 
     @Override
-    @JsonIgnore
+//    @JsonIgnore
     public LocalDateTime getAuditTime() {
         return super.getAuditTime();
     }

@@ -6,6 +6,7 @@ import cc.domovoi.spring.geometry.model.GeoInterLayerContextLike;
 import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.List;
+import java.util.Objects;
 
 public interface GeneralGeometryInterLayerServiceInterface<INNER extends GeoInterLayerContextLike<K, OUTER>, OUTER, K, E extends GeneralGeometryMultipleJoiningEntityInterface<K, INNER, OUTER>> extends GeneralGeometryInterLayerRetrieveServiceInterface<INNER, OUTER, K, E>, GeneralGeometryServiceInterface<INNER, OUTER, K, E> {
 
@@ -40,9 +41,11 @@ public interface GeneralGeometryInterLayerServiceInterface<INNER extends GeoInte
     default void imp(E entity) {
         entity.geometryOuterGetMap().forEach((key, supplier) -> {
             OUTER outer = supplier.get();
-            INNER inner = geometryService().tempInner();
-            inner.setOuter(outer);
-            entity.geometryInnerSetMap().get(key).accept(inner);
+            if (Objects.nonNull(outer)) {
+                INNER inner = geometryService().tempInner();
+                inner.setOuter(outer);
+                entity.geometryInnerSetMap().get(key).accept(inner);
+            }
         });
     }
 }
