@@ -1,10 +1,13 @@
 package cc.domovoi.spring.utils;
 
+import cc.domovoi.tools.defaults.NullDefaultUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,12 +16,42 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ClassUtils {
 
     @SuppressWarnings("unchecked")
     public static <T, U> List<T> forceCastClass(List<U> uList, Class<T> tClass) {
         return uList.stream().map(u -> (T) u).collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> genericType(Class<?> clazz, Integer... index) {
+        Type type0 = Stream.of(index).reduce(clazz.getGenericSuperclass(), (type, idx) -> {
+            if (type != null) {
+                if (type instanceof ParameterizedType) {
+                    Type[] types = ((ParameterizedType) type).getActualTypeArguments();
+                    if (idx < types.length) {
+                        return types[idx];
+                    }
+                }
+            }
+            return null;
+        }, NullDefaultUtils::nvl);
+        if (type0 == null) {
+            return null;
+        }
+        if (type0 instanceof Class) {
+            return (Class<T>) type0;
+        }
+        else if (type0 instanceof ParameterizedType) {
+            return (Class<T>) ((ParameterizedType) type0).getRawType();
+        }
+        else {
+            throw new RuntimeException("no supported type " + type0.getTypeName());
+        }
+
+
     }
 
     // acquire classes from declare packageName
