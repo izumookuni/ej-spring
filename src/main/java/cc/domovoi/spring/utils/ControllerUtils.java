@@ -23,7 +23,7 @@ public class ControllerUtils {
         logger.info(name);
         Map<String, Object> jsonMap = new HashMap<>();
         try {
-            Object result = data.get();
+            E result = data.get();
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
             e.printStackTrace();
@@ -97,5 +97,23 @@ public class ControllerUtils {
             dataMap.put("id", t2.v2());
             return dataMap;
         });
+    }
+
+    public static <E, R> Map<String, Object> commonOptionalFunction(Logger logger, String name, Supplier<? extends Optional<E>> data, Function<? super E, ? extends R> op) {
+        logger.info(name);
+        Map<String, Object> jsonMap = new HashMap<>();
+        try {
+//            Object result = data.get();
+            Optional<E> result = data.get();
+            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.map(op).orElse(null));
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(String.format("error in %s, message: %s", name, e.getMessage()));
+            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    public static <E, R> Map<String, Object> commonOptionalFunction(Logger logger, String name, Supplier<? extends Optional<E>> data) {
+        return commonOptionalFunction(logger, name, data, Function.identity());
     }
 }
