@@ -128,22 +128,30 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return findEntityListByDao(entity);
     }
 
+    default ResultQuery<Record> findListByKeyDSL(List<Object> keyList, JoiningProperty joiningProperty) {
+        return dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList));
+    }
+
     @Override
-    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass) {
+    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, String name) {
         if (keyList.isEmpty()) {
             return Collections.emptyList();
         }
         Set<Tuple2<JoiningProperty, java.lang.reflect.Field>> joiningPropertySet = GeneralAnnotationEntityInterface.joiningPropertySet(entityClass);
         JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
-        List<E> eList = dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList)).fetch().into(entityClass()); // .stream().peek(e -> this.doAfterFindEntity(0, e)).collect(Collectors.toList());
+        List<E> eList = findListByKeyDSL(keyList, joiningProperty).fetch().into(entityClass()); // .stream().peek(e -> this.doAfterFindEntity(0, e)).collect(Collectors.toList());
         joiningColumn(eList);
-        doAfterFindList(0, eList);
+        doAfterFindList(0, name, eList);
 //        processAfterFindResult(eList);
         return eList;
     }
 
+    default ResultQuery<Record> findPojoDSL(P pojo) {
+        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo));
+    }
+
     default P findPojoByDao(P pojo) {
-        Record record = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo)).fetchOne();
+        Record record = findPojoDSL(pojo).fetchOne();
         if (Objects.nonNull(record)) {
             return record.into(getType());
         }
@@ -153,7 +161,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default List<P> findPojoListByDao(P pojo) {
-        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo)).fetch().into(getType());
+        return findPojoDSL(pojo).fetch().into(getType());
     }
 
     default E findEntityUsingIdByDao(K id) {
@@ -162,8 +170,12 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return findEntityByDao(entity);
     }
 
+    default ResultQuery<Record> findEntityDSL(E entity) {
+        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity));
+    }
+
     default E findEntityByDao(E entity) {
-        Record record = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetchOne();
+        Record record = findEntityDSL(entity).fetchOne();
         if (Objects.nonNull(record)) {
             E result = record.into(entityClass());
             joiningColumn(Collections.singletonList(result));
@@ -175,7 +187,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default List<E> findEntityListByDao(E entity) {
-        List<E> result = dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity)).fetch().into(entityClass());
+        List<E> result = findEntityDSL(entity).fetch().into(entityClass());
         joiningColumn(result);
         return result;
     }

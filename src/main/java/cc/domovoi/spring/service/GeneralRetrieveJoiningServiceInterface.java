@@ -1,5 +1,6 @@
 package cc.domovoi.spring.service;
 
+import cc.domovoi.spring.annotation.condition.CollectCondition;
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.service.annotation.JoiningTable;
@@ -15,7 +16,6 @@ import cc.domovoi.spring.utils.joiningdepthtree.JoiningFixedDepthTree;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
 
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,7 +34,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     List<E> innerFindList(E entity);
 
-    List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass);
+    List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, String name);
 
     default Map<String, GeneralRetrieveJoiningServiceInterface> joiningService() {
         return innerJoiningService();
@@ -98,52 +98,49 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         entityList.forEach(this::afterFindEntity);
     }
 
-    default void doBeforeFindEntity(Integer scope, E entity) {
+    default void doBeforeFindEntity(Integer scope, String name, E entity) {
         if (0 == scope) {
             beforeFindEntity(entity);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeFind.class, scope, entity);
+        GeneralUtils.doAnnotationMethod(this, BeforeFind.class, scope, name, entity);
     }
 
-    default void doAfterFindEntity(Integer scope, E entity) {
+    default void doAfterFindEntity(Integer scope, String name, E entity) {
         if (0 == scope) {
             afterFindEntity(entity);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterFind.class, scope, entity);
+        GeneralUtils.doAnnotationMethod(this, AfterFind.class, scope, name, entity);
     }
 
-    default void doAfterFindList(Integer scope, List<E> entityList) {
+    default void doAfterFindList(Integer scope, String name, List<E> entityList) {
         if (0 == scope) {
             afterFindList(entityList);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterFindList.class, scope, entityList);
+        GeneralUtils.doAnnotationMethod(this, AfterFindList.class, scope, name, entityList);
     }
 
     default Optional<String> findCondition(E entity) {
         return Optional.empty();
     }
 
-    default Optional<String> doFindCondition(E entity) {
+    default Optional<String> doFindCondition(String name, E entity) {
         Optional<String> findCondition = findCondition(entity);
         if (findCondition.isPresent()) {
             return findCondition;
         }
-        List<Tuple2<FindCondition, Method>> conditionMethodList = GeneralUtils.methodAnnotationOrdered(this.getClass(), FindCondition.class, 0);
-        for (Tuple2<FindCondition, Method> t2 : conditionMethodList) {
-            try {
-                Optional<String> findCondition1 = on(this).call(t2.v2().getName(), entity).get();
-                if (findCondition1.isPresent()) {
-                    return findCondition1;
-                }
-            } catch (Exception e) {
-                return Optional.of(e.getMessage());
-            }
-        }
-        return Optional.empty();
+        return GeneralUtils.doCondition(this, FindCondition.class, 0, name, entity);
     }
 
     default Optional<String> collectCondition(E entity) {
         return Optional.empty();
+    }
+
+    default Optional<String> doCollectCondition(String name, E entity) {
+        Optional<String> collectCondition = collectCondition(entity);
+        if (collectCondition.isPresent()) {
+            return collectCondition;
+        }
+        return GeneralUtils.doCondition(this, CollectCondition.class, 0, name, entity);
     }
 
     default JoiningDepthTreeLike depthTree() {
@@ -163,17 +160,16 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default E findEntity(K id, Function<? super K, ? extends E> function, JoiningDepthTreeLike depthTree) {
+        return findEntity(id, function, depthTree, "findEntity");
+    }
+
+    default E findEntity(K id, Function<? super K, ? extends E> function, JoiningDepthTreeLike depthTree, String name) {
         // no findCondition
-        // before find
-//        processBeforeFindResult(id, "id");
         // find entity
         E e = function.apply(id);
         // after find
         if (Objects.nonNull(e)) {
-//            processAfterFindResult(Collections.singletonList(e));
-            doAfterFindEntity(0, e);
-//            joinEntityListByTree(Collections.singletonList(e), depthTree);
-//            doAfterFindEntity(1, e);
+            doAfterFindEntity(0, name, e);
             Optional<String> collectConditionResult = collectCondition(e);
             if (collectConditionResult.isPresent()) {
                 throw new RuntimeException(collectConditionResult.get());
@@ -182,9 +178,9 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                 throw new RuntimeException("record is not available");
             }
             else {
-                doAfterFindEntity(1, e);
-                joinEntityListByTree(Collections.singletonList(e), depthTree);
-                doAfterFindEntity(2, e);
+                doAfterFindEntity(1, name, e);
+                joinEntityListByTree(Collections.singletonList(e), depthTree, name);
+                doAfterFindEntity(2, name, e);
                 return e;
             }
         }
@@ -193,28 +189,36 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         }
     }
 
+    default E findEntity(K id, JoiningDepthTreeLike depthTree, String name) {
+        return findEntity(id, this::innerFindEntity, depthTree, name);
+    }
+
     default E findEntity(K id, JoiningDepthTreeLike depthTree) {
         return findEntity(id, this::innerFindEntity, depthTree);
     }
 
+    default E findEntity(K id, String name) {
+        return findEntity(id, depthTree(), name);
+    }
+
     default E findEntity(E entity, Function<? super E, ? extends E> function, JoiningDepthTreeLike depthTree) {
+        return findEntity(entity, function, depthTree, "findEntity");
+    }
+
+    default E findEntity(E entity, Function<? super E, ? extends E> function, JoiningDepthTreeLike depthTree, String name) {
         // findCondition
-        Optional<String> findConditionResult = doFindCondition(entity);
+        Optional<String> findConditionResult = doFindCondition(name, entity);
         if (findConditionResult.isPresent()) {
             throw new RuntimeException(findConditionResult.get());
         }
         // before find
         if (Objects.nonNull(entity)) {
-            doBeforeFindEntity(0, entity);
-//            processBeforeFindResult(entity, "entity");
+            doBeforeFindEntity(0, name, entity);
         }
         E e = function.apply(entity);
         // after find
         if (Objects.nonNull(e)) {
-//            processAfterFindResult(Collections.singletonList(e));
-            doAfterFindEntity(0, e);
-//            joinEntityListByTree(Collections.singletonList(e), depthTree);
-//            doAfterFindEntity(1, e);
+            doAfterFindEntity(0, name, e);
             Optional<String> collectConditionResult = collectCondition(e);
             if (collectConditionResult.isPresent()) {
                 throw new RuntimeException(collectConditionResult.get());
@@ -223,9 +227,9 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                 throw new RuntimeException("record is not available");
             }
             else {
-                doAfterFindEntity(1, e);
-                joinEntityListByTree(Collections.singletonList(e), depthTree);
-                doAfterFindEntity(2, e);
+                doAfterFindEntity(1, name, e);
+                joinEntityListByTree(Collections.singletonList(e), depthTree, name);
+                doAfterFindEntity(2, name, e);
                 return e;
             }
         }
@@ -239,37 +243,46 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         return findEntity(entity, e -> supplier.get(), depthTree);
     }
 
+    default E findEntity(Supplier<? extends E> supplier, JoiningDepthTreeLike depthTree, String name) {
+        E entity = onClass(entityClass()).create().get();
+        return findEntity(entity, e -> supplier.get(), depthTree, name);
+    }
+
+    default E findEntity(E entity, JoiningDepthTreeLike depthTree, String name) {
+        return findEntity(entity, this::innerFindEntity, depthTree, name);
+    }
+
     default E findEntity(E entity, JoiningDepthTreeLike depthTree) {
         return findEntity(entity, this::innerFindEntity, depthTree);
     }
 
+    default E findEntity(E entity, String name) {
+        return findEntity(entity, depthTree(), name);
+    }
+
     default List<E> findList(E entity, Function<? super E, ? extends List<E>> function, JoiningDepthTreeLike depthTree) {
+        return findList(entity, function, depthTree, "findList");
+    }
+
+    default List<E> findList(E entity, Function<? super E, ? extends List<E>> function, JoiningDepthTreeLike depthTree, String name) {
         // findCondition
-        Optional<String> findConditionResult = doFindCondition(entity);
+        Optional<String> findConditionResult = doFindCondition(name, entity);
         if (findConditionResult.isPresent()) {
             throw new RuntimeException(findConditionResult.get());
         }
         // before find
         if (Objects.nonNull(entity)) {
-//            beforeFindEntity(entity);
-            doBeforeFindEntity(0, entity);
-//            processBeforeFindResult(entity, "entity");
+            doBeforeFindEntity(0, name, entity);
         }
 
-//        List<E> eList = innerFindList(entity);
-//        eList.forEach(this::afterFindEntity);
-//        joinEntityListByTree(eList, depthTree);
-//        return eList.stream().filter(e -> !collectCondition(e).isPresent()).collect(Collectors.toList());
-
         List<E> eList0 = function.apply(entity);
-        doAfterFindList(0, eList0);
-//        processAfterFindResult(eList0);
+        doAfterFindList(0, name, eList0);
         List<E> eList1 = eList0.stream()
                 .filter(e -> (Objects.isNull(e.getAvailable()) || e.getAvailable()) && !collectCondition(e).isPresent())
                 .collect(Collectors.toList());
-        doAfterFindList(1, eList1);
-        joinEntityListByTree(eList1, depthTree);
-        doAfterFindList(2, eList1);
+        doAfterFindList(1, name, eList1);
+        joinEntityListByTree(eList1, depthTree, name);
+        doAfterFindList(2, name, eList1);
         return eList1;
     }
 
@@ -278,12 +291,25 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
         return findList(entity, e -> supplier.get(), depthTree);
     }
 
+    default List<E> findList(Supplier<? extends List<E>> supplier, JoiningDepthTreeLike depthTree, String name) {
+        E entity = onClass(entityClass()).create().get();
+        return findList(entity, e -> supplier.get(), depthTree, name);
+    }
+
+    default List<E> findList(E entity, JoiningDepthTreeLike depthTree, String name) {
+        return findList(entity, this::innerFindList, depthTree, name);
+    }
+
     default List<E> findList(E entity, JoiningDepthTreeLike depthTree) {
         return findList(entity, this::innerFindList, depthTree);
     }
 
+    default List<E> findList(E entity, String name) {
+        return findList(entity, depthTree(), name);
+    }
+
     @SuppressWarnings("unchecked")
-    default void joinEntityListByTree(List<E> entityList, JoiningDepthTreeLike tree) {
+    default void joinEntityListByTree(List<E> entityList, JoiningDepthTreeLike tree, String name) {
         // When depthTree is the default (leaf), return directly
         logger().debug("tree: " + tree.treeString());
         if (tree.isLeaf()) {
@@ -328,9 +354,9 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
                             return innerKeyList != null ? innerKeyList.stream() : Stream.empty();
                         }).collect(Collectors.toList());
 
-                        List<GeneralJoiningEntityInterface> joiningEntityList0 = joiningService.findListByKey(keyList, subKey, currentService.entityClass());
+                        List<GeneralJoiningEntityInterface> joiningEntityList0 = joiningService.findListByKey(keyList, subKey, currentService.entityClass(), name);
                         List<GeneralJoiningEntityInterface> joiningEntityList = joiningEntityList0.stream().filter(e -> (Objects.isNull(e.getAvailable()) || e.getAvailable()) && !joiningService.collectCondition(e).isPresent()).collect(Collectors.toList());
-                        joiningService.doAfterFindList(1, joiningEntityList);
+                        joiningService.doAfterFindList(1, name, joiningEntityList);
                         currentEntityList.forEach(e -> {
                             Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap = e.joiningKeyMap();
                             List<Object> innerKeyList = innerJoiningKeyMap.get(subKey).get();

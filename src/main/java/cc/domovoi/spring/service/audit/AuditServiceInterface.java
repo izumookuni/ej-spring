@@ -73,7 +73,11 @@ public interface AuditServiceInterface {
      * @return AuditChangeContextGroupModel List
      */
     default <T extends GeneralAuditEntityInterface> List<AuditChangeContextGroupModel> findAuditChangeRecord(List<AuditDisplayEntity> auditDisplayEntityList, Class<T> auditClass, Predicate<? super String> contextNameFilter, Predicate<? super List<String>> scopeIdListFilter, Predicate<? super String> contextIdFilter, Predicate<? super String> fieldNameFilter) {
-        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityList.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName()) && scopeIdListFilter.test(auditDisplayEntity.getScopeIdList())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName));
+        List<AuditDisplayEntity> auditDisplayEntityListInScope = auditDisplayEntityList.stream().collect(Collectors.groupingBy(AuditDisplayEntity::getContextId))
+                .values().stream().filter(list -> list.stream().anyMatch(auditDisplayEntity -> scopeIdListFilter.test(auditDisplayEntity.getScopeIdList())))
+                .flatMap(List::stream).collect(Collectors.toList());
+
+        Map<String, List<AuditDisplayEntity>> auditDisplayEntityListMap = auditDisplayEntityListInScope.stream().filter(auditDisplayEntity -> contextNameFilter.test(auditDisplayEntity.getContextName())).collect(Collectors.groupingBy(AuditDisplayEntity::getContextName)); //  && scopeIdListFilter.test(auditDisplayEntity.getScopeIdList())
         return auditDisplayEntityListMap.entrySet().stream().map(entry -> {
             // context group
             String contextName = entry.getKey();

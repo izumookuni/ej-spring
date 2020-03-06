@@ -2,11 +2,9 @@ package cc.domovoi.spring.controller;
 
 import cc.domovoi.spring.annotation.after.AfterFindList;
 import cc.domovoi.spring.annotation.before.BeforeFind;
-import cc.domovoi.spring.utils.CommonLogger;
 import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,18 +42,18 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
 
     }
 
-    default void doBeforeFindEntity(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeFindEntity(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
             beforeFindEntity(entity);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeFind.class, scope, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeFind.class, scope, name, entity, request, response);
     }
 
-    default void doAfterFindList(Integer scope, List<E> entityList, HttpServletRequest request, HttpServletResponse response) {
+    default void doAfterFindList(Integer scope, String name, List<E> entityList, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
             afterFindList(entityList);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterFindList.class, scope, entityList, request, response);
+        GeneralUtils.doAnnotationMethod(this, AfterFindList.class, scope, name, entityList, request, response);
     }
 
     /**
@@ -76,9 +74,9 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("findEntity: %s", entity));
-            doBeforeFindEntity(0, entity, request, response);
+            doBeforeFindEntity(0, "findEntity", entity, request, response);
             List<E> entityList = findEntityFunction(entity);
-            doAfterFindList(0, entityList, request, response);
+            doAfterFindList(0, "findEntity", entityList, request, response);
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, entityList);
 
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class Timer {
@@ -74,5 +75,9 @@ public class Timer {
         }
         recordStartTime.clear();
         recordDurationMap.clear();
+    }
+
+    public static <Logger> void showDurationMillis(Logger logger, BiConsumer<? super Logger, ? super String> op) {
+        durationMillis().forEach((k, v) -> op.accept(logger, k + " -> " + v / 1000_000 + "ms"));
     }
 }

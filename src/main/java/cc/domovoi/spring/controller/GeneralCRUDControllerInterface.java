@@ -66,52 +66,52 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
 
     default void beforeDelete(E entity, HttpServletRequest request, HttpServletResponse response) { }
 
-    default void afterAdd(E entity, HttpServletRequest request, HttpServletResponse response, Try<Tuple2<Integer, K>> result) { }
+    default void afterAdd(E entity, Try<Tuple2<Integer, K>> result, HttpServletRequest request, HttpServletResponse response) { }
 
-    default void afterUpdate(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) { }
+    default void afterUpdate(E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) { }
 
-    default void afterDelete(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) { }
+    default void afterDelete(E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) { }
 
-    default void doBeforeAdd(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeAdd(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
             beforeAdd(entity, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeAdd.class, scope, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeAdd.class, scope, name, entity, request, response);
     }
 
-    default void doBeforeUpdate(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeUpdate(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
             beforeUpdate(entity, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeUpdate.class, scope, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeUpdate.class, scope, name, entity, request, response);
     }
 
-    default void doBeforeDelete(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeDelete(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
             beforeDelete(entity, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, BeforeDelete.class, scope, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeDelete.class, scope, name, entity, request, response);
     }
 
-    default void doAfterAdd(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response, Try<Tuple2<Integer, K>> result) {
+    default void doAfterAdd(Integer scope, String name, E entity, Try<Tuple2<Integer, K>> result, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
-            afterAdd(entity, request, response, result);
+            afterAdd(entity, result, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterAdd.class, scope, entity, request, response, result);
+        GeneralUtils.doAnnotationMethod(this, AfterAdd.class, scope, name, entity, result, request, response);
     }
 
-    default void doAfterUpdate(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
+    default void doAfterUpdate(Integer scope, String name, E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
-            afterUpdate(entity, request, response, result);
+            afterUpdate(entity, result, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterUpdate.class, scope, entity, request, response, result);
+        GeneralUtils.doAnnotationMethod(this, AfterUpdate.class, scope, name, entity, result, request, response);
     }
 
-    default void doAfterDelete(Integer scope, E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
+    default void doAfterDelete(Integer scope, String name, E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
         if (0 == scope) {
-            afterDelete(entity, request, response, result);
+            afterDelete(entity, result, request, response);
         }
-        GeneralUtils.doFindAnnotationMethod(this, AfterDelete.class, scope, entity, request, response, result);
+        GeneralUtils.doAnnotationMethod(this, AfterDelete.class, scope, name, entity, result, request, response);
     }
 
     /**
@@ -132,10 +132,10 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("addEntity: %s", entity));
-            doBeforeAdd(0, entity, request, response);
+            doBeforeAdd(0, "addEntity", entity, request, response);
 //            beforeAdd(entity, request, response);
             Try<Tuple2<Integer, K>> result = addEntityFunction(entity, Optional.of(request), Optional.of(response));
-            doAfterAdd(0, entity, request, response, result);
+            doAfterAdd(0, "addEntity", entity, result, request, response);
 //            afterAdd(entity, request, response);
             if (result.isSuccess()) {
                 Tuple2<Integer, K> data = result.get();
@@ -174,10 +174,10 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("jsonMap: %s", entity));
-            doBeforeUpdate(0, entity, request, response);
+            doBeforeUpdate(0, "updateEntity", entity, request, response);
 //            beforeUpdate(entity, request, response);
             Try<Integer> result = updateEntityFunction(entity, Optional.of(request), Optional.of(response));
-            doAfterUpdate(0, entity, request, response, result);
+            doAfterUpdate(0, "updateEntity", entity, result, request, response);
 //            afterUpdate(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
@@ -212,10 +212,10 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("deleteEntity: %s", entity));
-            doBeforeDelete(0, entity, request, response);
+            doBeforeDelete(0, "deleteEntity", entity, request, response);
 //            beforeDelete(entity, request, response);
             Try<Integer> result = deleteEntityFunction(entity, Optional.of(request), Optional.of(response));
-            doAfterDelete(0, entity, request, response, result);
+            doAfterDelete(0, "deleteEntity", entity, result, request, response);
 //            afterDelete(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());

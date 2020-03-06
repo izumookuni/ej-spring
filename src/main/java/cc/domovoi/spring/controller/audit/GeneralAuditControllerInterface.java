@@ -19,17 +19,17 @@ import java.util.Map;
 public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntityInterface<K>> extends GeneralAuditBasicControllerInterface<K, E> {
 
     @AfterAdd(order = -100)
-    default void recordAddAuditEntity(E entity, HttpServletRequest request, HttpServletResponse response, Try<Tuple2<Integer, K>> result) {
+    default void recordAddAuditEntity(E entity, Try<Tuple2<Integer, K>> result, HttpServletRequest request, HttpServletResponse response) {
         recordAddAuditEntity(entity, request);
     }
 
     @AfterUpdate(order = -100)
-    default void recordUpdateAuditEntity(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
+    default void recordUpdateAuditEntity(E entity ,Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
         recordUpdateAuditEntity(entity, request);
     }
 
     @AfterDelete(order = -100)
-    default void recordDeleteAuditEntity(E entity, HttpServletRequest request, HttpServletResponse response, Try<Integer> result) {
+    default void recordDeleteAuditEntity(E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
         recordDeleteAuditEntity(entity, request);
     }
 

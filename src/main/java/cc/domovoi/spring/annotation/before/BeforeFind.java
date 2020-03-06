@@ -12,4 +12,8 @@ public @interface BeforeFind {
     int order() default Integer.MAX_VALUE;
 
     int scope() default 0;
+
+    String[] skip() default {};
+
+    String[] include() default {};
 }
