@@ -2,13 +2,11 @@ package cc.domovoi.spring.utils;
 
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
-import org.jooq.lambda.function.Function3;
+import org.jooq.lambda.function.Function2;
 import org.jooq.lambda.tuple.Tuple2;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,7 @@ public class ControllerUtils {
         }
     }
 
-    public static <E extends StandardJoiningEntityInterface> Map<String, Object> deleteBatch(Logger logger, String name, List<String> idList, Class<E> entityClass, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response, Function3<E, Optional<HttpServletRequest>, Optional<HttpServletResponse>, Try<Integer>> deleteEntityFunction) {
+    public static <E extends StandardJoiningEntityInterface> Map<String, Object> deleteBatch(Logger logger, String name, List<String> idList, Class<E> entityClass, Map<String, Object> params, Function2<E, Map<String, Object>, Try<Integer>> deleteEntityFunction) {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger.info(String.format("deleteEntityBatch: %s", idList));
@@ -40,7 +38,7 @@ public class ControllerUtils {
                 try {
                     E deleteQuery = entityClass.newInstance();
                     deleteQuery.setId(id);
-                    return deleteEntityFunction.apply(deleteQuery, request, response);
+                    return deleteEntityFunction.apply(deleteQuery, params);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
@@ -68,7 +66,7 @@ public class ControllerUtils {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, op.apply(result.get()));
             }
             else {
-                throw new RuntimeException(result.failed().get().getMessage());
+                throw result.failed().get();
             }
         } catch (Exception e) {
             e.printStackTrace();

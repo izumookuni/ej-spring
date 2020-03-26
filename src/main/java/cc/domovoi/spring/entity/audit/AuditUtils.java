@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModelProperty;
 import org.jooq.lambda.function.Consumer2;
 import org.jooq.lambda.function.Consumer3;
 import org.jooq.lambda.tuple.Tuple2;
-import org.joor.Reflect;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;

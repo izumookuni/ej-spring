@@ -7,6 +7,7 @@ import cc.domovoi.spring.annotation.after.AfterUpdate;
 import cc.domovoi.spring.annotation.before.BeforeAdd;
 import cc.domovoi.spring.annotation.before.BeforeDelete;
 import cc.domovoi.spring.annotation.before.BeforeUpdate;
+import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * OriginalCRUDControllerInterface.
@@ -34,84 +34,81 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * The function that add Entity.
      *
      * @param entity entity
-     * @param request request
-     * @param response request
+     * @param params params
      * @return The number of successful insert operations.
      */
-    Try<Tuple2<Integer, K>> addEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response);
+    Try<Tuple2<Integer, K>> addEntityFunction(E entity, Map<String, Object> params);
 
     /**
      * The function that update Entity.
      *
      * @param entity entity
-     * @param request request
-     * @param response request
+     * @param params params
      * @return The number of successful update operations.
      */
-    Try<Integer> updateEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response);
+    Try<Integer> updateEntityFunction(E entity, Map<String, Object> params);
 
     /**
      * The function that delete Entity.
      *
      * @param entity entity
-     * @param request request
-     * @param response request
+     * @param params params
      * @return The number of successful delete operations.
      */
-    Try<Integer> deleteEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response);
+    Try<Integer> deleteEntityFunction(E entity, Map<String, Object> params);
 
-    default void beforeAdd(E entity, HttpServletRequest request, HttpServletResponse response) { }
+    default void beforeAdd(E entity, Map<String, Object> params) { }
 
-    default void beforeUpdate(E entity, HttpServletRequest request, HttpServletResponse response) { }
+    default void beforeUpdate(E entity, Map<String, Object> params) { }
 
-    default void beforeDelete(E entity, HttpServletRequest request, HttpServletResponse response) { }
+    default void beforeDelete(E entity, Map<String, Object> params) { }
 
-    default void afterAdd(E entity, Try<Tuple2<Integer, K>> result, HttpServletRequest request, HttpServletResponse response) { }
+    default void afterAdd(E entity, Try<Tuple2<Integer, K>> result, Map<String, Object> params) { }
 
-    default void afterUpdate(E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) { }
+    default void afterUpdate(E entity, Try<Integer> result, Map<String, Object> params) { }
 
-    default void afterDelete(E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) { }
+    default void afterDelete(E entity, Try<Integer> result, Map<String, Object> params) { }
 
-    default void doBeforeAdd(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeAdd(Integer scope, String name, E entity, Map<String, Object> params) {
         if (0 == scope) {
-            beforeAdd(entity, request, response);
+            beforeAdd(entity, params);
         }
-        GeneralUtils.doAnnotationMethod(this, BeforeAdd.class, scope, name, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeAdd.class, scope, name, entity, params);
     }
 
-    default void doBeforeUpdate(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeUpdate(Integer scope, String name, E entity, Map<String, Object> params) {
         if (0 == scope) {
-            beforeUpdate(entity, request, response);
+            beforeUpdate(entity, params);
         }
-        GeneralUtils.doAnnotationMethod(this, BeforeUpdate.class, scope, name, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeUpdate.class, scope, name, entity, params);
     }
 
-    default void doBeforeDelete(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeDelete(Integer scope, String name, E entity, Map<String, Object> params) {
         if (0 == scope) {
-            beforeDelete(entity, request, response);
+            beforeDelete(entity, params);
         }
-        GeneralUtils.doAnnotationMethod(this, BeforeDelete.class, scope, name, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeDelete.class, scope, name, entity, params);
     }
 
-    default void doAfterAdd(Integer scope, String name, E entity, Try<Tuple2<Integer, K>> result, HttpServletRequest request, HttpServletResponse response) {
+    default void doAfterAdd(Integer scope, String name, E entity, Try<Tuple2<Integer, K>> result, Map<String, Object> params) {
         if (0 == scope) {
-            afterAdd(entity, result, request, response);
+            afterAdd(entity, result, params);
         }
-        GeneralUtils.doAnnotationMethod(this, AfterAdd.class, scope, name, entity, result, request, response);
+        GeneralUtils.doAnnotationMethod(this, AfterAdd.class, scope, name, entity, result, params);
     }
 
-    default void doAfterUpdate(Integer scope, String name, E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
+    default void doAfterUpdate(Integer scope, String name, E entity, Try<Integer> result, Map<String, Object> params) {
         if (0 == scope) {
-            afterUpdate(entity, result, request, response);
+            afterUpdate(entity, result, params);
         }
-        GeneralUtils.doAnnotationMethod(this, AfterUpdate.class, scope, name, entity, result, request, response);
+        GeneralUtils.doAnnotationMethod(this, AfterUpdate.class, scope, name, entity, result, params);
     }
 
-    default void doAfterDelete(Integer scope, String name, E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
+    default void doAfterDelete(Integer scope, String name, E entity, Try<Integer> result, Map<String, Object> params) {
         if (0 == scope) {
-            afterDelete(entity, result, request, response);
+            afterDelete(entity, result, params);
         }
-        GeneralUtils.doAnnotationMethod(this, AfterDelete.class, scope, name, entity, result, request, response);
+        GeneralUtils.doAnnotationMethod(this, AfterDelete.class, scope, name, entity, result, params);
     }
 
     /**
@@ -132,10 +129,14 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("addEntity: %s", entity));
-            doBeforeAdd(0, "addEntity", entity, request, response);
+            Map<String, Object> params = new HashMap<>();
+            params.put("_request", request);
+            params.put("_response", response);
+            params.put("_auditIp", AuditUtils.getIpAddr(request));
+            doBeforeAdd(0, "addEntity", entity, params);
 //            beforeAdd(entity, request, response);
-            Try<Tuple2<Integer, K>> result = addEntityFunction(entity, Optional.of(request), Optional.of(response));
-            doAfterAdd(0, "addEntity", entity, result, request, response);
+            Try<Tuple2<Integer, K>> result = addEntityFunction(entity, params);
+            doAfterAdd(0, "addEntity", entity, result, params);
 //            afterAdd(entity, request, response);
             if (result.isSuccess()) {
                 Tuple2<Integer, K> data = result.get();
@@ -174,10 +175,14 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("jsonMap: %s", entity));
-            doBeforeUpdate(0, "updateEntity", entity, request, response);
+            Map<String, Object> params = new HashMap<>();
+            params.put("_request", request);
+            params.put("_response", response);
+            params.put("_auditIp", AuditUtils.getIpAddr(request));
+            doBeforeUpdate(0, "updateEntity", entity, params);
 //            beforeUpdate(entity, request, response);
-            Try<Integer> result = updateEntityFunction(entity, Optional.of(request), Optional.of(response));
-            doAfterUpdate(0, "updateEntity", entity, result, request, response);
+            Try<Integer> result = updateEntityFunction(entity, params);
+            doAfterUpdate(0, "updateEntity", entity, result, params);
 //            afterUpdate(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
@@ -212,10 +217,14 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("deleteEntity: %s", entity));
-            doBeforeDelete(0, "deleteEntity", entity, request, response);
+            Map<String, Object> params = new HashMap<>();
+            params.put("_request", request);
+            params.put("_response", response);
+            params.put("_auditIp", AuditUtils.getIpAddr(request));
+            doBeforeDelete(0, "deleteEntity", entity, params);
 //            beforeDelete(entity, request, response);
-            Try<Integer> result = deleteEntityFunction(entity, Optional.of(request), Optional.of(response));
-            doAfterDelete(0, "deleteEntity", entity, result, request, response);
+            Try<Integer> result = deleteEntityFunction(entity, params);
+            doAfterDelete(0, "deleteEntity", entity, result, params);
 //            afterDelete(entity, request, response);
             if (result.isSuccess()) {
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());

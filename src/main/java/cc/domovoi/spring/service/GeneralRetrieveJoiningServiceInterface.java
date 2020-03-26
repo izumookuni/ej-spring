@@ -28,11 +28,15 @@ import static org.joor.Reflect.onClass;
 
 public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoiningEntityInterface<K>> extends OriginalServiceInterface {
 
+    Class<K> keyClass();
+
     Class<E> entityClass();
 
     E innerFindEntity(K id);
 
     List<E> innerFindList(E entity);
+
+    List<E> innerFindListById(List<K> idList);
 
     List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, String name);
 
@@ -157,6 +161,14 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     default List<E> findList(E entity) {
         return findList(entity, depthTree());
+    }
+
+    default List<E> findListById(List<K> idList) {
+        return findListById(idList, this::innerFindListById, depthTree(), "findList");
+    }
+
+    default List<E> findListById(List<K> idList, JoiningDepthTreeLike depthTree) {
+        return findListById(idList, this::innerFindListById, depthTree, "findList");
     }
 
     default E findEntity(K id, Function<? super K, ? extends E> function, JoiningDepthTreeLike depthTree) {
@@ -306,6 +318,20 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     default List<E> findList(E entity, String name) {
         return findList(entity, depthTree(), name);
+    }
+
+    default List<E> findListById(List<K> idList, Function<? super List<K>, ? extends List<E>> function, JoiningDepthTreeLike depthTree, String name) {
+        // no findCondition
+        // find entityList
+        List<E> eList0 = function.apply(idList);
+        doAfterFindList(0, name, eList0);
+        List<E> eList1 = eList0.stream()
+                .filter(e -> (Objects.isNull(e.getAvailable()) || e.getAvailable()) && !collectCondition(e).isPresent())
+                .collect(Collectors.toList());
+        doAfterFindList(1, name, eList1);
+        joinEntityListByTree(eList1, depthTree, name);
+        doAfterFindList(2, name, eList1);
+        return eList1;
     }
 
     @SuppressWarnings("unchecked")

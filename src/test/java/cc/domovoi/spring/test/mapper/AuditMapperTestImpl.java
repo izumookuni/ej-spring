@@ -34,7 +34,7 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
 
     @Deprecated
     @Override
-    public List<AuditDisplayEntity> findList(AuditDisplayEntity entity) {
+    public List<AuditDisplayEntity> findAuditList(AuditDisplayEntity entity) {
         return auditDisplayEntityList.stream().filter(auditDisplayEntity -> Objects.equals(auditDisplayEntity, entity)).peek(auditDisplayEntity -> {
             List<String> scopeIdList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
             auditDisplayEntity.setScopeIdList(scopeIdList);
@@ -42,7 +42,7 @@ public class AuditMapperTestImpl implements AuditMapperInterface {
     }
 
     @Override
-    public List<AuditDisplayEntity> findListById(List<String> idList) {
+    public List<AuditDisplayEntity> findAuditListById(List<String> idList) {
         return auditDisplayEntityList.stream().filter(auditDisplayEntity -> idList.contains(auditDisplayEntity.getAuditId())).peek(auditDisplayEntity -> {
             List<String> scopeIdList = auditScopeList.stream().filter(t2 -> Objects.equals(t2.v1(), auditDisplayEntity.getAuditId())).map(Tuple2::v2).collect(Collectors.toList());
             auditDisplayEntity.setScopeIdList(scopeIdList);

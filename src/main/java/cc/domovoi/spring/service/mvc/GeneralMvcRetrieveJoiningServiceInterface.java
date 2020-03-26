@@ -22,6 +22,11 @@ public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJ
         return findListByMapper(entity);
     }
 
+    @Override
+    default List<E> innerFindListById(List<K> idList) {
+        return findListUsingIdByMapper(idList);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, String name) {

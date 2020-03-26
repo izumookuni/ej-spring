@@ -15,7 +15,7 @@ public class GeneralUtils {
 
     private static Logger logger = CommonLogger.logger;
 
-    public static  <T, A extends Annotation> void doAnnotationMethod(T t, Class<A> aClass, Integer scope, String name, Object... args) {
+    public static <T, A extends Annotation> void doAnnotationMethod(T t, Class<A> aClass, Integer scope, String name, Object... args) {
         List<Tuple2<A, Method>> methodAnnotationList = methodAnnotationOrdered(t.getClass(), aClass, scope, name);
         int argsCount = args.length;
 //        logger().debug("methodAnnotationList size: " + methodAnnotationList.size());

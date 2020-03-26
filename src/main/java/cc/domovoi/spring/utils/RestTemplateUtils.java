@@ -159,7 +159,7 @@ public class RestTemplateUtils {
         return restfulResponseExtractor(clazz, clientHttpResponse -> {});
     }
 
-    public static <T> ResponseExtractor<Try<T>> restfulListResponseExtractor(Class<T> clazz, Consumer<? super ClientHttpResponse> responseConsumer) {
+    public static <T> ResponseExtractor<Try<List<T>>> restfulListResponseExtractor(Class<T> clazz, Consumer<? super ClientHttpResponse> responseConsumer) {
         return restfulResponseExtractor(is -> {
             String responseJson = IOUtils.toString(is, StandardCharsets.UTF_8);
             JavaType javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, clazz);
@@ -167,7 +167,7 @@ public class RestTemplateUtils {
         } , responseConsumer);
     }
 
-    public static <T> ResponseExtractor<Try<T>> restfulListResponseExtractor(Class<T> clazz) {
+    public static <T> ResponseExtractor<Try<List<T>>> restfulListResponseExtractor(Class<T> clazz) {
         return restfulListResponseExtractor(clazz, clientHttpResponse -> {});
     }
 

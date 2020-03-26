@@ -13,24 +13,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntityInterface<K>> extends GeneralAuditBasicControllerInterface<K, E> {
 
     @AfterAdd(order = -100)
-    default void recordAddAuditEntity(E entity, Try<Tuple2<Integer, K>> result, HttpServletRequest request, HttpServletResponse response) {
-        recordAddAuditEntity(entity, request);
+    default void recordAddAuditEntity(E entity, Try<Tuple2<Integer, K>> result, Map<String, Object> params) {
+        recordAddAuditEntity(entity, (HttpServletRequest) params.get("_request"));
     }
 
     @AfterUpdate(order = -100)
-    default void recordUpdateAuditEntity(E entity ,Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
-        recordUpdateAuditEntity(entity, request);
+    default void recordUpdateAuditEntity(E entity ,Try<Integer> result, Map<String, Object> params) {
+        recordUpdateAuditEntity(entity, (HttpServletRequest) params.get("_request"));
     }
 
     @AfterDelete(order = -100)
-    default void recordDeleteAuditEntity(E entity, Try<Integer> result, HttpServletRequest request, HttpServletResponse response) {
-        recordDeleteAuditEntity(entity, request);
+    default void recordDeleteAuditEntity(E entity, Try<Integer> result, Map<String, Object> params) {
+        recordDeleteAuditEntity(entity, (HttpServletRequest) params.get("_request"));
     }
 
     default void recordAddAuditEntity(E entity, HttpServletRequest request) {

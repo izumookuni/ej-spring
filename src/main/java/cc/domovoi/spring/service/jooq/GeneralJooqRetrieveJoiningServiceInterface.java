@@ -43,14 +43,23 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return record;
     }
 
-    default E convertEntityToPojo(P pojo) {
+    default E convertPojoToEntity(P pojo) {
         E entity = onClass(entityClass()).create().get();
         BeanUtils.copyProperties(pojo, entity);
         return entity;
     }
 
-    default P convertPojoToEntity(E entity) {
+    default P convertEntityToPojo(E entity) {
         return entity.toPojo();
+    }
+
+    default String keyField() {
+        return "id";
+    }
+
+    @SuppressWarnings("unchecked")
+    default Class<K> keyClass() {
+        return (Class<K>) getTable().field(keyField()).getType();
     }
 
     default Condition initConditionUsingEntity(E entity, Function3<? super Condition, ? super Record, ? super E, ? extends Condition> addition, Predicate<? super org.jooq.Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
@@ -128,8 +137,15 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return findEntityListByDao(entity);
     }
 
+    @Override
+    default List<E> innerFindListById(List<K> idList) {
+        List<E> result = dsl().select().from(getTable()).where(getTable().field("id", keyClass()).in(idList)).fetch().into(entityClass());
+        joiningColumn(result, Optional.empty());
+        return result;
+    }
+
     default ResultQuery<Record> findListByKeyDSL(List<Object> keyList, JoiningProperty joiningProperty) {
-        return dsl().select(getTable().asterisk()).from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList));
+        return dsl().select().from(getTable()).where(field(name(joiningProperty.joiningColumn())).in(keyList));
     }
 
     @Override
@@ -140,14 +156,14 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         Set<Tuple2<JoiningProperty, java.lang.reflect.Field>> joiningPropertySet = GeneralAnnotationEntityInterface.joiningPropertySet(entityClass);
         JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
         List<E> eList = findListByKeyDSL(keyList, joiningProperty).fetch().into(entityClass()); // .stream().peek(e -> this.doAfterFindEntity(0, e)).collect(Collectors.toList());
-        joiningColumn(eList);
+        joiningColumn(eList, Optional.empty());
         doAfterFindList(0, name, eList);
 //        processAfterFindResult(eList);
         return eList;
     }
 
     default ResultQuery<Record> findPojoDSL(P pojo) {
-        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingPojo(pojo));
+        return dsl().select().from(getTable()).where(initConditionUsingPojo(pojo));
     }
 
     default P findPojoByDao(P pojo) {
@@ -171,14 +187,14 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default ResultQuery<Record> findEntityDSL(E entity) {
-        return dsl().select(getTable().asterisk()).from(getTable()).where(initConditionUsingEntity(entity));
+        return dsl().select().from(getTable()).where(initConditionUsingEntity(entity));
     }
 
     default E findEntityByDao(E entity) {
         Record record = findEntityDSL(entity).fetchOne();
         if (Objects.nonNull(record)) {
             E result = record.into(entityClass());
-            joiningColumn(Collections.singletonList(result));
+            joiningColumn(Collections.singletonList(result), Optional.of(entity));
             return result;
         }
         else {
@@ -188,12 +204,12 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     default List<E> findEntityListByDao(E entity) {
         List<E> result = findEntityDSL(entity).fetch().into(entityClass());
-        joiningColumn(result);
+        joiningColumn(result, Optional.of(entity));
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    default void joiningColumn(List<E> entityList) {
+    default void joiningColumn(List<E> entityList, Optional<E> query) {
         if (!entityList.isEmpty()) {
 //            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
             List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(entityClass());
@@ -206,7 +222,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
                     }
                     Map targetKeyMap;
                     if (!joiningColumn.custom().equals(JoiningColumnFunctionInterfaceImpl.class)) {
-                        targetKeyMap = onClass(joiningColumn.custom()).create().call("apply", dsl(), keyList).get();
+                        targetKeyMap = onClass(joiningColumn.custom()).create().call("apply", dsl(), keyList, query).get();
                     }
                     else {
                         Class<? extends Table> tableClass = joiningColumn.table();

@@ -8,9 +8,9 @@ public interface AuditMapperInterface {
 
     AuditDisplayEntity findEntityById(String id);
 
-    List<AuditDisplayEntity> findList(AuditDisplayEntity entity);
+    List<AuditDisplayEntity> findAuditList(AuditDisplayEntity entity);
 
-    List<AuditDisplayEntity> findListById(List<String> idList);
+    List<AuditDisplayEntity> findAuditListById(List<String> idList);
 
     Integer addEntity(AuditDisplayEntity entity);
 

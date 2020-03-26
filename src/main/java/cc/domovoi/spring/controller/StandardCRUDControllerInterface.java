@@ -5,9 +5,7 @@ import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
 import cc.domovoi.spring.service.StandardJoiningServiceInterface;
 import org.jooq.lambda.tuple.Tuple2;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Optional;
+import java.util.Map;
 
 /**
  * BaseCRUDControllerInterface.
@@ -18,17 +16,17 @@ import java.util.Optional;
 public interface StandardCRUDControllerInterface<E extends StandardJoiningEntityInterface, S extends StandardJoiningServiceInterface<E>> extends StandardRetrieveControllerInterface<E, S>, GeneralCRUDControllerInterface<String, E> {
 
     @Override
-    default Try<Tuple2<Integer, String>> addEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
-        return service().addEntity(entity, request, response);
+    default Try<Tuple2<Integer, String>> addEntityFunction(E entity, Map<String, Object> params) {
+        return service().addEntity(entity, params);
     }
 
     @Override
-    default Try<Integer> updateEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
-        return service().updateEntity(entity, request, response);
+    default Try<Integer> updateEntityFunction(E entity, Map<String, Object> params) {
+        return service().updateEntity(entity, params);
     }
 
     @Override
-    default Try<Integer> deleteEntityFunction(E entity, Optional<HttpServletRequest> request, Optional<HttpServletResponse> response) {
-        return service().deleteEntity(entity, request, response);
+    default Try<Integer> deleteEntityFunction(E entity, Map<String, Object> params) {
+        return service().deleteEntity(entity, params);
     }
 }

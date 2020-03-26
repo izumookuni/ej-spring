@@ -30,11 +30,11 @@ public interface AuditServiceInterface {
     }
 
     default List<AuditDisplayEntity> findAuditList(AuditDisplayEntity entity) {
-        return auditMapper().findList(entity);
+        return auditMapper().findAuditList(entity);
     }
 
     default List<AuditDisplayEntity> findAuditListById(List<String> idList) {
-        return ServiceUtils.findListGrouped(auditMapper(), idList, Function.identity(), (l, r) -> r, AuditMapperInterface::findListById);
+        return ServiceUtils.findListGrouped(auditMapper(), idList, Function.identity(), (l, r) -> r, AuditMapperInterface::findAuditListById);
     }
 
     default Integer addAudit(AuditDisplayEntity entity) {

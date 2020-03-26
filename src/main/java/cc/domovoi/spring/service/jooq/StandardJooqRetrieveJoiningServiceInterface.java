@@ -5,4 +5,9 @@ import cc.domovoi.spring.service.StandardRetrieveJoiningServiceInterface;
 import org.jooq.TableRecord;
 
 public interface StandardJooqRetrieveJoiningServiceInterface<R extends TableRecord<R>, P, E extends StandardJooqEntityInterface<P>> extends GeneralJooqRetrieveJoiningServiceInterface<R, P, String, E>, StandardRetrieveJoiningServiceInterface<E> {
+
+    @Override
+    default Class<String> keyClass() {
+        return String.class;
+    }
 }

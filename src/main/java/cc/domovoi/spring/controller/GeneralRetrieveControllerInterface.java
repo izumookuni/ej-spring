@@ -2,6 +2,7 @@ package cc.domovoi.spring.controller;
 
 import cc.domovoi.spring.annotation.after.AfterFindList;
 import cc.domovoi.spring.annotation.before.BeforeFind;
+import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
@@ -42,18 +43,18 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
 
     }
 
-    default void doBeforeFindEntity(Integer scope, String name, E entity, HttpServletRequest request, HttpServletResponse response) {
+    default void doBeforeFindEntity(Integer scope, String name, E entity, Map<String, Object> params) {
         if (0 == scope) {
             beforeFindEntity(entity);
         }
-        GeneralUtils.doAnnotationMethod(this, BeforeFind.class, scope, name, entity, request, response);
+        GeneralUtils.doAnnotationMethod(this, BeforeFind.class, scope, name, entity, params);
     }
 
-    default void doAfterFindList(Integer scope, String name, List<E> entityList, HttpServletRequest request, HttpServletResponse response) {
+    default void doAfterFindList(Integer scope, String name, List<E> entityList, Map<String, Object> params) {
         if (0 == scope) {
             afterFindList(entityList);
         }
-        GeneralUtils.doAnnotationMethod(this, AfterFindList.class, scope, name, entityList, request, response);
+        GeneralUtils.doAnnotationMethod(this, AfterFindList.class, scope, name, entityList, params);
     }
 
     /**
@@ -74,9 +75,13 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("findEntity: %s", entity));
-            doBeforeFindEntity(0, "findEntity", entity, request, response);
+            Map<String, Object> params = new HashMap<>();
+            params.put("_request", request);
+            params.put("_response", response);
+            params.put("_auditIp", AuditUtils.getIpAddr(request));
+            doBeforeFindEntity(0, "findEntity", entity, params);
             List<E> entityList = findEntityFunction(entity);
-            doAfterFindList(0, "findEntity", entityList, request, response);
+            doAfterFindList(0, "findEntity", entityList, params);
             return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, entityList);
 
         } catch (Exception e) {
@@ -122,7 +127,7 @@ public interface GeneralRetrieveControllerInterface<E> extends OriginalControlle
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> testPost(@RequestBody Map<String, String> body) {
+    default Map<String, Object> testPost(@RequestBody Map<String, Object> body) {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("testPost: %s", body));
