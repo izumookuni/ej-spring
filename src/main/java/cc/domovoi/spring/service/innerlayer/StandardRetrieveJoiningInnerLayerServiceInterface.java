@@ -1,11 +1,9 @@
 package cc.domovoi.spring.service.innerlayer;
 
-import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
 import cc.domovoi.spring.service.StandardRetrieveJoiningServiceInterface;
 import cc.domovoi.spring.utils.RestTemplateUtils;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;

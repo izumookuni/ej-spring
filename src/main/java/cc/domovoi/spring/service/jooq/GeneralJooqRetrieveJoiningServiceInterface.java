@@ -210,12 +210,14 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     @SuppressWarnings("unchecked")
     default void joiningColumn(List<E> entityList, Optional<E> query) {
+        logger().debug("joiningColumn");
         if (!entityList.isEmpty()) {
 //            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
             List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(entityClass());
             for (java.lang.reflect.Field field : fields) {
                 JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
                 if (joiningColumn != null) {
+                    logger().debug("joiningColumn field " + field.getName());
                     List<Object> keyList = entityList.stream().map(entity -> on(entity).get(joiningColumn.key())).filter(Objects::nonNull).collect(Collectors.toList());
                     if (keyList.isEmpty()) {
                         return;
