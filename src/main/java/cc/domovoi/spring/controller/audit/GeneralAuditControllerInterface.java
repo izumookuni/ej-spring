@@ -86,7 +86,7 @@ public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntity
             produces = "application/json")
     @ResponseBody
     @Override
-    default Map<String, Object> initAuditRecordF() {
+    default Map<String, Object> initAuditRecordF() throws Exception {
         return ControllerUtils.commonTryFunction(logger(), "initAuditRecord", () -> this.initAuditRecord(this::findEntityFunctionForAuditRecord, "controller"));
     }
 //

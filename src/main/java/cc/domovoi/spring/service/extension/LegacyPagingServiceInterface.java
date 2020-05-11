@@ -7,6 +7,7 @@ import cc.domovoi.spring.mapper.extension.CountingMapperInterface;
 
 import java.util.List;
 
+@Deprecated
 public interface LegacyPagingServiceInterface<E extends GeneralJoiningEntityInterface<?> & PagingEntityInterface, M extends CountingMapperInterface<E> & GeneralRetrieveMapperInterface<?, E>> extends PagingServiceInterface<E, M> {
 
     @Override

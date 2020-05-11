@@ -119,7 +119,7 @@ public class RestTemplateUtils {
             else {
                 try(InputStream is = response.getBody()) {
                     return new Success<>(bodyToObjectFunction.apply(is));
-                } catch (IOException e) {
+                } catch (Exception e) {
                     return new Failure<>(e);
                 }
             }
@@ -187,7 +187,7 @@ public class RestTemplateUtils {
             HttpEntity<String> httpEntity = new HttpEntity<>(requestJson, headers);
             RequestCallback requestCallback = restTemplate.httpEntityCallback(httpEntity, String.class);
             return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, uriVariables);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return new Failure<>(e);
         }
     }
@@ -198,7 +198,7 @@ public class RestTemplateUtils {
             HttpEntity<String> httpEntity = new HttpEntity<>(requestJson, headers);
             RequestCallback requestCallback = restTemplate.httpEntityCallback(httpEntity, String.class);
             return restTemplate.execute(url, httpMethod, requestCallback, responseExtractor, uriVariables);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return new Failure<>(e);
         }
     }

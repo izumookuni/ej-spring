@@ -1,4 +1,4 @@
-package cc.domovoi.spring.entity.audit;
+package cc.domovoi.spring.entity.audit.fieldbase;
 
 import io.swagger.annotations.ApiModel;
 

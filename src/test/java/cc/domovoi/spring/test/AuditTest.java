@@ -1,7 +1,7 @@
 package cc.domovoi.spring.test;
 
 import cc.domovoi.collection.util.Try;
-import cc.domovoi.spring.entity.audit.AuditChangeContextGroupModel;
+import cc.domovoi.spring.entity.audit.fieldbase.AuditChangeContextGroupModel;
 import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.entity.audit.batch.AuditChangeContextGroupBatchModel;
 import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl;

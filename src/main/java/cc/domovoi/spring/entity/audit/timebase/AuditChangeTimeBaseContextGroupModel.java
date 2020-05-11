@@ -1,25 +1,22 @@
-package cc.domovoi.spring.entity.audit;
+package cc.domovoi.spring.entity.audit.timebase;
 
 import io.swagger.annotations.ApiModel;
 
 import java.util.List;
 
-@ApiModel(value = "Audit Change L4")
-public class AuditChangeContextGroupModel {
+@ApiModel(value = "Audit Change Time Base L4")
+public class AuditChangeTimeBaseContextGroupModel {
 
     private String contextName;
 
-    private List<AuditChangeContextModel> changeContext;
+    private List<AuditChangeTimeBaseContextModel> changeContext;
 
     @Override
     public String toString() {
-        return "AuditChangeContextGroupModel{" +
+        return "AuditChangeTimeBaseContextGroupModel{" +
                 "contextName='" + contextName + '\'' +
                 ", changeContext=" + changeContext +
                 '}';
-    }
-
-    public AuditChangeContextGroupModel() {
     }
 
     public String getContextName() {
@@ -30,11 +27,11 @@ public class AuditChangeContextGroupModel {
         this.contextName = contextName;
     }
 
-    public List<AuditChangeContextModel> getChangeContext() {
+    public List<AuditChangeTimeBaseContextModel> getChangeContext() {
         return changeContext;
     }
 
-    public void setChangeContext(List<AuditChangeContextModel> changeContext) {
+    public void setChangeContext(List<AuditChangeTimeBaseContextModel> changeContext) {
         this.changeContext = changeContext;
     }
 }

@@ -1,8 +1,6 @@
 package cc.domovoi.spring.service;
 
-import cc.domovoi.collection.util.Failure;
-import cc.domovoi.collection.util.Success;
-import cc.domovoi.collection.util.Try;
+import cc.domovoi.collection.util.*;
 import cc.domovoi.spring.annotation.condition.AddCondition;
 import cc.domovoi.spring.annotation.condition.DeleteCondition;
 import cc.domovoi.spring.annotation.condition.UpdateCondition;
@@ -15,12 +13,10 @@ import cc.domovoi.spring.annotation.before.BeforeDelete;
 import cc.domovoi.spring.annotation.before.BeforeUpdate;
 import cc.domovoi.spring.utils.GeneralUtils;
 import org.jooq.lambda.tuple.Tuple2;
+import org.joor.Reflect;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntityInterface<K>> extends GeneralRetrieveJoiningServiceInterface<K, E> {
 
@@ -131,7 +127,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Tuple2<Integer, K>> addEntity(E entity) {
-        return addEntity(entity, Collections.emptyMap());
+        return addEntity(entity, new HashMap<>());
     }
 
     default void initDefaultField(E entity) {
@@ -152,7 +148,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Tuple2<Integer, K>> addEntity(E entity, String name) {
-        return addEntity(entity, Collections.emptyMap(), name);
+        return addEntity(entity, new HashMap<>(), name);
     }
 
     default Try<Tuple2<Integer, K>> addEntity(E entity, Map<String, Object> params, String name) {
@@ -194,7 +190,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Integer> updateEntity(E entity) {
-        return updateEntity(entity, Collections.emptyMap());
+        return updateEntity(entity, new HashMap<>());
     }
 
     default Try<Integer> updateEntity(E entity, Map<String, Object> params) {
@@ -202,7 +198,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Integer> updateEntity(E entity, String name) {
-        return updateEntity(entity, Collections.emptyMap(), name);
+        return updateEntity(entity, new HashMap<>(), name);
     }
 
     default Try<Integer> updateEntity(E entity, Map<String, Object> params, String name) {
@@ -228,7 +224,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Integer> deleteEntity(E entity) {
-        return deleteEntity(entity, Collections.emptyMap());
+        return deleteEntity(entity, new HashMap<>());
     }
 
     default Try<Integer> deleteEntity(E entity, Map<String, Object> params) {
@@ -236,7 +232,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Integer> deleteEntity(E entity, String name) {
-        return deleteEntity(entity, Collections.emptyMap(), name);
+        return deleteEntity(entity, new HashMap<>(), name);
     }
 
     default Try<Integer> deleteEntity(E entity, Map<String, Object> params, String name) {
@@ -263,4 +259,22 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         return innerDeleteResult;
     }
 
+    default Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntity(E entity, Map<String, Object> params, String name) {
+        return addEntity(entity, params, name).flatMap(result -> {
+            if (Objects.nonNull(result.v2())) {
+                return new Success<>(new Right<>(result));
+            }
+            else {
+                return updateEntity(entity, params, name).map(Left::apply);
+            }
+        });
+    }
+
+    default Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntity(E entity, Map<String, Object> params) {
+        return addOrUpdateEntity(entity, params, "addOrUpdateEntity");
+    }
+
+    default Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntity(E entity) {
+        return addOrUpdateEntity(entity, new HashMap<>(), "addOrUpdateEntity");
+    }
 }

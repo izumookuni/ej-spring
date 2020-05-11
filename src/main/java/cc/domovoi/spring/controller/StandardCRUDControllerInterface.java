@@ -1,5 +1,6 @@
 package cc.domovoi.spring.controller;
 
+import cc.domovoi.collection.util.Either;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
 import cc.domovoi.spring.service.StandardJoiningServiceInterface;
@@ -28,5 +29,15 @@ public interface StandardCRUDControllerInterface<E extends StandardJoiningEntity
     @Override
     default Try<Integer> deleteEntityFunction(E entity, Map<String, Object> params) {
         return service().deleteEntity(entity, params);
+    }
+
+    @Override
+    default Try<Either<Integer, Tuple2<Integer, String>>> addOrUpdateEntityFunction(E entity, Map<String, Object> params) {
+        return service().addOrUpdateEntity(entity, params);
+    }
+
+    @Override
+    default Boolean checkEntityExistsFunction(E entity) {
+        return service().checkEntityExists(entity);
     }
 }

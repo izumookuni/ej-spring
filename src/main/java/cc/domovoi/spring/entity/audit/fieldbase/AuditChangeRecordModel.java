@@ -1,5 +1,6 @@
-package cc.domovoi.spring.entity.audit;
+package cc.domovoi.spring.entity.audit.fieldbase;
 
+import cc.domovoi.spring.entity.audit.AuditDisplayEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

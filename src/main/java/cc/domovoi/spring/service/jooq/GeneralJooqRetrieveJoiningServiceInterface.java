@@ -16,7 +16,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,18 +66,6 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     default Condition initConditionUsingEntity(E entity, Function3<? super Condition, ? super Record, ? super E, ? extends Condition> addition, Predicate<? super org.jooq.Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
         return initConditionUsingPojo(entity.toPojo(), (c, r) -> addition.apply(c, r, entity), predicateIncluding, predicateExcluding);
-//        Record record = unMapper(entity.toPojo());
-//        Map<org.jooq.Field<?>, Object> conditionMap = new HashMap<>();
-//        for (org.jooq.Field<?> field : record.fields()) {
-//            if (!predicateExcluding.test(field) && predicateIncluding.test(field)) {
-//                Object value = field.getValue(record);
-//                if (Objects.nonNull(value)) {
-//                    conditionMap.put(field, value);
-//                }
-//            }
-//        }
-//        Condition condition0 = condition(conditionMap);
-//        return addition.apply(condition0, record, entity);
     }
 
     default Condition initConditionUsingEntity(E entity) {
@@ -186,8 +176,18 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         return findEntityByDao(entity);
     }
 
+
+    default <Re extends Record> SelectConditionStep<Re> findRecordListByKeyDSL(E entity, Function<? super DSLContext, ? extends SelectSelectStep<Re>> selectFunction) {
+        return selectFunction.apply(dsl()).from(getTable()).where(initConditionUsingEntity(entity));
+    }
+
+    default SelectConditionStep<Record> findEntityDSLSelectConditionStep(E entity) {
+        return findRecordListByKeyDSL(entity, DSLContext::select);
+//        return dsl().select().from(getTable()).where(initConditionUsingEntity(entity));
+    }
+
     default ResultQuery<Record> findEntityDSL(E entity) {
-        return dsl().select().from(getTable()).where(initConditionUsingEntity(entity));
+        return findEntityDSLSelectConditionStep(entity);
     }
 
     default E findEntityByDao(E entity) {
@@ -206,6 +206,18 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         List<E> result = findEntityDSL(entity).fetch().into(entityClass());
         joiningColumn(result, Optional.of(entity));
         return result;
+    }
+
+    default E findEntityDSLAndJoiningColumn(Supplier<? extends E> supplier, Optional<E> query) {
+        E e = supplier.get();
+        joiningColumn(Collections.singletonList(e), query);
+        return e;
+    }
+
+    default List<E> findListDSLAndJoiningColumn(Supplier<? extends List<E>> supplier, Optional<E> query) {
+        List<E> eList = supplier.get();
+        joiningColumn(eList, query);
+        return eList;
     }
 
     @SuppressWarnings("unchecked")

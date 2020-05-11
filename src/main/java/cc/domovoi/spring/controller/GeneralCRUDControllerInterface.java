@@ -1,5 +1,6 @@
 package cc.domovoi.spring.controller;
 
+import cc.domovoi.collection.util.Either;
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.annotation.after.AfterAdd;
 import cc.domovoi.spring.annotation.after.AfterDelete;
@@ -11,6 +12,7 @@ import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
+import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * OriginalCRUDControllerInterface.
@@ -56,6 +58,23 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * @return The number of successful delete operations.
      */
     Try<Integer> deleteEntityFunction(E entity, Map<String, Object> params);
+
+    /**
+     * The function that add or update Entity.
+     *
+     * @param entity entity
+     * @param params params
+     * @return The number of successful insert or update operations.
+     */
+    Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntityFunction(E entity, Map<String, Object> params);
+
+    /**
+     * The function that Check entity exists.
+     *
+     * @param entity Entity
+     * @return Whether entity exists.
+     */
+    Boolean checkEntityExistsFunction(E entity);
 
     default void beforeAdd(E entity, Map<String, Object> params) { }
 
@@ -118,6 +137,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * @param request request
      * @param response response
      * @return The number of successful insert operations.
+     * @throws Exception exception
      */
     @ApiOperation(value = "Add entity", notes = "id, creationTime and updateTime will be generated automatically by the system")
     @RequestMapping(
@@ -125,7 +145,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> addEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) {
+    default Map<String, Object> addEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("addEntity: %s", entity));
@@ -146,14 +166,15 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, dataMap);
             }
             else {
-                result.failed().get().printStackTrace();
-                throw new RuntimeException(result.failed().get().getMessage());
+//                result.failed().get().printStackTrace();
+                throw result.failed().get();
             }
 //            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             logger().error(String.format("error in addEntity, message: %s", e.getMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw e;
         }
     }
 
@@ -164,6 +185,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * @param request request
      * @param response response
      * @return The number of successful update operations.
+     * @throws Exception exception
      */
     @ApiOperation(value = "Update entity", notes = "id can't be null")
     @RequestMapping(
@@ -171,10 +193,10 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> updateEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) {
+    default Map<String, Object> updateEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
-            logger().info(String.format("jsonMap: %s", entity));
+            logger().info(String.format("updateEntity: %s", entity));
             Map<String, Object> params = new HashMap<>();
             params.put("_request", request);
             params.put("_response", response);
@@ -188,14 +210,15 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
             else {
-                result.failed().get().printStackTrace();
-                throw new RuntimeException(result.failed().get().getMessage());
+//                result.failed().get().printStackTrace();
+                throw result.failed().get();
             }
 //            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             logger().error(String.format("error in updateEntity, message: %s", e.getMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw e;
         }
     }
 
@@ -206,6 +229,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * @param request request
      * @param response response
      * @return The number of successful delete operations.
+     * @throws Exception exception
      */
     @ApiOperation(value = "Delete entity", notes = "none")
     @RequestMapping(
@@ -213,7 +237,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> deleteEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) {
+    default Map<String, Object> deleteEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("deleteEntity: %s", entity));
@@ -230,14 +254,133 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
                 return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
             }
             else {
-                result.failed().get().printStackTrace();
-                throw new RuntimeException(result.failed().get().getMessage());
+//                result.failed().get().printStackTrace();
+                throw result.failed().get();
             }
 //            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             logger().error(String.format("error in deleteEntity, message: %s", e.getMessage()));
-            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw e;
+        }
+    }
+
+    default Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntity(@RequestBody E entity, Map<String, Object> params) {
+        Boolean existsFlag = checkEntityExistsFunction(entity);
+        if (!existsFlag) {
+            // add
+            doBeforeAdd(0, "addEntity", entity, params);
+        }
+        else {
+            // update
+            doBeforeUpdate(0, "updateEntity", entity, params);
+        }
+        Try<Either<Integer, Tuple2<Integer, K>>> result = addOrUpdateEntityFunction(entity, params);
+        if (!existsFlag) {
+            // add
+            doAfterAdd(0, "addEntity", entity, result.map(either -> either.right().get()), params);
+        }
+        else {
+            // update
+            doAfterUpdate(0, "updateEntity", entity, result.map(either -> either.left().get()), params);
+        }
+        return result;
+    }
+
+    /**
+     * And or Update entity.
+     *
+     * @param entity The entity need to be add or updated.
+     * @param request request
+     * @param response response
+     * @return The number of successful add or update operations.
+     * @throws Exception exception
+     */
+    @ApiOperation(value = "Add or Update entity", notes = "")
+    @RequestMapping(
+            value = "add-or-update",
+            method = {RequestMethod.POST},
+            produces = "application/json")
+    @ResponseBody
+    default Map<String, Object> addOrUpdateEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, Object> jsonMap = new HashMap<>();
+        try {
+            logger().info(String.format("addOrUpdateEntity: %s", entity));
+            Map<String, Object> params = new HashMap<>();
+            params.put("_request", request);
+            params.put("_response", response);
+            params.put("_auditIp", AuditUtils.getIpAddr(request));
+            Try<Either<Integer, Tuple2<Integer, K>>> result = addOrUpdateEntity(entity, params);
+            if (result.isSuccess()) {
+                return result.get().fold(l -> RestfulUtils.fillOk(jsonMap, HttpStatus.OK, l), r -> {
+                    Tuple2<Integer, K> data = r;
+                    Map<String, Object> dataMap = new HashMap<>();
+                    dataMap.put("result", data.v1());
+                    dataMap.put("id", data.v2());
+                    return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, dataMap);
+                });
+            }
+            else {
+                throw result.failed().get();
+            }
+
+        } catch (Exception e) {
+            logger().error(String.format("error in addOrUpdateEntity, message: %s", e.getMessage()));
+            throw e;
+        }
+    }
+
+    /**
+     * And or Update entity.
+     *
+     * @param entityList The entityList need to be add or updated.
+     * @param request request
+     * @param response response
+     * @return The number of successful add or update operations.
+     * @throws Exception exception
+     */
+    @ApiOperation(value = "Add or Update entity", notes = "")
+    @RequestMapping(
+            value = "add-or-update/batch",
+            method = {RequestMethod.POST},
+            produces = "application/json")
+    @ResponseBody
+    default Map<String, Object> addOrUpdateEntityBatch(@RequestBody List<E> entityList, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, Object> jsonMap = new HashMap<>();
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("_request", request);
+            params.put("_response", response);
+            params.put("_auditIp", AuditUtils.getIpAddr(request));
+            List<Try<Either<Integer, Tuple2<Integer, K>>>> result0 = entityList.stream().map(entity -> addOrUpdateEntity(entity, params)).collect(Collectors.toList());
+            Try<List<Either<Integer, Tuple2<Integer, K>>>> result = result0.stream().reduce(Try.apply(() -> new ArrayList<>()), (z, e) -> z.flatMap(l -> e.map(ee -> {
+                l.add(ee);
+                return l;
+            })), (l, r) -> l.flatMap(ll -> r.map(rr -> {
+                ll.addAll(rr);
+                return ll;
+            })));
+            if (result.isSuccess()) {
+                List<Either<Integer, Tuple2<Integer, K>>> data = result.get();
+                Tuple2<List<Integer>, List<Tuple2<Integer, K>>> result2 = Seq.partition(data.stream(), Either::isLeft)
+                        .map1(eithers -> eithers.map(either -> either.left().get()).collect(Collectors.toList()))
+                        .map2(eithers -> eithers.map(either -> either.right().get()).collect(Collectors.toList()));
+                Map<String, Object> updateDataMap = new HashMap<>();
+                updateDataMap.put("result", result2.v1().stream().mapToInt(e -> e).sum());
+                Map<String, Object> addDataMap = new HashMap<>();
+                addDataMap.put("result", result2.v2().stream().mapToInt(Tuple2::v1).sum());
+                addDataMap.put("id", result2.v2().stream().map(Tuple2::v2).collect(Collectors.toList()));
+                jsonMap.put("addResult", addDataMap);
+                jsonMap.put("updateResult", updateDataMap);
+                return RestfulUtils.fillOk(jsonMap, HttpStatus.OK);
+            }
+            else {
+                throw result.failed().get();
+            }
+        } catch (Exception e) {
+            logger().error(String.format("error in addOrUpdateEntityBatch, message: %s", e.getMessage()));
+            throw e;
         }
     }
 }

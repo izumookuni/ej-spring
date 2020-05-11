@@ -10,6 +10,7 @@ import cc.domovoi.spring.service.GeneralServiceInterface;
  * @param <E> Entity type.
  * @param <M> Mapper type.
  */
+@Deprecated
 public interface CountingServiceInterface<E extends GeneralJoiningEntityInterface<?>, M extends CountingMapperInterface<E>> extends GeneralServiceInterface<M> {
 
     /**

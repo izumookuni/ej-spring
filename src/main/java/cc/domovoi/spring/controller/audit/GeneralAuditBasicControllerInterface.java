@@ -1,7 +1,7 @@
 package cc.domovoi.spring.controller.audit;
 
 import cc.domovoi.spring.controller.GeneralCRUDControllerInterface;
-import cc.domovoi.spring.entity.audit.AuditChangeContextGroupModel;
+import cc.domovoi.spring.entity.audit.fieldbase.AuditChangeContextGroupModel;
 import cc.domovoi.spring.entity.audit.AuditRequestModel;
 import cc.domovoi.spring.entity.audit.GeneralAuditEntityInterface;
 import cc.domovoi.spring.entity.audit.batch.AuditChangeContextGroupBatchModel;
@@ -28,7 +28,7 @@ public interface GeneralAuditBasicControllerInterface<K, E extends GeneralAuditE
             method = {RequestMethod.GET, RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> findAuditChangeContextGroupModel(@RequestBody AuditRequestModel model) {
+    default Map<String, Object> findAuditChangeContextGroupModel(@RequestBody AuditRequestModel model) throws Exception {
         return ControllerUtils.commonFunction(logger(), "findAuditChangeContextGroupModel", () -> this.findAuditChangeContextGroupModel(Optional.ofNullable(model.getContextName()), Optional.ofNullable(model.getScopeId()), Optional.ofNullable(model.getContextId()), Optional.ofNullable(model.getAuditField())));
     }
 
@@ -38,7 +38,7 @@ public interface GeneralAuditBasicControllerInterface<K, E extends GeneralAuditE
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> initAuditRecordF() {
+    default Map<String, Object> initAuditRecordF() throws Exception {
         return ControllerUtils.commonTryFunction(logger(), "initAuditRecord", () -> this.initAuditRecord(this::findEntityFunctionForAuditRecord, "service"));
     }
 
@@ -53,7 +53,7 @@ public interface GeneralAuditBasicControllerInterface<K, E extends GeneralAuditE
             method = {RequestMethod.GET, RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> findAuditChangeContextGroupBatchModel(@RequestBody AuditRequestModel model) {
+    default Map<String, Object> findAuditChangeContextGroupBatchModel(@RequestBody AuditRequestModel model) throws Exception {
         return ControllerUtils.commonFunction(logger(), "findAuditChangeContextGroupBatchModel", () -> this.findAuditChangeContextGroupBatchModel(Optional.ofNullable(model.getContextName()), Optional.ofNullable(model.getScopeId()), Optional.ofNullable(model.getContextId()), Optional.ofNullable(model.getAuditField())));
     }
 }
