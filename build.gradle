@@ -44,7 +44,7 @@ tasks.withType(JavaCompile) {
 dependencies {
     compile 'cc.domovoi:ej-collection:0.0.5'
     compile 'cc.domovoi:ej-lambda:0.0.3'
-    compile(group: 'cc.domovoi', name: 'ej-tools', version: '20191101150224-SNAPSHOT')
+    compile(group: 'cc.domovoi', name: 'ej-tools', version: '0.0.2')
 
     compile group: 'org.jooq', name: 'jool-java-8', version: '0.9.14'
 
