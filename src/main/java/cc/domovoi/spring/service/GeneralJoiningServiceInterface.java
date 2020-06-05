@@ -260,7 +260,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntity(E entity, Map<String, Object> params, String name) {
-        return addEntity(entity, params, name).flatMap(result -> {
+        return addEntity(entity, params, name).fold(failure -> updateEntity(entity, params, name).map(Left::apply), result -> {
             if (Objects.nonNull(result.v2())) {
                 return new Success<>(new Right<>(result));
             }
@@ -268,6 +268,14 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
                 return updateEntity(entity, params, name).map(Left::apply);
             }
         });
+//        return addEntity(entity, params, name).flatMap(result -> {
+//            if (Objects.nonNull(result.v2())) {
+//                return new Success<>(new Right<>(result));
+//            }
+//            else {
+//                return updateEntity(entity, params, name).map(Left::apply);
+//            }
+//        });
     }
 
     default Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntity(E entity, Map<String, Object> params) {
