@@ -4,7 +4,7 @@ import cc.domovoi.spring.entity.audit.GeneralAuditEntityInterface;
 
 import java.util.List;
 
-public class AuditChangeContextGroupBatchModel<T extends GeneralAuditEntityInterface> {
+public class AuditChangeContextGroupBatchModel<T extends GeneralAuditEntityInterface<?>> {
 
     private String contextName;
 

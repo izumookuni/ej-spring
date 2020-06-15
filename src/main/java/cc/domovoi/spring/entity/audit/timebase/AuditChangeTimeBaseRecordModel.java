@@ -1,7 +1,9 @@
 package cc.domovoi.spring.entity.audit.timebase;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "审计字段变化记录 L1")
 public class AuditChangeTimeBaseRecordModel {
 
     @ApiModelProperty(value = "field")

@@ -1,7 +1,10 @@
 package cc.domovoi.spring.entity.audit.timebase;
 
+import io.swagger.annotations.ApiModel;
+
 import java.util.List;
 
+@ApiModel(value = "审计记录变化记录 L3")
 public class AuditChangeTimeBaseContextModel {
 
     private String contextId;

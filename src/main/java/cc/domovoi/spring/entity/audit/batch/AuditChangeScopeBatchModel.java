@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-public class AuditChangeScopeBatchModel<T extends GeneralAuditEntityInterface> {
+public class AuditChangeScopeBatchModel<T extends GeneralAuditEntityInterface<?>> {
 
     @ApiModelProperty(value = "before")
     private List<T> before;
