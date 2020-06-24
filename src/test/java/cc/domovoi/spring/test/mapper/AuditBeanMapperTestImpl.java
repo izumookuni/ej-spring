@@ -47,6 +47,16 @@ public class AuditBeanMapperTestImpl implements StandardMapperInterface<AuditBea
     }
 
     @Override
+    public Integer updateBaseForced(AuditBeanEntityTestImpl entity) {
+        return updateBase(entity);
+    }
+
+    @Override
+    public Integer updateBaseSetNull(AuditBeanEntityTestImpl entity, List<String> setNull) {
+        return updateBase(entity);
+    }
+
+    @Override
     public Integer deleteBase(AuditBeanEntityTestImpl entity) {
         logger.debug("deleteBase: " + entity);
         AuditBeanEntityTestImpl auditDisplayEntityImpl = findBaseById(entity.getId());

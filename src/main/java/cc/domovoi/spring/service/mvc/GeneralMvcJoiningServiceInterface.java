@@ -9,6 +9,7 @@ import cc.domovoi.spring.service.GeneralJoiningServiceInterface;
 import org.jooq.lambda.tuple.Tuple2;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 public interface GeneralMvcJoiningServiceInterface<K, E extends GeneralJoiningEntityInterface<K>, M extends GeneralMapperInterface<K, E>> extends GeneralMvcRetrieveJoiningServiceInterface<K, E, M>, GeneralJoiningServiceInterface<K, E> {
@@ -39,6 +40,16 @@ public interface GeneralMvcJoiningServiceInterface<K, E extends GeneralJoiningEn
     }
 
     @Override
+    default Try<Integer> innerUpdateEntityForced(E entity) {
+        return Try.apply(() -> updateEntityForcedByMapper(entity));
+    }
+
+    @Override
+    default Try<Tuple2<Integer, E>> innerUpdateEntitySetNull(E entity, List<String> setNull) {
+        return Try.apply(() -> updateEntitySetNullByMapper(entity, setNull));
+    }
+
+    @Override
     default Try<Integer> innerDeleteEntity(E entity) {
         return Try.apply(() -> deleteEntityByMapper(entity));
     }
@@ -59,6 +70,17 @@ public interface GeneralMvcJoiningServiceInterface<K, E extends GeneralJoiningEn
     default Integer updateEntityByMapper(E entity) {
         entity.setUpdateTime(LocalDateTime.now());
         return mvcMapper().updateBase(entity);
+    }
+
+    default Integer updateEntityForcedByMapper(E entity) {
+        entity.setUpdateTime(LocalDateTime.now());
+        return mvcMapper().updateBaseForced(entity);
+    }
+
+    default Tuple2<Integer, E> updateEntitySetNullByMapper(E entity, List<String> setNull) {
+        entity.setUpdateTime(LocalDateTime.now());
+        // FIXME: entityAfterUpdate
+        return new Tuple2<>(mvcMapper().updateBaseSetNull(entity, setNull), entity);
     }
 
     default Integer deleteEntityByMapper(E entity) {

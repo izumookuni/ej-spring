@@ -6,6 +6,7 @@ import cc.domovoi.spring.annotation.after.AfterDelete;
 import cc.domovoi.spring.annotation.after.AfterUpdate;
 import cc.domovoi.spring.entity.audit.*;
 import cc.domovoi.spring.utils.ControllerUtils;
+import cc.domovoi.tools.defaults.NullDefaultUtils;
 import io.swagger.annotations.ApiOperation;
 import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntityInterface<K>> extends GeneralAuditBasicControllerInterface<K, E> {
 
@@ -23,8 +26,12 @@ public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntity
     }
 
     @AfterUpdate(order = -100)
-    default void recordUpdateAuditEntity(E entity ,Try<Integer> result, Map<String, Object> params) {
-        recordUpdateAuditEntity(entity, (HttpServletRequest) params.get("_request"));
+    default void recordUpdateAuditEntity(E entity, Try<Integer> result, Map<String, Object> params) {
+        recordUpdateAuditEntity(entity,
+                (HttpServletRequest) params.get("_request"),
+                (Boolean) params.get("forced"),
+                Optional.ofNullable((List<String>) params.get("setNull")),
+                (E) params.get("entityAfterUpdate"));
     }
 
     @AfterDelete(order = -100)
@@ -44,15 +51,43 @@ public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntity
         auditService().addAudit(auditDisplayEntity);
     }
 
-    default void recordUpdateAuditEntity(E entity, HttpServletRequest request) {
-        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
-            auditEntity.setAuditBehavior("update");
-            auditEntity.setAuditType("controller");
-            auditEntity.setAuditLevel("info");
-            auditEntity.setAuditAuthor(auditAuthorGetter());
-            auditEntity.setAuditIp(AuditUtils.getIpAddr(request));
-            auditEntity.setAuditUri(request.getRequestURI());
-        });
+    default void recordUpdateAuditEntity(E entity, HttpServletRequest request, Boolean forced, Optional<List<String>> setNull, E entityAfterUpdate) {
+        boolean forcedFlag = NullDefaultUtils.defaultBooleanValue(forced);
+        boolean setNullFlag = setNull.isPresent();
+        final AuditDisplayEntity auditDisplayEntity;
+        if (forcedFlag || !setNullFlag) {
+            auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+                if (forcedFlag) {
+                    auditEntity.setAuditBehavior("update/forced");
+                } else {
+                    // normal
+                    auditEntity.setAuditBehavior("update");
+                }
+                auditEntity.setAuditType("controller");
+                auditEntity.setAuditLevel("info");
+                auditEntity.setAuditAuthor(auditAuthorGetter());
+                auditEntity.setAuditIp(AuditUtils.getIpAddr(request));
+                auditEntity.setAuditUri(request.getRequestURI());
+            });
+        } else {
+            // setNullFlag
+            auditDisplayEntity = entityAfterUpdate.asAuditDisplayEntity(auditEntity -> {
+                auditEntity.setAuditBehavior("update/forced");
+                auditEntity.setAuditType("controller");
+                auditEntity.setAuditLevel("info");
+                auditEntity.setAuditAuthor(auditAuthorGetter());
+                auditEntity.setAuditIp(AuditUtils.getIpAddr(request));
+                auditEntity.setAuditUri(request.getRequestURI());
+            });
+        }
+//        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+//            auditEntity.setAuditBehavior("update");
+//            auditEntity.setAuditType("controller");
+//            auditEntity.setAuditLevel("info");
+//            auditEntity.setAuditAuthor(auditAuthorGetter());
+//            auditEntity.setAuditIp(AuditUtils.getIpAddr(request));
+//            auditEntity.setAuditUri(request.getRequestURI());
+//        });
         auditService().addAudit(auditDisplayEntity);
     }
 
@@ -68,7 +103,7 @@ public interface GeneralAuditControllerInterface<K, E extends GeneralAuditEntity
         auditService().addAudit(auditDisplayEntity);
     }
 
-//    @ApiOperation(value = "find audit change record", notes = "")
+    //    @ApiOperation(value = "find audit change record", notes = "")
 //    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK",response = AuditChangeContextGroupModel.class)})
 //    @RequestMapping(
 //            value = "audit-change-record",

@@ -15,10 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -184,6 +181,8 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * @param entity The entity need to be updated.
      * @param request request
      * @param response response
+     * @param forced forced
+     * @param sn setNull
      * @return The number of successful update operations.
      * @throws Exception exception
      */
@@ -193,7 +192,7 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             method = {RequestMethod.POST},
             produces = "application/json")
     @ResponseBody
-    default Map<String, Object> updateEntity(@RequestBody E entity, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    default Map<String, Object> updateEntity(@RequestBody E entity, @RequestParam(required = false) Boolean forced, @RequestParam(required = false) List<String> sn, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, Object> jsonMap = new HashMap<>();
         try {
             logger().info(String.format("updateEntity: %s", entity));
@@ -201,6 +200,12 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             params.put("_request", request);
             params.put("_response", response);
             params.put("_auditIp", AuditUtils.getIpAddr(request));
+            if (Objects.nonNull(forced)) {
+                params.put("forced", forced);
+            }
+            if (Objects.nonNull(sn)) {
+                params.put("setNull", sn);
+            }
             doBeforeUpdate(0, "updateEntity", entity, params);
 //            beforeUpdate(entity, request, response);
             Try<Integer> result = updateEntityFunction(entity, params);

@@ -196,7 +196,7 @@ public interface AuditServiceInterface {
 
         List<AuditChangeRecordModel> auditChangeRecordModelList = new ArrayList<>();
         keyContentList.stream().reduce(null, (z, m) -> {
-            if (Objects.isNull(m.v1()) || m.v1().equals(z)) {
+            if (!Objects.equals("update/forced", m.v2.getAuditBehavior()) && (Objects.isNull(m.v1()) || m.v1().equals(z))) {
                 // z == m.v1
                 return z;
             }

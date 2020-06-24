@@ -12,8 +12,8 @@ import cc.domovoi.spring.annotation.before.BeforeAdd;
 import cc.domovoi.spring.annotation.before.BeforeDelete;
 import cc.domovoi.spring.annotation.before.BeforeUpdate;
 import cc.domovoi.spring.utils.GeneralUtils;
+import cc.domovoi.tools.defaults.NullDefaultUtils;
 import org.jooq.lambda.tuple.Tuple2;
-import org.joor.Reflect;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,6 +27,10 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     Try<Tuple2<Integer, K>> innerAddEntity(E entity);
 
     Try<Integer> innerUpdateEntity(E entity);
+
+    Try<Integer> innerUpdateEntityForced(E entity);
+
+    Try<Tuple2<Integer, E>> innerUpdateEntitySetNull(E entity, List<String> setNull);
 
     Try<Integer> innerDeleteEntity(E entity);
 
@@ -166,8 +170,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         if (Objects.isNull(entity.getId())) {
             entity.setId(idGenerator());
             idFlag = false;
-        }
-        else {
+        } else {
             idFlag = true;
         }
         // before add 0
@@ -201,6 +204,18 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         return updateEntity(entity, new HashMap<>(), name);
     }
 
+    default Try<Integer> updateEntity(E entity, Boolean forced, Optional<List<String>> setNull) {
+        return updateEntity(entity, new HashMap<>(), forced, setNull);
+    }
+
+    default Try<Integer> updateEntity(E entity, Map<String, Object> params, Boolean forced, Optional<List<String>> setNull) {
+        if (Objects.nonNull(forced)) {
+            params.put("forced", forced);
+        }
+        setNull.ifPresent(sn -> params.put("setNull", sn));
+        return updateEntity(entity, params, "updateEntity");
+    }
+
     default Try<Integer> updateEntity(E entity, Map<String, Object> params, String name) {
         // before update 1
         if (Objects.nonNull(entity)) {
@@ -215,7 +230,16 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         if (Objects.nonNull(entity)) {
             doBeforeUpdate(0, name, entity, params);
         }
-        Try<Integer> innerUpdateResult = innerUpdateEntity(entity);
+//        Try<Integer> innerUpdateResult = innerUpdateEntity(entity);
+        Boolean forced = (Boolean) params.getOrDefault("forced", false);
+        Optional<List<String>> setNull = Optional.ofNullable((List<String>) params.get("setNull"));
+        Try<Integer> innerUpdateResult = NullDefaultUtils.defaultBooleanValue(forced) ?
+                innerUpdateEntityForced(entity) :
+                setNull.map(sn -> {
+                    Try<Tuple2<Integer, E>> r = innerUpdateEntitySetNull(entity, sn);
+                    r.foreach(t2 -> params.put("entityAfterUpdate", t2.v2()));
+                    return r.map(Tuple2::v1);
+                }).orElseGet(() -> innerUpdateEntity(entity));
         // after update
         if (Objects.nonNull(entity)) {
             doAfterUpdate(0, name, entity, innerUpdateResult, params);
@@ -263,8 +287,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
         return addEntity(entity, params, name).fold(failure -> updateEntity(entity, params, name).map(Left::apply), result -> {
             if (Objects.nonNull(result.v2())) {
                 return new Success<>(new Right<>(result));
-            }
-            else {
+            } else {
                 return updateEntity(entity, params, name).map(Left::apply);
             }
         });
