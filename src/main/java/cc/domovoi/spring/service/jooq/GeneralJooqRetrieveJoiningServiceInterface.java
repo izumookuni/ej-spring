@@ -7,6 +7,7 @@ import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
 import cc.domovoi.spring.entity.annotation.JoiningColumn;
 import cc.domovoi.spring.entity.annotation.JoiningProperty;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
+import cc.domovoi.spring.utils.JooqUtils;
 import org.jooq.*;
 import org.jooq.lambda.function.Function3;
 import org.jooq.lambda.tuple.Tuple2;
@@ -114,7 +115,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     default Condition initConditionUsingPojoIncludingField(P pojo, String... filedName) {
-        return  initConditionUsingPojoIncludingField(pojo, (c, r) -> c, filedName);
+        return initConditionUsingPojoIncludingField(pojo, (c, r) -> c, filedName);
     }
 
     @Override
@@ -222,44 +223,45 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 
     @SuppressWarnings("unchecked")
     default void joiningColumn(List<E> entityList, Optional<E> query) {
-        logger().debug("joiningColumn");
-        if (!entityList.isEmpty()) {
-//            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
-            List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(entityClass());
-            for (java.lang.reflect.Field field : fields) {
-                JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
-                if (joiningColumn != null) {
-                    logger().debug("joiningColumn field " + field.getName());
-                    List<Object> keyList = entityList.stream().map(entity -> on(entity).get(joiningColumn.key())).filter(Objects::nonNull).collect(Collectors.toList());
-                    if (keyList.isEmpty()) {
-                        return;
-                    }
-                    Map targetKeyMap;
-                    if (!joiningColumn.custom().equals(JoiningColumnFunctionInterfaceImpl.class)) {
-                        targetKeyMap = onClass(joiningColumn.custom()).create().call("apply", dsl(), keyList, query).get();
-                    }
-                    else {
-                        Class<? extends Table> tableClass = joiningColumn.table();
-                        Table<Record> table = onClass(tableClass).create().get();
-                        Field<?> foreignKeyField = table.field(joiningColumn.foreignKey());
-                        Field<?> targetKeyField = table.field(joiningColumn.targetKey());
-                        targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
-                    }
-//                    Map targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
-                    entityList.forEach(entity -> {
-                        Reflect reflect = on(entity);
-                        if (targetKeyMap.containsKey(reflect.get(joiningColumn.key()))) {
-                            Class<?> fieldClass = field.getType();
-                            if (fieldClass.getSimpleName().matches("(List)|(ArrayList)")) {
-                                reflect.set(field.getName(), targetKeyMap.get(reflect.get(joiningColumn.key())));
-                            }
-                            else {
-                                reflect.set(field.getName(), ((List<Object>) targetKeyMap.get(reflect.get(joiningColumn.key()))).get(0));
-                            }
-                        }
-                    });
-                }
-            }
-        }
+        JooqUtils.joiningColumn(entityList, query, entityClass(), dsl());
+//        logger().debug("joiningColumn");
+//        if (!entityList.isEmpty()) {
+////            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
+//            List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(entityClass());
+//            for (java.lang.reflect.Field field : fields) {
+//                JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
+//                if (joiningColumn != null) {
+//                    logger().debug("joiningColumn field " + field.getName());
+//                    List<Object> keyList = entityList.stream().map(entity -> on(entity).get(joiningColumn.key())).filter(Objects::nonNull).collect(Collectors.toList());
+//                    if (keyList.isEmpty()) {
+//                        return;
+//                    }
+//                    Map targetKeyMap;
+//                    if (!joiningColumn.custom().equals(JoiningColumnFunctionInterfaceImpl.class)) {
+//                        targetKeyMap = onClass(joiningColumn.custom()).create().call("apply", dsl(), keyList, query).get();
+//                    }
+//                    else {
+//                        Class<? extends Table> tableClass = joiningColumn.table();
+//                        Table<Record> table = onClass(tableClass).create().get();
+//                        Field<?> foreignKeyField = table.field(joiningColumn.foreignKey());
+//                        Field<?> targetKeyField = table.field(joiningColumn.targetKey());
+//                        targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
+//                    }
+////                    Map targetKeyMap = dsl().select(foreignKeyField, targetKeyField).from(table).where(foreignKeyField.in(keyList)).fetch().intoGroups(foreignKeyField, targetKeyField);
+//                    entityList.forEach(entity -> {
+//                        Reflect reflect = on(entity);
+//                        if (targetKeyMap.containsKey(reflect.get(joiningColumn.key()))) {
+//                            Class<?> fieldClass = field.getType();
+//                            if (fieldClass.getSimpleName().matches("(List)|(ArrayList)")) {
+//                                reflect.set(field.getName(), targetKeyMap.get(reflect.get(joiningColumn.key())));
+//                            }
+//                            else {
+//                                reflect.set(field.getName(), ((List<Object>) targetKeyMap.get(reflect.get(joiningColumn.key()))).get(0));
+//                            }
+//                        }
+//                    });
+//                }
+//            }
+//        }
     }
 }
