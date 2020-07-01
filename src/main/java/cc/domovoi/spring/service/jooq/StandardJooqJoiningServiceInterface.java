@@ -7,9 +7,4 @@ import org.jooq.UpdatableRecord;
 import java.util.UUID;
 
 public interface StandardJooqJoiningServiceInterface<R extends UpdatableRecord<R>, P, E extends StandardJooqEntityInterface<P>> extends StandardJooqRetrieveJoiningServiceInterface<R, P, E>, GeneralJooqJoiningServiceInterface<R, P, String, E>, StandardJoiningServiceInterface<E> {
-
-    @Override
-    default Class<String> keyClass() {
-        return String.class;
-    }
 }
