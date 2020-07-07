@@ -22,13 +22,11 @@ public class AuditUtils {
         Class<?> t = clazz;
         do {
             for (Field field : t.getDeclaredFields()) {
-//                if (type != object ^ Modifier.isStatic(field.getModifiers())) {
-                    String name = field.getName();
+                String name = field.getName();
 
-                    if (!result.containsKey(name)) {
-                        result.put(name, field);
-                    }
-//                }
+                if (!result.containsKey(name)) {
+                    result.put(name, field);
+                }
             }
 
             t = t.getSuperclass();
