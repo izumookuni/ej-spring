@@ -4,10 +4,7 @@ import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
 import cc.domovoi.spring.mapper.GeneralRetrieveMapperInterface;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJoiningEntityInterface<K>, M extends GeneralRetrieveMapperInterface<K, E>> extends GeneralRetrieveJoiningServiceInterface<K, E>, MvcServiceInterface<M> {
@@ -29,13 +26,13 @@ public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJ
 
     @SuppressWarnings("unchecked")
     @Override
-    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, String name) {
+    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, Map<String, Object> params, String name) {
         if (keyList.isEmpty()) {
             return Collections.emptyList();
         }
         List<K> idList = keyList.stream().map(key -> (K) key).collect(Collectors.toList());
         List<E> eList =  findListUsingIdByMapper(idList); // .stream().peek(this::doAfterFindEntity).collect(Collectors.toList());
-        doAfterFindList(0, name, eList);
+        doAfterFindList(0, name, eList, params);
 //        processAfterFindResult(eList);
         return eList;
     }

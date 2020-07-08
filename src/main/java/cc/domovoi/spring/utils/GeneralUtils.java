@@ -1,5 +1,6 @@
 package cc.domovoi.spring.utils;
 
+import cc.domovoi.spring.annotation.method.ForcedBreak;
 import cc.domovoi.spring.annotation.method.ForcedThrow;
 import cc.domovoi.spring.annotation.method.Param;
 import org.jooq.lambda.tuple.Tuple2;
@@ -53,11 +54,19 @@ public class GeneralUtils {
                 }
                 Object[] objects = params(parameterCount, args, parameterList, params);
                 on(t).call(t2.v2().getName(), objects);
+                ForcedBreak forcedBreak = method.getAnnotation(ForcedBreak.class);
+                if (Objects.nonNull(forcedBreak)) {
+                    break;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 ForcedThrow forcedThrow = method.getAnnotation(ForcedThrow.class);
                 if (Objects.nonNull(forcedThrow)) {
                     throw e;
+                }
+                ForcedBreak forcedBreak = method.getAnnotation(ForcedBreak.class);
+                if (Objects.nonNull(forcedBreak)) {
+                    break;
                 }
             }
         }

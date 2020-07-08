@@ -1,5 +1,7 @@
 package cc.domovoi.spring.annotation.method;
 
+import org.springframework.web.bind.annotation.ValueConstants;
+
 import java.lang.annotation.*;
 
 @Target({ElementType.PARAMETER})
@@ -18,4 +20,6 @@ public @interface Param {
     boolean checkNull() default false;
 
     String[] alias() default {};
+
+    String defaultValue() default ValueConstants.DEFAULT_NONE;
 }

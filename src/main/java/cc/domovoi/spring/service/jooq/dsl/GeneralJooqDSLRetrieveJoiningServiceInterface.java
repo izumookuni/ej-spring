@@ -6,6 +6,7 @@ import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 import cc.domovoi.spring.service.mvc.MvcServiceInterface;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GeneralJooqDSLRetrieveJoiningServiceInterface<K, E extends GeneralJooqDSLEntityInterface<K, ?>, M extends GeneralJooqRetrieveJoiningMapperInterface<?, K, E>> extends GeneralRetrieveJoiningServiceInterface<K, E>, MvcServiceInterface<M> {
 
@@ -30,7 +31,9 @@ public interface GeneralJooqDSLRetrieveJoiningServiceInterface<K, E extends Gene
     }
 
     @Override
-    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, String name) {
-        return mvcMapper().findListByKey(keyList, context, entityClass, name);
+    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, Map<String, Object> params, String name) {
+        List<E> eList = mvcMapper().findListByKey(keyList, context, entityClass, name);
+        doAfterFindList(0, name, eList, params);
+        return eList;
     }
 }

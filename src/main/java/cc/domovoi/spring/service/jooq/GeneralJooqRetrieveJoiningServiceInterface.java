@@ -2,16 +2,13 @@ package cc.domovoi.spring.service.jooq;
 
 import cc.domovoi.lambda.EJLambda;
 import cc.domovoi.spring.entity.GeneralAnnotationEntityInterface;
-import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.entity.jooq.GeneralJooqEntityInterface;
-import cc.domovoi.spring.entity.annotation.JoiningColumn;
 import cc.domovoi.spring.entity.annotation.JoiningProperty;
 import cc.domovoi.spring.service.GeneralRetrieveJoiningServiceInterface;
 import cc.domovoi.spring.utils.JooqUtils;
 import org.jooq.*;
 import org.jooq.lambda.function.Function3;
 import org.jooq.lambda.tuple.Tuple2;
-import org.joor.Reflect;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
@@ -140,7 +137,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
     }
 
     @Override
-    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, String name) {
+    default List<E> findListByKey(List<Object> keyList, String context, Class<?> entityClass, Map<String, Object> params, String name) {
         if (keyList.isEmpty()) {
             return Collections.emptyList();
         }
@@ -148,7 +145,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
         JoiningProperty joiningProperty = joiningPropertySet.stream().filter(jP -> Objects.equals(StringUtils.hasText(jP.v1().value()) ? jP.v1().value() : jP.v2().getName(), context)).findFirst().map(Tuple2::v1).orElseThrow(() -> new RuntimeException(String.format("no joining property %s", context)));
         List<E> eList = findListByKeyDSL(keyList, joiningProperty).fetch().into(entityClass()); // .stream().peek(e -> this.doAfterFindEntity(0, e)).collect(Collectors.toList());
         joiningColumn(eList, Optional.empty());
-        doAfterFindList(0, name, eList);
+        doAfterFindList(0, name, eList, params);
 //        processAfterFindResult(eList);
         return eList;
     }
