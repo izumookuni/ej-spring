@@ -2,13 +2,13 @@ package cc.domovoi.spring.service;
 
 import cc.domovoi.spring.annotation.condition.CollectCondition;
 import cc.domovoi.spring.entity.GeneralJoiningEntityInterface;
-import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.service.annotation.JoiningTable;
 import cc.domovoi.spring.annotation.after.AfterFind;
 import cc.domovoi.spring.annotation.after.AfterFindList;
 import cc.domovoi.spring.annotation.before.BeforeFind;
 import cc.domovoi.spring.annotation.condition.FindCondition;
 import cc.domovoi.spring.utils.GeneralUtils;
+import cc.domovoi.spring.utils.ReflectUtils;
 import cc.domovoi.spring.utils.joiningdepthtree.DepthTreeType;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTree;
 import cc.domovoi.spring.utils.joiningdepthtree.JoiningDepthTreeLike;
@@ -47,7 +47,7 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     default Map<String, GeneralRetrieveJoiningServiceInterface> innerJoiningService() {
         Map<String, GeneralRetrieveJoiningServiceInterface> joiningService = new HashMap<>();
 //        java.lang.reflect.Field[] fields = this.getClass().getDeclaredFields();
-        List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(this.getClass());
+        List<java.lang.reflect.Field> fields = ReflectUtils.allFieldList(this.getClass());
         Reflect reflect = on(this);
         for (java.lang.reflect.Field field : fields) {
             JoiningTable joiningTable = field.getAnnotation(JoiningTable.class);
@@ -164,15 +164,22 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default List<E> findListById(List<K> idList) {
-        return findListById(idList, this::innerFindListById, depthTree(), new HashMap<>(), "findList");
+        Map<String, Object> params = new HashMap<>();
+        JoiningDepthTreeLike depthTree = depthTree();
+        params.put("_depthTree", depthTree);
+        return findListById(idList, this::innerFindListById, depthTree, params, "findList");
     }
 
     default List<E> findListById(List<K> idList, JoiningDepthTreeLike depthTree) {
-        return findListById(idList, this::innerFindListById, depthTree, new HashMap<>(), "findList");
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findListById(idList, this::innerFindListById, depthTree, params, "findList");
     }
 
     default E findEntity(K id, Function<? super K, ? extends E> function, JoiningDepthTreeLike depthTree) {
-        return findEntity(id, function, depthTree, new HashMap<>(), "findEntity");
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findEntity(id, function, depthTree, params, "findEntity");
     }
 
     default List<E> findListById(List<K> idList, Map<String, Object> params) {
@@ -214,7 +221,9 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default E findEntity(K id, JoiningDepthTreeLike depthTree, String name) {
-        return findEntity(id, this::innerFindEntity, depthTree, new HashMap<>(), name);
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findEntity(id, this::innerFindEntity, depthTree, params, name);
     }
 
     default E findEntity(K id, JoiningDepthTreeLike depthTree, Map<String, Object> params, String name) {
@@ -230,7 +239,9 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default E findEntity(E entity, Function<? super E, ? extends E> function, JoiningDepthTreeLike depthTree) {
-        return findEntity(entity, function, depthTree, new HashMap<>(), "findEntity");
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findEntity(entity, function, depthTree, params, "findEntity");
     }
 
     default E findEntity(E entity, Function<? super E, ? extends E> function, JoiningDepthTreeLike depthTree, Map<String, Object> params) {
@@ -277,11 +288,15 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     default E findEntity(Supplier<? extends E> supplier, JoiningDepthTreeLike depthTree, String name) {
         E entity = onClass(entityClass()).create().get();
-        return findEntity(entity, e -> supplier.get(), depthTree, new HashMap<>(), name);
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findEntity(entity, e -> supplier.get(), depthTree, params, name);
     }
 
     default E findEntity(E entity, JoiningDepthTreeLike depthTree, String name) {
-        return findEntity(entity, this::innerFindEntity, depthTree, new HashMap<>(), name);
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findEntity(entity, this::innerFindEntity, depthTree, params, name);
     }
 
     default E findEntity(Supplier<? extends E> supplier, JoiningDepthTreeLike depthTree, Map<String, Object> params, String name) {
@@ -302,7 +317,9 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
     }
 
     default List<E> findList(E entity, Function<? super E, ? extends List<E>> function, JoiningDepthTreeLike depthTree) {
-        return findList(entity, function, depthTree, new HashMap<>(), "findList");
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findList(entity, function, depthTree, params, "findList");
     }
 
     default List<E> findList(E entity, Function<? super E, ? extends List<E>> function, JoiningDepthTreeLike depthTree, Map<String, Object> params) {
@@ -338,11 +355,15 @@ public interface GeneralRetrieveJoiningServiceInterface<K, E extends GeneralJoin
 
     default List<E> findList(Supplier<? extends List<E>> supplier, JoiningDepthTreeLike depthTree, String name) {
         E entity = onClass(entityClass()).create().get();
-        return findList(entity, e -> supplier.get(), depthTree, new HashMap<>(), name);
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findList(entity, e -> supplier.get(), depthTree, params, name);
     }
 
     default List<E> findList(E entity, JoiningDepthTreeLike depthTree, String name) {
-        return findList(entity, this::innerFindList, depthTree, new HashMap<>(), name);
+        Map<String, Object> params = new HashMap<>();
+        params.put("_depthTree", depthTree);
+        return findList(entity, this::innerFindList, depthTree, params, name);
     }
 
     default List<E> findList(Supplier<? extends List<E>> supplier, JoiningDepthTreeLike depthTree, Map<String, Object> params, String name) {

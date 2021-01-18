@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
+@Deprecated
 public class ApplicationConfig {
 
     private static Logger logger = LoggerFactory.getLogger(ApplicationConfig.class);
@@ -96,6 +97,20 @@ public class ApplicationConfig {
     public static Config config() {
 //        lazyReloadConfig();
         return config;
+    }
+
+    public static Config localConfig(String... envs) {
+        Objects.requireNonNull(envs, "no envs");
+        Config localConfig = ConfigFactory.empty();
+        for (String env : envs) {
+            if (rootConfig.hasPath(env)) {
+                localConfig = localConfig.withFallback(rootConfig.getConfig(env));
+            }
+        }
+        if (rootConfig.hasPath("global")) {
+            localConfig = localConfig.withFallback(rootConfig.getConfig("global"));
+        }
+        return localConfig;
     }
 
 }

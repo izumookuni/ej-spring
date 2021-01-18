@@ -12,7 +12,7 @@ public interface GeneralMapperInterface<K, E extends GeneralJoiningEntityInterfa
      * @param entity The entity need to be added.
      * @return The number of successful insert operations.
      */
-    Integer addBase(E entity);
+    Integer add(E entity);
 
     /**
      * Update entity.
@@ -20,7 +20,7 @@ public interface GeneralMapperInterface<K, E extends GeneralJoiningEntityInterfa
      * @param entity The entity need to be updated.
      * @return The number of successful update operations.
      */
-    Integer updateBase(E entity);
+    Integer update(E entity);
 
     /**
      * Update entity Forced.
@@ -28,7 +28,7 @@ public interface GeneralMapperInterface<K, E extends GeneralJoiningEntityInterfa
      * @param entity The entity need to be updated.
      * @return The number of successful update operations.
      */
-    Integer updateBaseForced(E entity);
+    Integer updateForced(E entity);
 
     /**
      * Update entity, field in setNull list will be set null.
@@ -37,7 +37,7 @@ public interface GeneralMapperInterface<K, E extends GeneralJoiningEntityInterfa
      * @param setNull A list that field will be set null.
      * @return The number of successful update operations.
      */
-    Integer updateBaseSetNull(E entity, List<String> setNull);
+    Integer updateSetNull(E entity, List<String> setNull);
 
     /**
      * Delete entity.
@@ -45,5 +45,12 @@ public interface GeneralMapperInterface<K, E extends GeneralJoiningEntityInterfa
      * @param entity The entity need to be deleted.
      * @return The number of successful delete operations.
      */
-    Integer deleteBase(E entity);
+    Integer delete(E entity);
+
+    /**
+     * Delete entity by id
+     * @param idList The id of entity need to be deleted.
+     * @return The number of successful delete operations.
+     */
+    Integer deleteById(List<K> idList);
 }

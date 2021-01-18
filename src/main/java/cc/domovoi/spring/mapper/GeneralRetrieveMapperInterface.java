@@ -12,7 +12,7 @@ public interface GeneralRetrieveMapperInterface<K, E extends GeneralJoiningEntit
      * @param id ID of entity.
      * @return Entity.
      */
-    E findBaseById(K id);
+    E findById(K id);
 
     /**
      * Find entity list by id list.
@@ -20,7 +20,7 @@ public interface GeneralRetrieveMapperInterface<K, E extends GeneralJoiningEntit
      * @param idList Id list of entity list;
      * @return Entity list.
      */
-    List<E> findBaseListById(List<K> idList);
+    List<E> findListById(List<K> idList);
 
     /**
      * Find entity.
@@ -28,5 +28,5 @@ public interface GeneralRetrieveMapperInterface<K, E extends GeneralJoiningEntit
      * @param entity Query conditions.
      * @return Entity list.
      */
-    List<E> findBaseList(E entity);
+    List<E> findList(E entity);
 }

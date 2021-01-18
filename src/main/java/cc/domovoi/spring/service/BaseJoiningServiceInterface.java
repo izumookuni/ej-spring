@@ -150,7 +150,7 @@ public interface BaseJoiningServiceInterface<E extends StandardJoiningEntityInte
         LocalDateTime now = LocalDateTime.now();
         entity.setCreationTime(now);
         entity.setUpdateTime(now);
-        return mvcMapper().addBase(entity);
+        return mvcMapper().add(entity);
     }
 
     /**
@@ -161,7 +161,7 @@ public interface BaseJoiningServiceInterface<E extends StandardJoiningEntityInte
      */
     default Integer updateEntityByMapper(E entity) {
         entity.setUpdateTime(LocalDateTime.now());
-        return mvcMapper().updateBase(entity);
+        return mvcMapper().update(entity);
     }
 
     /**
@@ -171,6 +171,6 @@ public interface BaseJoiningServiceInterface<E extends StandardJoiningEntityInte
      * @return The number of successful delete operations.
      */
     default Integer deleteEntityByMapper(E entity) {
-        return mvcMapper().deleteBase(entity);
+        return mvcMapper().delete(entity);
     }
 }

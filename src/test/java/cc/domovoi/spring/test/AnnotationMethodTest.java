@@ -24,7 +24,7 @@ public class AnnotationMethodTest {
     @AfterFind(order = 2)
     @ForcedThrow
 //    @ForcedBreak
-    public void test2(@Param("b")Integer b) {
+    public void test2(@Param(value = "b", defaultValue = "3")Integer b) {
         logger.debug("test2 b: {}", b);
 //        throw new RuntimeException("test2 failed");
     }
@@ -38,7 +38,7 @@ public class AnnotationMethodTest {
     public void test() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("a", 2);
-        params.put("b", 3);
+//        params.put("b", 3);
         params.put("c", null);
         params.put("d", 7);
         params.put("e", 11);

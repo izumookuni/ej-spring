@@ -36,7 +36,7 @@ public class JoiningFixedDepthTree implements JoiningDepthTreeLike {
     }
 
     public JoiningFixedDepthTree next() {
-        return new JoiningFixedDepthTree(this.depth - 1);
+        return new JoiningFixedDepthTree(this.depth - 1, this.exclude);
     }
 
     public Integer getDepth() {

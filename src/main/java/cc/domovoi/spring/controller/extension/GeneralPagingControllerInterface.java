@@ -22,6 +22,7 @@ import java.util.function.Function;
  *
  * @param <E> Entity type.
  */
+
 public interface GeneralPagingControllerInterface<E> extends OriginalControllerInterface {
 
     /**

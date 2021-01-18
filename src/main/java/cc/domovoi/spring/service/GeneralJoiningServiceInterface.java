@@ -14,6 +14,7 @@ import cc.domovoi.spring.annotation.before.BeforeUpdate;
 import cc.domovoi.spring.utils.GeneralUtils;
 import cc.domovoi.tools.defaults.NullDefaultUtils;
 import org.jooq.lambda.tuple.Tuple2;
+import org.joor.Reflect;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -34,6 +35,8 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
 
     Try<Integer> innerDeleteEntity(E entity);
 
+    Try<Integer> innerDeleteEntityById(List<K> idList);
+
     default Optional<String> addCondition(E entity, Map<String, Object> params) {
         return Optional.empty();
     }
@@ -43,7 +46,7 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
     }
 
     default Optional<String> deleteCondition(E entity, Map<String, Object> params) {
-        return Objects.nonNull(entity) && Objects.nonNull(entity.getId()) ? Optional.empty() : Optional.of("id must not be null");
+        return (Objects.nonNull(entity) && Objects.nonNull(entity.getId())) || (Objects.nonNull(params) && params.containsKey("_idList")) ? Optional.empty() : Optional.of("id must not be null");
     }
 
     default Optional<String> doAddCondition(String name, E entity, Map<String, Object> params) {
@@ -307,5 +310,31 @@ public interface GeneralJoiningServiceInterface<K, E extends GeneralJoiningEntit
 
     default Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntity(E entity) {
         return addOrUpdateEntity(entity, new HashMap<>(), "addOrUpdateEntity");
+    }
+
+    default Try<Integer> deleteEntityById(List<K> idList, Map<String, Object> params, String name) {
+        params.putIfAbsent("_idList", idList);
+        E entity = Reflect.onClass(entityClass()).create().get();
+        // before delete 1
+        doBeforeDelete(1, name, entity, params);
+        // deleteCondition
+        Optional<String> deleteConditionResult = doDeleteCondition(name, entity, params);
+        if (deleteConditionResult.isPresent()) {
+            return new Failure<>(new RuntimeException(deleteConditionResult.get()));
+        }
+        // before delete 0
+        if (Objects.nonNull(entity)) {
+            doBeforeDelete(0, name, entity, params);
+        }
+        Try<Integer> innerDeleteResult = innerDeleteEntityById(idList);
+        // after delete
+        if (Objects.nonNull(entity)) {
+            doAfterDelete(0, name, entity, innerDeleteResult, params);
+        }
+        return innerDeleteResult;
+    }
+
+    default Try<Integer> deleteEntityById(List<K> idList, Map<String, Object> params) {
+        return deleteEntityById(idList, params, "deleteEntityById");
     }
 }

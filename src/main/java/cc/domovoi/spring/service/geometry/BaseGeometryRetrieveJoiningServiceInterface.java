@@ -78,13 +78,13 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
         try {
             int listSize = normalizeIdList.size();
             if (listSize <= 500) {
-                return mvcMapper().findBaseListById(normalizeIdList);
+                return mvcMapper().findListById(normalizeIdList);
             }
             else {
                 List<E> entityList = new ArrayList<>();
                 for (int i = 0; i < listSize / 500; i++) {
                     List<String> innerIdList = normalizeIdList.subList(i * 500, (i + 1) * 500);
-                    List<E> innerEntityList = mvcMapper().findBaseListById(innerIdList);
+                    List<E> innerEntityList = mvcMapper().findListById(innerIdList);
                     entityList.addAll(innerEntityList);
                 }
                 // after find
@@ -94,7 +94,7 @@ public interface BaseGeometryRetrieveJoiningServiceInterface<INNER extends GeoCo
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return normalizeIdList.stream().map(mvcMapper()::findBaseById).collect(Collectors.toList());
+            return normalizeIdList.stream().map(mvcMapper()::findById).collect(Collectors.toList());
         }
 
     }

@@ -6,6 +6,7 @@ import cc.domovoi.spring.entity.StandardJoiningEntityInterface;
 import cc.domovoi.spring.service.StandardJoiningServiceInterface;
 import org.jooq.lambda.tuple.Tuple2;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,6 +35,11 @@ public interface StandardCRUDControllerInterface<E extends StandardJoiningEntity
     @Override
     default Try<Either<Integer, Tuple2<Integer, String>>> addOrUpdateEntityFunction(E entity, Map<String, Object> params) {
         return service().addOrUpdateEntity(entity, params);
+    }
+
+    @Override
+    default Try<Integer> deleteEntityByIdFunction(List<String> idList, Map<String, Object> params) {
+        return service().deleteEntityById(idList, params);
     }
 
     @Override

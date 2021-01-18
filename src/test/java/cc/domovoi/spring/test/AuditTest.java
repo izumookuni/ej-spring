@@ -2,7 +2,6 @@ package cc.domovoi.spring.test;
 
 import cc.domovoi.collection.util.Try;
 import cc.domovoi.spring.entity.audit.fieldbase.AuditChangeContextGroupModel;
-import cc.domovoi.spring.entity.audit.AuditUtils;
 import cc.domovoi.spring.entity.audit.batch.AuditChangeContextGroupBatchModel;
 import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl;
 import cc.domovoi.spring.test.entity.AuditBeanEntityTestImpl2;
@@ -10,6 +9,7 @@ import cc.domovoi.spring.test.mapper.AuditBeanMapperTestImpl;
 import cc.domovoi.spring.test.mapper.AuditMapperTestImpl;
 import cc.domovoi.spring.test.service.AuditBeanServiceTestImpl;
 import cc.domovoi.spring.test.service.AuditServiceTestImpl;
+import cc.domovoi.spring.utils.ReflectUtils;
 import cc.domovoi.tools.jackson.ObjectMappers;
 import cc.domovoi.tools.utils.RandomUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,7 +101,7 @@ public class AuditTest {
     @Test
     public void testAllFieldList() {
         AuditBeanEntityTestImpl2 entity = new AuditBeanEntityTestImpl2();
-        List<Field> fieldList = AuditUtils.allFieldList(entity.getClass());
+        List<Field> fieldList = ReflectUtils.allFieldList(entity.getClass());
         logger.debug("fieldList size " + fieldList.size());
         fieldList.forEach(field -> logger.debug("field " + field.getName()));
     }

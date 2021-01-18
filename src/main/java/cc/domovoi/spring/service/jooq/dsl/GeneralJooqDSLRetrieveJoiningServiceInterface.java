@@ -17,17 +17,17 @@ public interface GeneralJooqDSLRetrieveJoiningServiceInterface<K, E extends Gene
 
     @Override
     default E innerFindEntity(K id) {
-        return mvcMapper().findBaseById(id);
+        return mvcMapper().findById(id);
     }
 
     @Override
     default List<E> innerFindList(E entity) {
-        return mvcMapper().findBaseList(entity);
+        return mvcMapper().findList(entity);
     }
 
     @Override
     default List<E> innerFindListById(List<K> idList) {
-        return mvcMapper().findBaseListById(idList);
+        return mvcMapper().findListById(idList);
     }
 
     @Override

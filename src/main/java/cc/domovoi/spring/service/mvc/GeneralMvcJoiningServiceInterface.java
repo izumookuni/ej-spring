@@ -54,6 +54,11 @@ public interface GeneralMvcJoiningServiceInterface<K, E extends GeneralJoiningEn
         return Try.apply(() -> deleteEntityByMapper(entity));
     }
 
+    @Override
+    default Try<Integer> innerDeleteEntityById(List<K> idList) {
+        return Try.apply(() -> deleteEntityByIdByMapper(idList));
+    }
+
     default Integer addEntityByMapper(E entity) {
 //        if (Objects.isNull(entity.getId())) {
 //            entity.setId(idGenerator());
@@ -64,26 +69,30 @@ public interface GeneralMvcJoiningServiceInterface<K, E extends GeneralJoiningEn
 //        LocalDateTime now = LocalDateTime.now();
 //        entity.setCreationTime(now);
 //        entity.setUpdateTime(now);
-        return mvcMapper().addBase(entity);
+        return mvcMapper().add(entity);
     }
 
     default Integer updateEntityByMapper(E entity) {
         entity.setUpdateTime(LocalDateTime.now());
-        return mvcMapper().updateBase(entity);
+        return mvcMapper().update(entity);
     }
 
     default Integer updateEntityForcedByMapper(E entity) {
         entity.setUpdateTime(LocalDateTime.now());
-        return mvcMapper().updateBaseForced(entity);
+        return mvcMapper().updateForced(entity);
     }
 
     default Tuple2<Integer, E> updateEntitySetNullByMapper(E entity, List<String> setNull) {
         entity.setUpdateTime(LocalDateTime.now());
         // FIXME: entityAfterUpdate
-        return new Tuple2<>(mvcMapper().updateBaseSetNull(entity, setNull), entity);
+        return new Tuple2<>(mvcMapper().updateSetNull(entity, setNull), entity);
     }
 
     default Integer deleteEntityByMapper(E entity) {
-        return mvcMapper().deleteBase(entity);
+        return mvcMapper().delete(entity);
+    }
+
+    default Integer deleteEntityByIdByMapper(List<K> idList) {
+        return mvcMapper().deleteById(idList);
     }
 }

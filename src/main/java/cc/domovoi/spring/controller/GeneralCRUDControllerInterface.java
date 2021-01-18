@@ -14,6 +14,7 @@ import cc.domovoi.spring.utils.RestfulUtils;
 import io.swagger.annotations.ApiOperation;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;
+import org.joor.Reflect;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,6 +65,15 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
      * @return The number of successful insert or update operations.
      */
     Try<Either<Integer, Tuple2<Integer, K>>> addOrUpdateEntityFunction(E entity, Map<String, Object> params);
+
+    /**
+     * The function that delete Entity by id.
+     *
+     * @param idList id list
+     * @param params params
+     * @return The number of successful delete operations.
+     */
+    Try<Integer> deleteEntityByIdFunction(List<K> idList, Map<String, Object> params);
 
     /**
      * The function that Check entity exists.
@@ -385,6 +395,52 @@ public interface GeneralCRUDControllerInterface<K, E> extends GeneralRetrieveCon
             }
         } catch (Exception e) {
             logger().error(String.format("error in addOrUpdateEntityBatch, message: %s", e.getMessage()));
+            throw e;
+        }
+    }
+
+    /**
+     * Delete entity by id.
+     *
+     * @param idList The id of entity need to be deleted.
+     * @param request request
+     * @param response response
+     * @return The number of successful delete operations.
+     * @throws Exception exception
+     */
+    @ApiOperation(value = "Delete entity by id", notes = "none")
+    @RequestMapping(
+            value = "delete-by-id",
+            method = {RequestMethod.POST},
+            produces = "application/json")
+    @ResponseBody
+    default Map<String, Object> deleteEntityById(@RequestBody List<K> idList, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, Object> jsonMap = new HashMap<>();
+        try {
+            logger().info(String.format("deleteEntityById: %s", idList));
+            Map<String, Object> params = new HashMap<>();
+            params.put("_request", request);
+            params.put("_response", response);
+            params.put("_auditIp", AuditUtils.getIpAddr(request));
+            params.put("_idList", idList);
+            E entity = Reflect.onClass(entityClass()).create().get();
+            doBeforeDelete(0, "deleteEntity", entity, params);
+//            beforeDelete(entity, request, response);
+            Try<Integer> result = deleteEntityByIdFunction(idList, params);
+            doAfterDelete(0, "deleteEntity", entity, result, params);
+//            afterDelete(entity, request, response);
+            if (result.isSuccess()) {
+                return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result.get());
+            }
+            else {
+//                result.failed().get().printStackTrace();
+                throw result.failed().get();
+            }
+//            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK, result);
+        } catch (Exception e) {
+//            e.printStackTrace();
+            logger().error(String.format("error in deleteEntity, message: %s", e.getMessage()));
+//            return RestfulUtils.fillError(jsonMap, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             throw e;
         }
     }

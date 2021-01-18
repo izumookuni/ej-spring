@@ -30,7 +30,7 @@ public interface GeneralJooqRetrieveJoiningMapperInterface<R extends TableRecord
     Class<E> entityClass();
 
     @Override
-    default E findBaseById(K id) {
+    default E findById(K id) {
         E e = findEntityUsingIdByDSL(id);
         if (Objects.nonNull(e)) {
             doAfterFindEntity(0, "findBaseById", e);
@@ -39,7 +39,7 @@ public interface GeneralJooqRetrieveJoiningMapperInterface<R extends TableRecord
     }
 
     @Override
-    default List<E> findBaseListById(List<K> idList) {
+    default List<E> findListById(List<K> idList) {
         List<E> eList = dsl().select().from(table()).where(table().field("id", keyClass()).in(idList)).fetch().into(entityClass());
         JooqUtils.joiningColumn(eList, Optional.empty(), entityClass(), dsl());
         doAfterFindList(0, "findBaseListById", eList);
@@ -47,7 +47,7 @@ public interface GeneralJooqRetrieveJoiningMapperInterface<R extends TableRecord
     }
 
     @Override
-    default List<E> findBaseList(E entity) {
+    default List<E> findList(E entity) {
         if (Objects.nonNull(entity)) {
             doBeforeFindEntity(0, "findBaseList", entity);
         }
@@ -77,7 +77,40 @@ public interface GeneralJooqRetrieveJoiningMapperInterface<R extends TableRecord
 
     default Condition initConditionUsingEntity(E entity, Function3<? super Condition, ? super Record, ? super E, ? extends Condition> addition, Predicate<? super Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
 //        return initConditionUsingPojo(entity.toPojo(), (c, r) -> addition.apply(c, r, entity), predicateIncluding, predicateExcluding);
-        Record record = convertEntityToRecord(entity);
+//        Record record = convertEntityToRecord(entity);
+//        Map<Field<?>, Object> conditionMap = new HashMap<>();
+//        for (org.jooq.Field<?> field : record.fields()) {
+//            if (!predicateExcluding.test(field) && predicateIncluding.test(field)) {
+//                Object value = field.getValue(record);
+//                if (Objects.nonNull(value)) {
+//                    conditionMap.put(field, value);
+//                }
+//            }
+//        }
+//        Condition condition0 = condition(conditionMap);
+//        return addition.apply(condition0, record, entity);
+        return initConditionUsingE2(entity, addition, predicateIncluding, predicateExcluding);
+    }
+
+    default <E2 extends E> Condition initConditionUsingE2(E2 e2, Function3<? super Condition, ? super Record, ? super E2, ? extends Condition> addition, Predicate<? super Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
+//        Record record = convertEntityToRecord(e2);
+//        Map<Field<?>, Object> conditionMap = new HashMap<>();
+//        for (org.jooq.Field<?> field : record.fields()) {
+//            if (!predicateExcluding.test(field) && predicateIncluding.test(field)) {
+//                Object value = field.getValue(record);
+//                if (Objects.nonNull(value)) {
+//                    conditionMap.put(field, value);
+//                }
+//            }
+//        }
+//        Condition condition0 = condition(conditionMap);
+//        return addition.apply(condition0, record, e2);
+        return initConditionUsingObject(e2, Function.identity(), addition, predicateIncluding, predicateExcluding);
+    }
+
+    default <A> Condition initConditionUsingObject(A a, Function<? super A, ? extends E> aeMapper, Function3<? super Condition, ? super Record, ? super A, ? extends Condition> addition, Predicate<? super Field<?>> predicateIncluding, Predicate<? super org.jooq.Field<?>> predicateExcluding) {
+        E e = aeMapper.apply(a);
+        Record record = convertEntityToRecord(e);
         Map<Field<?>, Object> conditionMap = new HashMap<>();
         for (org.jooq.Field<?> field : record.fields()) {
             if (!predicateExcluding.test(field) && predicateIncluding.test(field)) {
@@ -88,7 +121,7 @@ public interface GeneralJooqRetrieveJoiningMapperInterface<R extends TableRecord
             }
         }
         Condition condition0 = condition(conditionMap);
-        return addition.apply(condition0, record, entity);
+        return addition.apply(condition0, record, a);
     }
 
     default Condition initConditionUsingEntity(E entity) {

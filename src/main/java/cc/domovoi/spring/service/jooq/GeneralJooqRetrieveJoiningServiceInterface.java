@@ -224,7 +224,7 @@ public interface GeneralJooqRetrieveJoiningServiceInterface<R extends TableRecor
 //        logger().debug("joiningColumn");
 //        if (!entityList.isEmpty()) {
 ////            java.lang.reflect.Field[] fields = entityClass().getDeclaredFields();
-//            List<java.lang.reflect.Field> fields = AuditUtils.allFieldList(entityClass());
+//            List<java.lang.reflect.Field> fields = ReflectUtils.allFieldList(entityClass());
 //            for (java.lang.reflect.Field field : fields) {
 //                JoiningColumn joiningColumn = field.getAnnotation(JoiningColumn.class);
 //                if (joiningColumn != null) {

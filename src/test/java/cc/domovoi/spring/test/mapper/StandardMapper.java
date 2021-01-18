@@ -16,13 +16,13 @@ public class StandardMapper<E extends StandardEntity> implements StandardRetriev
     }
 
     @Override
-    public E findBaseById(String id) {
+    public E findById(String id) {
         Optional<E> entity = entityList.stream().filter(e -> e.getId().equals(id)).findFirst();
         return entity.orElseGet(() -> null);
     }
 
     @Override
-    public List<E> findBaseListById(List<String> idList) {
+    public List<E> findListById(List<String> idList) {
         if (idList == null || idList.isEmpty()) {
             return Collections.emptyList();
         }
@@ -30,7 +30,7 @@ public class StandardMapper<E extends StandardEntity> implements StandardRetriev
     }
 
     @Override
-    public List<E> findBaseList(E entity) {
+    public List<E> findList(E entity) {
         if (entity.getId() == null) {
             return entityList;
         }

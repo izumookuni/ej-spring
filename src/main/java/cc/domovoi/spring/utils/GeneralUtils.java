@@ -5,6 +5,7 @@ import cc.domovoi.spring.annotation.method.ForcedThrow;
 import cc.domovoi.spring.annotation.method.Param;
 import org.jooq.lambda.tuple.Tuple2;
 import org.slf4j.Logger;
+import org.springframework.web.bind.annotation.ValueConstants;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -193,6 +194,9 @@ public class GeneralUtils {
                         }
                     }
                 }
+            }
+            if (Objects.isNull(objects[idx]) && !Objects.equals(param.defaultValue(), ValueConstants.DEFAULT_NONE)) {
+                objects[idx] = TypeConverterUtils.convert(param.defaultValue(), parameter.v1().getType());
             }
             idx++;
         }

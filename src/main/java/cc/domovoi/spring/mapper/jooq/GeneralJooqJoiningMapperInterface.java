@@ -14,21 +14,21 @@ import java.util.Objects;
 public interface GeneralJooqJoiningMapperInterface<R extends UpdatableRecord<R>, K, E extends GeneralJooqDSLEntityInterface<K, R>> extends GeneralJooqRetrieveJoiningMapperInterface<R, K, E>, GeneralMapperInterface<K, E>, RichMapperInterface<K, E> {
 
     @Override
-    default Integer addBase(E entity) {
-        doBeforeAdd(0, "addBase", entity);
+    default Integer add(E entity) {
+        doBeforeAdd(0, "add", entity);
         Integer addResult = addEntityByDSL(entity);
-        doAfterAdd(0, "addBase", entity, addResult);
+        doAfterAdd(0, "add", entity, addResult);
         return addResult;
     }
 
     @Override
-    default Integer updateBase(E entity) {
-        doBeforeUpdate(0, "updateBase", entity);
+    default Integer update(E entity) {
+        doBeforeUpdate(0, "update", entity);
         E e = findEntityUsingIdByDSL(entity.getId());
         if (Objects.nonNull(e)) {
             E e1 = BeanMapUtils.copyPropertyIgnoreNull(e, entity);
             Integer result = updateEntityByDSL(e1);
-            doAfterUpdate(0, "updateBase", entity, result);
+            doAfterUpdate(0, "update", entity, result);
             return result;
         }
         else {
@@ -38,23 +38,23 @@ public interface GeneralJooqJoiningMapperInterface<R extends UpdatableRecord<R>,
     }
 
     @Override
-    default Integer updateBaseForced(E entity) {
-        doBeforeUpdate(0, "updateBase", entity);
+    default Integer updateForced(E entity) {
+        doBeforeUpdate(0, "updateForced", entity);
         Integer result = updateEntityByDSL(entity);
-        doAfterUpdate(0, "updateBase", entity, result);
+        doAfterUpdate(0, "updateForced", entity, result);
         return result;
     }
 
     @Override
-    default Integer updateBaseSetNull(E entity, List<String> setNull) {
-        doBeforeUpdate(0, "updateBase", entity);
+    default Integer updateSetNull(E entity, List<String> setNull) {
+        doBeforeUpdate(0, "updateSetNull", entity);
         E e = findEntityUsingIdByDSL(entity.getId());
         if (Objects.nonNull(e)) {
             E e1 = BeanMapUtils.copyPropertyIgnoreNull(e, entity);
             Reflect r = Reflect.on(e1);
             setNull.forEach(s -> r.set(s, null));
             Integer result = updateEntityByDSL(e1);
-            doAfterUpdate(0, "updateBase", entity, result);
+            doAfterUpdate(0, "updateSetNull", entity, result);
             BeanUtils.copyProperties(e1, entity);
             return result;
         }
@@ -64,11 +64,16 @@ public interface GeneralJooqJoiningMapperInterface<R extends UpdatableRecord<R>,
     }
 
     @Override
-    default Integer deleteBase(E entity) {
-        doBeforeDelete(1, "deleteBase", entity);
+    default Integer delete(E entity) {
+        doBeforeDelete(0, "delete", entity);
         Integer result = deleteEntityByDSL(entity);
-        doBeforeDelete(0, "deleteBase", entity);
+        doAfterDelete(0, "delete", entity, result);
         return result;
+    }
+
+    @Override
+    default Integer deleteById(List<K> idList) {
+        return deleteEntityListByDSL(idList);
     }
 
     default Boolean checkEntityExists(E entity) {
@@ -89,6 +94,10 @@ public interface GeneralJooqJoiningMapperInterface<R extends UpdatableRecord<R>,
 
     default Integer deleteEntityByDSL(E entity) {
         return dsl().deleteFrom(table()).where(initConditionUsingEntity(entity)).execute();
+    }
+
+    default Integer deleteEntityListByDSL(List<K> idList) {
+        return dsl().deleteFrom(table()).where(table().field("id", keyClass()).in(idList)).execute();
     }
 
 }

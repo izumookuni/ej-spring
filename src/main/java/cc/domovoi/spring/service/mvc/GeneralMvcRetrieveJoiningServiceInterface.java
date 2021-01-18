@@ -38,11 +38,11 @@ public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJ
     }
 
     default E findEntityByMapper(K id) {
-        return mvcMapper().findBaseById(id);
+        return mvcMapper().findById(id);
     }
 
     default List<E> findListByMapper(E entity) {
-        return mvcMapper().findBaseList(entity);
+        return mvcMapper().findList(entity);
     }
 
     default List<E> findListUsingIdByMapper(List<K> idList) {
@@ -56,20 +56,20 @@ public interface GeneralMvcRetrieveJoiningServiceInterface<K, E extends GeneralJ
         try {
             int listSize = normalizeIdList.size();
             if (listSize <= 500) {
-                return mvcMapper().findBaseListById(normalizeIdList);
+                return mvcMapper().findListById(normalizeIdList);
             }
             else {
                 List<E> entityList = new ArrayList<>();
                 for (int i = 0; i < listSize / 500; i++) {
                     List<K> innerIdList = normalizeIdList.subList(i * 500, (i + 1) * 500);
-                    List<E> innerEntityList = mvcMapper().findBaseListById(innerIdList);
+                    List<E> innerEntityList = mvcMapper().findListById(innerIdList);
                     entityList.addAll(innerEntityList);
                 }
                 return entityList;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return normalizeIdList.stream().map(mvcMapper()::findBaseById).collect(Collectors.toList());
+            return normalizeIdList.stream().map(mvcMapper()::findById).collect(Collectors.toList());
         }
     }
 }

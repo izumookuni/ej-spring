@@ -57,6 +57,11 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
         return Try.apply(() -> deleteEntityByDao(entity));
     }
 
+    @Override
+    default Try<Integer> innerDeleteEntityById(List<K> idList) {
+        return Try.apply(() -> deleteEntityByIdByDao(idList));
+    }
+
     default Integer addEntityByDao(E entity) {
 //        if (Objects.isNull(entity.getId())) {
 //            entity.setId(idGenerator());
@@ -115,5 +120,9 @@ public interface GeneralJooqJoiningServiceInterface<R extends UpdatableRecord<R>
     default Integer deleteEntityByDao(E entity) {
         return dsl().deleteFrom(getTable()).where(initConditionUsingEntity(entity)).execute();
 //        return unMapper(entity.toPojo()).delete();
+    }
+
+    default Integer deleteEntityByIdByDao(List<K> idList) {
+        return dsl().deleteFrom(getTable()).where(getTable().field("id", keyClass()).in(idList)).execute();
     }
 }

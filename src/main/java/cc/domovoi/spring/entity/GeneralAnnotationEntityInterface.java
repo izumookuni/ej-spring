@@ -1,7 +1,7 @@
 package cc.domovoi.spring.entity;
 
 import cc.domovoi.spring.entity.annotation.JoiningProperty;
-import cc.domovoi.spring.entity.audit.AuditUtils;
+import cc.domovoi.spring.utils.ReflectUtils;
 import org.jooq.lambda.tuple.Tuple2;
 import org.joor.Reflect;
 
@@ -35,7 +35,7 @@ public interface GeneralAnnotationEntityInterface<K> extends GeneralJoiningEntit
     default Map<String, Supplier<? extends List<Object>>> innerJoiningKeyMap() {
         Map<String, Supplier<? extends List<Object>>> joiningKeyMap = new HashMap<>();
 //        Field[] fields = this.getClass().getDeclaredFields();
-        List<Field> fields = AuditUtils.allFieldList(this.getClass());
+        List<Field> fields = ReflectUtils.allFieldList(this.getClass());
         Reflect reflect = on(this);
         for (Field field : fields) {
             JoiningProperty joiningProperty = field.getAnnotation(JoiningProperty.class);
@@ -59,7 +59,7 @@ public interface GeneralAnnotationEntityInterface<K> extends GeneralJoiningEntit
     default Map<String, Consumer<? super Object>> innerJoiningEntityMap() {
         Map<String, Consumer<? super Object>> joiningEntityMap = new HashMap<>();
 //        Field[] fields = this.getClass().getDeclaredFields();
-        List<Field> fields = AuditUtils.allFieldList(this.getClass());
+        List<Field> fields = ReflectUtils.allFieldList(this.getClass());
         Reflect reflect = on(this);
         for (Field field : fields) {
             JoiningProperty joiningProperty = field.getAnnotation(JoiningProperty.class);
@@ -86,13 +86,13 @@ public interface GeneralAnnotationEntityInterface<K> extends GeneralJoiningEntit
 
     static Set<Tuple2<JoiningProperty, Field>> joiningPropertySet(Class<?> eClass) {
 //        Field[] fields = eClass.getDeclaredFields();
-        List<Field> fields = AuditUtils.allFieldList(eClass);
+        List<Field> fields = ReflectUtils.allFieldList(eClass);
         return fields.stream().map(field -> new Tuple2<>(field.getAnnotation(JoiningProperty.class), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
     }
 
     static <T extends Annotation> Set<Tuple2<T, Field>> fieldAnnotationSet(Class<?> eClass, Class<T> aClass) {
 //        Field[] fields = eClass.getDeclaredFields();
-        List<Field> fields = AuditUtils.allFieldList(eClass);
+        List<Field> fields = ReflectUtils.allFieldList(eClass);
         return fields.stream().map(field -> new Tuple2<>(field.getAnnotation(aClass), field)).filter(t2 -> Objects.nonNull(t2.v1())).collect(Collectors.toSet());
     }
 

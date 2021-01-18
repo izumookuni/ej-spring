@@ -20,7 +20,7 @@ public interface GeneralJooqDSLJoiningServiceInterface<K, E extends GeneralJooqD
     @Override
     default Try<Tuple2<Integer, K>> innerAddEntity(E entity) {
         try {
-            Integer addResult = mvcMapper().addBase(entity);
+            Integer addResult = mvcMapper().add(entity);
             return new Success<>(new Tuple2<>(addResult, entity.getId()));
         } catch (Exception e) {
             e.printStackTrace();
@@ -30,22 +30,27 @@ public interface GeneralJooqDSLJoiningServiceInterface<K, E extends GeneralJooqD
 
     @Override
     default Try<Integer> innerUpdateEntity(E entity) {
-        return Try.apply(() -> mvcMapper().updateBase(entity));
+        return Try.apply(() -> mvcMapper().update(entity));
     }
 
     @Override
     default Try<Integer> innerUpdateEntityForced(E entity) {
-        return Try.apply(() -> mvcMapper().updateBaseForced(entity));
+        return Try.apply(() -> mvcMapper().updateForced(entity));
     }
 
     @Override
     default Try<Tuple2<Integer, E>> innerUpdateEntitySetNull(E entity, List<String> setNull) {
-        return Try.apply(() -> new Tuple2<>(mvcMapper().updateBaseSetNull(entity, setNull), entity));
+        return Try.apply(() -> new Tuple2<>(mvcMapper().updateSetNull(entity, setNull), entity));
     }
 
     @Override
     default Try<Integer> innerDeleteEntity(E entity) {
-        return Try.apply(() -> mvcMapper().deleteBase(entity));
+        return Try.apply(() -> mvcMapper().delete(entity));
+    }
+
+    @Override
+    default Try<Integer> innerDeleteEntityById(List<K> idList) {
+        return Try.apply(() -> mvcMapper().deleteById(idList));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package cc.domovoi.spring.entity.audit;
 
+import cc.domovoi.spring.utils.ReflectUtils;
 import io.swagger.annotations.ApiModelProperty;
 import org.jooq.lambda.function.Consumer2;
 import org.jooq.lambda.function.Consumer3;
@@ -17,41 +18,14 @@ import java.util.stream.Stream;
 
 public class AuditUtils {
 
+    @Deprecated
     public static List<Field> allFieldList(Class<?> clazz) {
-        Map<String, Field> result = new HashMap<>();
-        Class<?> t = clazz;
-        do {
-            for (Field field : t.getDeclaredFields()) {
-                String name = field.getName();
-
-                if (!result.containsKey(name)) {
-                    result.put(name, field);
-                }
-            }
-
-            t = t.getSuperclass();
-        }
-        while (t != null);
-
-        return new ArrayList<>(result.values());
+        return ReflectUtils.allFieldList(clazz);
     }
 
+    @Deprecated
     public static List<Method> allMethodList(Class<?> clazz) {
-        Map<String, Method> result = new HashMap<>();
-        Class<?> t = clazz;
-        do {
-            for (Method method : t.getDeclaredMethods()) {
-                String name = method.getName();
-
-                if (!result.containsKey(name)) {
-                    result.put(name, method);
-                }
-            }
-            t = t.getSuperclass();
-        }
-        while (t != null);
-
-        return new ArrayList<>(result.values());
+        return ReflectUtils.allMethodList(clazz);
     }
 
     public static List<Tuple2<Field, AuditRecord>> auditRecordList(Class<? extends GeneralAuditEntityInterface> auditClass, Predicate<? super AuditRecord> filter) {
@@ -60,7 +34,7 @@ public class AuditUtils {
         Optional<Audit> auditOptional = audit(auditClass);
         return auditOptional.flatMap(audit -> {
             if (audit.record().length != 0) {
-                List<Field> fieldList = allFieldList(auditClass);
+                List<Field> fieldList = ReflectUtils.allFieldList(auditClass);
                 return Optional.of(Stream.of(audit.record()).map(auditRecord -> {
                     Optional<Field> fieldOptional = fieldList.stream().filter(field -> Objects.equals(field.getName(), auditRecord.target())).findFirst();
                     return fieldOptional.map(field -> new Tuple2<>(field, auditRecord));
@@ -69,7 +43,7 @@ public class AuditUtils {
             else {
                 return Optional.empty();
             }
-        }).orElseGet(() -> allFieldList(auditClass).stream().map(field -> new Tuple2<>(field, field.getAnnotation(AuditRecord.class))).filter(t2 -> Objects.nonNull(t2.v2())).filter(t2 -> filter.test(t2.v2())).collect(Collectors.toList()));
+        }).orElseGet(() -> ReflectUtils.allFieldList(auditClass).stream().map(field -> new Tuple2<>(field, field.getAnnotation(AuditRecord.class))).filter(t2 -> Objects.nonNull(t2.v2())).filter(t2 -> filter.test(t2.v2())).collect(Collectors.toList()));
 //        return allFieldList(auditClass).stream().map(field -> new Tuple2<>(field, field.getAnnotation(AuditRecord.class))).filter(t2 -> Objects.nonNull(t2.v2())).filter(t2 -> filter.test(t2.v2())).collect(Collectors.toList());
     }
 
@@ -140,7 +114,7 @@ public class AuditUtils {
     public static List<Field> auditFieldList(Class<? extends GeneralAuditEntityInterface> auditClass) {
         Optional<Audit> auditOptional = audit(auditClass);
 //        Field[] fields = auditClass.getDeclaredFields();
-        List<Field> fieldList = allFieldList(auditClass);
+        List<Field> fieldList = ReflectUtils.allFieldList(auditClass);
         return auditOptional.map(audit -> {
             List<String> include = Arrays.asList(audit.include());
             List<String> skip = Arrays.asList(audit.skip());
@@ -151,7 +125,7 @@ public class AuditUtils {
 
     public static List<Tuple2<Field, Optional<AuditRecord>>> auditFieldListV2(Class<? extends GeneralAuditEntityInterface> auditClass) {
         Optional<Audit> auditOptional = audit(auditClass);
-        List<Field> fieldList = allFieldList(auditClass);
+        List<Field> fieldList = ReflectUtils.allFieldList(auditClass);
         return auditOptional.map(audit -> {
             List<Tuple2<Field, AuditRecord>> auditRecordFieldList = auditRecordList(auditClass, auditRecord -> !auditRecord.ignore());
             List<String> include = Arrays.asList(audit.include());

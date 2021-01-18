@@ -9,21 +9,25 @@ import cc.domovoi.spring.annotation.after.AfterUpdate;
 import cc.domovoi.spring.utils.audit.GeneralAuditInterface;
 import cc.domovoi.tools.defaults.NullDefaultUtils;
 import org.jooq.lambda.tuple.Tuple2;
+import org.joor.Reflect;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface GeneralAuditServiceInterface<K, E extends GeneralAuditEntityInterface<K>> extends GeneralJoiningServiceInterface<K, E>, GeneralAuditInterface<E> {
 
     @AfterAdd(order = -100)
     default void processingAddAudit(E entity, Try<Tuple2<Integer, K>> result, Map<String, Object> params) {
-        recordAddAuditEntity(entity, Optional.ofNullable((String) params.get("_auditIp")));
+        recordAddAuditEntity(entity, params, Optional.ofNullable((String) params.get("_auditIp")));
     }
 
     @AfterUpdate(order = -100)
     default void processingUpdateAudit(E entity, Try<Integer> result, Map<String, Object> params) {
-        recordUpdateAuditEntity(entity,
+        recordUpdateAuditEntity(entity, params,
                 Optional.ofNullable((String) params.get("_auditIp")),
                 (Boolean) params.get("forced"),
                 Optional.ofNullable((List<String>) params.get("setNull")),
@@ -32,10 +36,10 @@ public interface GeneralAuditServiceInterface<K, E extends GeneralAuditEntityInt
 
     @AfterDelete(order = -100)
     default void processingDeleteAudit(E entity, Try<Integer> result, Map<String, Object> params) {
-        recordDeleteAuditEntity(entity, Optional.ofNullable((String) params.get("_auditIp")));
+        recordDeleteAuditEntity(entity, params, Optional.ofNullable((String) params.get("_auditIp")), params.containsKey("_idList") ? Optional.of((List<K>) params.get("_idList")) : Optional.empty());
     }
 
-    default Integer recordAddAuditEntity(E entity, Optional<String> auditIp) {
+    default Integer recordAddAuditEntity(E entity, Map<String, Object> params, Optional<String> auditIp) {
         AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
             auditEntity.setAuditBehavior("add");
             auditEntity.setAuditType("service");
@@ -46,7 +50,7 @@ public interface GeneralAuditServiceInterface<K, E extends GeneralAuditEntityInt
         return auditService().addAudit(auditDisplayEntity);
     }
 
-    default Integer recordUpdateAuditEntity(E entity, Optional<String> auditIp, Boolean forced, Optional<List<String>> setNull, E entityAfterUpdate) {
+    default Integer recordUpdateAuditEntity(E entity, Map<String, Object> params, Optional<String> auditIp, Boolean forced, Optional<List<String>> setNull, E entityAfterUpdate) {
         boolean forcedFlag = NullDefaultUtils.defaultBooleanValue(forced);
         boolean setNullFlag = setNull.isPresent();
         final AuditDisplayEntity auditDisplayEntity;
@@ -83,14 +87,28 @@ public interface GeneralAuditServiceInterface<K, E extends GeneralAuditEntityInt
         return auditService().addAudit(auditDisplayEntity);
     }
 
-    default Integer recordDeleteAuditEntity(E entity, Optional<String> auditIp) {
-        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
-            auditEntity.setAuditBehavior("delete");
-            auditEntity.setAuditType("service");
-            auditEntity.setAuditLevel("info");
-            auditEntity.setAuditAuthor(auditAuthorGetter());
-            auditIp.ifPresent(auditEntity::setAuditIp);
-        });
-        return auditService().addAudit(auditDisplayEntity);
+    default Integer recordDeleteAuditEntity(E entity, Map<String, Object> params, Optional<String> auditIp, Optional<List<K>> idList) {
+//        AuditDisplayEntity auditDisplayEntity = entity.asAuditDisplayEntity(auditEntity -> {
+//            auditEntity.setAuditBehavior("delete");
+//            auditEntity.setAuditType("service");
+//            auditEntity.setAuditLevel("info");
+//            auditEntity.setAuditAuthor(auditAuthorGetter());
+//            auditIp.ifPresent(auditEntity::setAuditIp);
+//        });
+//        return auditService().addAudit(auditDisplayEntity);
+        return idList.map(iL -> iL.stream().map(id -> {
+            E e = Reflect.onClass(entityClass()).create().get();
+            e.setId(id);
+            return e;
+        })).orElseGet(() -> Stream.of(entity))
+                .map(e -> e.asAuditDisplayEntity(auditEntity -> {
+                    auditEntity.setAuditBehavior("delete");
+                    auditEntity.setAuditType("service");
+                    auditEntity.setAuditLevel("info");
+                    auditEntity.setAuditAuthor(auditAuthorGetter());
+                    auditIp.ifPresent(auditEntity::setAuditIp);
+                }))
+                .mapToInt(auditService()::addAudit).sum();
+
     }
 }

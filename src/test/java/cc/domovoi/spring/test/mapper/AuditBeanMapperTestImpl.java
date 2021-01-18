@@ -21,9 +21,9 @@ public class AuditBeanMapperTestImpl implements StandardMapperInterface<AuditBea
     }
 
     @Override
-    public Integer addBase(AuditBeanEntityTestImpl entity) {
+    public Integer add(AuditBeanEntityTestImpl entity) {
         logger.debug("addBase: " + entity);
-        if (findBaseById(entity.getId()) != null) {
+        if (findById(entity.getId()) != null) {
             auditBeanEntityTestImplList.add(entity);
             return 1;
         }
@@ -33,9 +33,9 @@ public class AuditBeanMapperTestImpl implements StandardMapperInterface<AuditBea
     }
 
     @Override
-    public Integer updateBase(AuditBeanEntityTestImpl entity) {
+    public Integer update(AuditBeanEntityTestImpl entity) {
         logger.debug("updateBase: " + entity);
-        AuditBeanEntityTestImpl auditDisplayEntityImpl = findBaseById(entity.getId());
+        AuditBeanEntityTestImpl auditDisplayEntityImpl = findById(entity.getId());
         if (auditDisplayEntityImpl != null) {
             auditBeanEntityTestImplList.remove(auditDisplayEntityImpl);
             auditBeanEntityTestImplList.add(entity);
@@ -47,19 +47,19 @@ public class AuditBeanMapperTestImpl implements StandardMapperInterface<AuditBea
     }
 
     @Override
-    public Integer updateBaseForced(AuditBeanEntityTestImpl entity) {
-        return updateBase(entity);
+    public Integer updateForced(AuditBeanEntityTestImpl entity) {
+        return update(entity);
     }
 
     @Override
-    public Integer updateBaseSetNull(AuditBeanEntityTestImpl entity, List<String> setNull) {
-        return updateBase(entity);
+    public Integer updateSetNull(AuditBeanEntityTestImpl entity, List<String> setNull) {
+        return update(entity);
     }
 
     @Override
-    public Integer deleteBase(AuditBeanEntityTestImpl entity) {
+    public Integer delete(AuditBeanEntityTestImpl entity) {
         logger.debug("deleteBase: " + entity);
-        AuditBeanEntityTestImpl auditDisplayEntityImpl = findBaseById(entity.getId());
+        AuditBeanEntityTestImpl auditDisplayEntityImpl = findById(entity.getId());
         if (auditDisplayEntityImpl != null) {
             auditBeanEntityTestImplList.remove(auditDisplayEntityImpl);
             return 1;
@@ -70,17 +70,25 @@ public class AuditBeanMapperTestImpl implements StandardMapperInterface<AuditBea
     }
 
     @Override
-    public AuditBeanEntityTestImpl findBaseById(String id) {
+    public Integer deleteById(List<String> idList) {
+        logger.debug("deleteById: " + idList);
+        List<AuditBeanEntityTestImpl> auditDisplayEntityImplList = findListById(idList);
+        auditBeanEntityTestImplList.removeAll(auditDisplayEntityImplList);
+        return auditDisplayEntityImplList.size();
+    }
+
+    @Override
+    public AuditBeanEntityTestImpl findById(String id) {
         return auditBeanEntityTestImplList.stream().filter(auditBeanEntityTestImpl -> Objects.equals(auditBeanEntityTestImpl.getId(), id)).findFirst().orElse(null);
     }
 
     @Override
-    public List<AuditBeanEntityTestImpl> findBaseListById(List<String> idList) {
+    public List<AuditBeanEntityTestImpl> findListById(List<String> idList) {
         return auditBeanEntityTestImplList.stream().filter(auditBeanEntityTestImpl -> idList.contains(auditBeanEntityTestImpl.getId())).collect(Collectors.toList());
     }
 
     @Override
-    public List<AuditBeanEntityTestImpl> findBaseList(AuditBeanEntityTestImpl entity) {
+    public List<AuditBeanEntityTestImpl> findList(AuditBeanEntityTestImpl entity) {
         return auditBeanEntityTestImplList.stream().filter(auditBeanEntityTestImpl -> Objects.equals(auditBeanEntityTestImpl, entity)).collect(Collectors.toList());
     }
 }

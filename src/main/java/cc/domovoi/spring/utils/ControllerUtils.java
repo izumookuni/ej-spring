@@ -119,4 +119,19 @@ public class ControllerUtils {
     public static <E, R> Map<String, Object> commonOptionalFunction(Logger logger, String name, Supplier<? extends Optional<E>> data) throws Exception {
         return commonOptionalFunction(logger, name, data, Function.identity());
     }
+
+    public static <R> Map<String, Object> commonPagingFunction(Logger logger, String name, Supplier<? extends Tuple2<Integer, List<R>>> data) throws Exception {
+        logger.info(name);
+        try {
+            Map<String, Object> jsonMap = new HashMap<>();
+            Tuple2<Integer, List<R>> result = data.get();
+            jsonMap.put("total", result.v1());
+            jsonMap.put("rows", result.v2());
+            return RestfulUtils.fillOk(jsonMap, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(String.format("error in %s, message: %s", name, e.getMessage()));
+            throw e;
+        }
+    }
 }
